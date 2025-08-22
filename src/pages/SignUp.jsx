@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Coffee, User, Mail, Lock, Eye, EyeOff, CheckCircle, XCircle, AlertCircle } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-
+import { apiClient } from "@/lib/api"
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -34,18 +34,11 @@ export default function Signup() {
   const onSubmit = async (data) => {
     setIsLoading(true)
     try {
-      // Register the user
-      const registerResponse = await fetch("https://busy-fool-backend.vercel.app/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: data.name,
-          email: data.email,
-          password: data.password,
-          role: "owner", // or set dynamically if needed
-        }),
+      const registerResponse = await apiClient.post("/auth/register", {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role: "owner", // or set dynamically if needed
       })
 
       if (!registerResponse.ok) {
@@ -62,16 +55,9 @@ export default function Signup() {
 
       showToastMessage("Registration successful! Logging you in...", "success")
 
-      // Automatically log in after registration
-      const loginResponse = await fetch("https://busy-fool-backend.vercel.app/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-        }),
+      const loginResponse = await apiClient.post("/auth/login", {
+        email: data.email,
+        password: data.password,
       })
 
       if (!loginResponse.ok) {

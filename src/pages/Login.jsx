@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Coffee, Mail, Lock, Eye, EyeOff, XCircle, ArrowRight, Shield, CheckCircle, AlertCircle } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { apiClient } from "@/lib/api"
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
@@ -32,15 +33,9 @@ export default function Login() {
   const onSubmit = async (data) => {
     setIsLoading(true)
     try {
-      const response = await fetch("https://busy-fool-backend.vercel.app/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-        }),
+      const response = await apiClient.post("/auth/login", {
+        email: data.email,
+        password: data.password,
       })
 
       if (!response.ok) {

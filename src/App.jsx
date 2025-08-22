@@ -12,7 +12,7 @@ import Sales from "./pages/Sales"
 import Dashboard from "./pages/Dashboard"
 
 import DragDropCSVPopup from "./components/DragDropCSVPopup"
-import DailySales from "./pages/DailySales"
+
 
 // Helper to check if user is logged in
 function isLoggedIn() {
@@ -96,15 +96,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/dailysales"
-          element={
-            <ProtectedRoute>
-              <DailySales />
-            </ProtectedRoute>
-          }
-        />
-
+    
         <Route
           path="/products"
           element={

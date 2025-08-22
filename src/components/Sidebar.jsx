@@ -1,19 +1,8 @@
-import React from "react"
+"use client"
 
-import {
-  LayoutDashboard,
-  Coffee,
-  Leaf,
-  BarChart3,
-  LogOut,
-  X,
-  Package,
-  ShoppingCart,
-  TrendingUp,
-  Receipt
-} from "lucide-react"
+import { LayoutDashboard, Coffee, Leaf, LogOut, X, Package, Receipt } from "lucide-react"
 import { NavLink } from "react-router-dom"
-
+import { apiClient } from "@/lib/api"
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/welcome" },
   { name: "Products", icon: Coffee, path: "/products" },
@@ -22,28 +11,20 @@ const navItems = [
 
   { name: "Sales", icon: Receipt, path: "/sales" },
   //  { name: "Daily Sales", icon: Receipt, path: "/dailysales" },
- 
-    // { name: "My Profile", icon: BarChart3, path: "/profile" }
-    // { name: "What-If", icon: BarChart3, path: "/what-if" },
 
+  // { name: "My Profile", icon: BarChart3, path: "/profile" }
+  // { name: "What-If", icon: BarChart3, path: "/what-if" },
 ]
 export const Sidebar = ({ isOpen, onClose }) => {
-   const handleLogout = async () => {
-    const token = localStorage.getItem("accessToken");
+  const handleLogout = async () => {
     try {
-      await fetch("https://busy-fool-backend.vercel.app/auth/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await apiClient.post("/auth/logout")
     } catch (error) {
       // Optionally handle error
     }
-    localStorage.removeItem("accessToken");
-    window.location.href = "/login";
-  };
+    localStorage.removeItem("accessToken")
+    window.location.href = "/login"
+  }
 
   return (
     <>
@@ -69,11 +50,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
       >
         {/* Mobile Logo */}
         <div className="flex items-center justify-between md:hidden p-4 border-b border-white/10 flex-shrink-0">
-          <img
-            src="/assets/logo3.png"
-            alt="Busy Fool Logo"
-            className="h-16 w-auto mx-auto animate-elegant-glow"
-          />
+          <img src="/assets/logo3.png" alt="Busy Fool Logo" className="h-16 w-auto mx-auto animate-elegant-glow" />
           <button onClick={onClose}>
             <X className="w-6 h-6 text-white hover:text-yellow-300 transition" />
           </button>
@@ -81,11 +58,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
         {/* Desktop Logo */}
         <div className="hidden md:flex items-center justify-center py-6 border-b border-white/10 flex-shrink-0">
-          <img
-            src="/assets/logo3.png"
-            alt="Busy Fool Logo"
-            className="h-24 w-auto animate-elegant-glow"
-          />
+          <img src="/assets/logo3.png" alt="Busy Fool Logo" className="h-24 w-auto animate-elegant-glow" />
         </div>
 
         {/* Navigation Links - This will expand to fill available space */}
@@ -110,11 +83,10 @@ export const Sidebar = ({ isOpen, onClose }) => {
           ))}
         </nav>
 
-       
-       {/* Logout - Fixed at bottom */}
+        {/* Logout - Fixed at bottom */}
         <div className="p-4 border-t border-white/10 flex-shrink-0">
-          <button 
-          onClick={handleLogout}
+          <button
+            onClick={handleLogout}
             className="flex items-center w-full gap-3 px-4 py-3 rounded-xl text-white hover:bg-[#3a2416] hover:text-red-400 transition"
           >
             <LogOut className="w-5 h-5" />

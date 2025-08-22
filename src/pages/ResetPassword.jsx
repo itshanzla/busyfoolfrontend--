@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Coffee, Lock, Eye, EyeOff, CheckCircle, XCircle, ArrowRight, Shield } from "lucide-react"
+import { apiClient } from "@/lib/api"
 
 export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false)
@@ -54,15 +55,9 @@ export default function ResetPassword() {
 
     setIsLoading(true)
     try {
-      const response = await fetch("https://busy-fool-backend.vercel.app/auth/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token: resetToken,
-          newPassword: data.password,
-        }),
+      const response = await apiClient.post("/auth/reset-password", {
+        token: resetToken,
+        newPassword: data.password,
       })
 
       if (!response.ok) {
