@@ -799,321 +799,396 @@ export default function Sales() {
         <Navbar onToggleSidebar={() => setSidebarOpen(true)} />
         <main className="flex-1 p-4 sm:p-6 space-y-6">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-              <div>
-                <h1 className="text-3xl font-bold text-amber-900 tracking-tight">Sales</h1>
-                <p className="text-amber-700 mt-1 text-sm">Track and import your product sales</p>
-                {currentUserName ? (
-                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                    <User className="w-3 h-3" />
-                    User: {currentUserName}
-                  </p>
-                ) : currentUserId ? (
-                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                    <User className="w-3 h-3" />
-                    User ID: {currentUserId}
-                  </p>
-                ) : (
-                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    loading.
-                  </p>
-                )}
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <Button
-                  onClick={() => setShowGuidelinesModal(true)}
-                  variant="outline"
-                  className="bg-white/80 hover:bg-white text-amber-700 border-amber-200 hover:border-amber-300 px-4 py-2 rounded-xl flex items-center gap-2 hover:shadow-md transition-all"
-                  type="button"
-                >
-                  <Info className="w-4 h-4" />
-                  CSV Guidelines
-                </Button>
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+  <div>
+    <h1 className="text-4xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent tracking-tight">
+      Sales
+    </h1>
+    <p className="text-green-600 mt-2 text-base font-medium">Track and import your product sales</p>
+    {currentUserName ? (
+      <p className="text-xs text-gray-600 mt-2 flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full inline-flex">
+        <User className="w-3 h-3" />
+        User: {currentUserName}
+      </p>
+    ) : currentUserId ? (
+      <p className="text-xs text-gray-600 mt-2 flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full inline-flex">
+        <User className="w-3 h-3" />
+        User ID: {currentUserId}
+      </p>
+    ) : (
+      <p className="text-xs text-red-600 mt-2 flex items-center gap-2 bg-red-50 px-3 py-1 rounded-full inline-flex">
+        <AlertCircle className="w-3 h-3" />
+        loading.
+      </p>
+    )}
+  </div>
+  <div className="flex gap-3 flex-wrap">
+    <Button
+      onClick={() => setShowGuidelinesModal(true)}
+      variant="outline"
+      className="bg-white/95 hover:bg-green-50 text-green-700 border-green-200 hover:border-green-300 px-5 py-2.5 rounded-xl flex items-center gap-2 hover:shadow-lg transition-all duration-300 font-semibold shadow-sm backdrop-blur-sm"
+      type="button"
+    >
+      <Info className="w-4 h-4" />
+      CSV Guidelines
+    </Button>
 
-                <Button
-                  onClick={exportSalesToCSV}
-                  className="bg-gradient-to-r from-[#6B4226] to-[#5a3620] text-white px-6 py-2 rounded-xl flex items-center gap-2 hover:shadow-lg transition-all shadow-sm"
-                  type="button"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Export CSV
-                </Button>
+    <Button
+      onClick={exportSalesToCSV}
+      className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all duration-300 shadow-lg font-semibold"
+      type="button"
+    >
+      <Download className="w-4 h-4" />
+      Export CSV
+    </Button>
 
-                <Button
-                  onClick={() => setShowCsvModal(true)}
-                  className="bg-gradient-to-r from-[#6B4226] to-[#5a3620] text-white px-6 py-2 rounded-xl flex items-center gap-2 hover:shadow-lg transition-all shadow-sm"
-                  disabled={isProcessingCsv}
-                  type="button"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Import CSV
-                </Button>
+    <Button
+      onClick={() => setShowCsvModal(true)}
+      className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all duration-300 shadow-lg font-semibold"
+      disabled={isProcessingCsv}
+      type="button"
+    >
+      <Upload className="w-4 h-4" />
+      Import CSV
+    </Button>
 
-                <Button
-                  onClick={() => setShowModal(true)}
-                  className="bg-gradient-to-r from-[#6B4226] to-[#5a3620] text-white px-6 py-2 rounded-xl flex items-center gap-2 hover:shadow-lg transition-all shadow-sm"
-                  disabled={isSubmitting}
-                  type="button"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Sale
-                </Button>
-              </div>
-            </div>
+    <Button
+      onClick={() => setShowModal(true)}
+      className="bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all duration-300 shadow-lg font-semibold"
+      disabled={isSubmitting}
+      type="button"
+    >
+      <Plus className="w-4 h-4" />
+      Add Sale
+    </Button>
+  </div>
+</div>
 
-            {message && (
-              <div
-                className={`mb-6 px-4 py-3 rounded-lg border-l-4 flex items-center gap-3 ${
-                  messageType === "success"
-                    ? "bg-green-50 text-green-800 border-green-400"
-                    : messageType === "warning"
-                      ? "bg-yellow-50 text-yellow-800 border-yellow-400"
-                      : "bg-red-50 text-red-800 border-red-400"
-                }`}
-              >
-                {messageType === "success" ? (
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                ) : messageType === "warning" ? (
-                  <AlertCircle className="w-5 h-5 text-yellow-600" />
-                ) : (
-                  <AlertCircle className="w-5 h-5 text-red-600" />
-                )}
-                <span className="font-medium">{message}</span>
-              </div>
-            )}
+{message && (
+  <div
+    className={`mb-8 px-6 py-4 rounded-xl border-l-4 flex items-center gap-4 shadow-lg backdrop-blur-sm ${
+      messageType === "success"
+        ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-800 border-green-400 shadow-green-100/50"
+        : messageType === "warning"
+          ? "bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-800 border-amber-400 shadow-amber-100/50"
+          : "bg-gradient-to-r from-red-50 to-rose-50 text-red-800 border-red-400 shadow-red-100/50"
+    }`}
+  >
+    <div className={`p-2 rounded-lg ${
+      messageType === "success"
+        ? "bg-green-100"
+        : messageType === "warning"
+          ? "bg-amber-100"
+          : "bg-red-100"
+    }`}>
+      {messageType === "success" ? (
+        <CheckCircle className="w-5 h-5 text-green-600" />
+      ) : messageType === "warning" ? (
+        <AlertCircle className="w-5 h-5 text-amber-600" />
+      ) : (
+        <AlertCircle className="w-5 h-5 text-red-600" />
+      )}
+    </div>
+    <span className="font-semibold text-lg">{message}</span>
+  </div>
+)}
 
-            {/* Show last preview stats above Sales History, as requested */}
-            {salesStats ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                {/* Total Sales Card - Always Blue (Neutral) */}
-                <Card className="group relative bg-white/95 backdrop-blur-sm border border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-600 mb-1">Total Sales</p>
-                        <p className="text-xs text-slate-500 mb-3">last preview</p>
-                        <p className="text-2xl font-bold text-slate-900">{formatCurrency(salesStats.totalSales)}</p>
-                      </div>
-                      <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
-                        <DollarSign className="w-5 h-5 text-blue-600" />
-                      </div>
-                    </div>
-                    <div className="mt-4 h-1 bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"></div>
-                  </CardContent>
-                </Card>
+{/* Enhanced Stats Cards */}
+{salesStats ? (
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+    {/* Total Sales Card - Blue Theme */}
+    <Card className="group relative bg-white/95 backdrop-blur-lg border border-blue-200/60 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-105">
+      <CardContent className="p-8">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-bold text-gray-600 mb-2 uppercase tracking-wider">Total Sales</p>
+            <p className="text-xs text-blue-600 mb-4 font-semibold bg-blue-50 px-2 py-1 rounded-full inline-block">last preview</p>
+            <p className="text-3xl font-black text-gray-900 group-hover:text-blue-700 transition-colors">
+              {formatCurrency(salesStats.totalSales)}
+            </p>
+          </div>
+          <div className="p-4 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl border-2 border-blue-200 shadow-lg group-hover:shadow-xl transition-all">
+            <DollarSign className="w-6 h-6 text-blue-600" />
+          </div>
+        </div>
+        <div className="mt-6 h-2 bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 rounded-full shadow-inner"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 to-transparent rounded-xl pointer-events-none"></div>
+      </CardContent>
+    </Card>
 
-                {/* Total Profit Card - Green if positive, Red if negative */}
-                <Card
-                  className={`group relative bg-white/95 backdrop-blur-sm border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
-                    salesStats.totalProfit >= 0
-                      ? "border-emerald-200/60 shadow-lg shadow-emerald-100/20"
-                      : "border-red-200/60 shadow-lg shadow-red-100/20"
-                  }`}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-600 mb-1">Total Profit</p>
-                        <p className="text-xs text-slate-500 mb-3">last preview</p>
-                        <p
-                          className={`text-2xl font-bold ${
-                            salesStats.totalProfit >= 0 ? "text-emerald-700" : "text-red-700"
-                          }`}
-                        >
-                          {formatCurrency(salesStats.totalProfit)}
-                        </p>
-                      </div>
-                      <div
-                        className={`p-3 rounded-xl border ${
-                          salesStats.totalProfit >= 0 ? "bg-emerald-50 border-emerald-100" : "bg-red-50 border-red-100"
-                        }`}
-                      >
-                        <DollarSign
-                          className={`w-5 h-5 ${salesStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}
-                        />
-                      </div>
-                    </div>
-                    <div
-                      className={`mt-4 h-1 rounded-full ${
-                        salesStats.totalProfit >= 0
-                          ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
-                          : "bg-gradient-to-r from-red-500 to-red-400"
-                      }`}
-                    ></div>
-                  </CardContent>
-                </Card>
+    {/* Total Profit Card - Dynamic Green/Red */}
+    <Card
+      className={`group relative bg-white/95 backdrop-blur-lg border-2 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 ${
+        salesStats.totalProfit >= 0
+          ? "border-emerald-200/60 shadow-xl shadow-emerald-100/30"
+          : "border-red-200/60 shadow-xl shadow-red-100/30"
+      }`}
+    >
+      <CardContent className="p-8">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-bold text-gray-600 mb-2 uppercase tracking-wider">Total Profit</p>
+            <p className={`text-xs mb-4 font-semibold px-2 py-1 rounded-full inline-block ${
+              salesStats.totalProfit >= 0 
+                ? "text-emerald-600 bg-emerald-50" 
+                : "text-red-600 bg-red-50"
+            }`}>
+              last preview
+            </p>
+            <p className={`text-3xl font-black group-hover:scale-110 transition-transform ${
+              salesStats.totalProfit >= 0 ? "text-emerald-700" : "text-red-700"
+            }`}>
+              {formatCurrency(salesStats.totalProfit)}
+            </p>
+          </div>
+          <div className={`p-4 rounded-xl border-2 shadow-lg group-hover:shadow-xl transition-all ${
+            salesStats.totalProfit >= 0 
+              ? "bg-gradient-to-br from-emerald-100 to-green-200 border-emerald-200" 
+              : "bg-gradient-to-br from-red-100 to-rose-200 border-red-200"
+          }`}>
+            <DollarSign className={`w-6 h-6 ${
+              salesStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-600"
+            }`} />
+          </div>
+        </div>
+        <div className={`mt-6 h-2 rounded-full shadow-inner ${
+          salesStats.totalProfit >= 0
+            ? "bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-400"
+            : "bg-gradient-to-r from-red-500 via-rose-400 to-red-400"
+        }`}></div>
+        <div className={`absolute inset-0 rounded-xl pointer-events-none ${
+          salesStats.totalProfit >= 0
+            ? "bg-gradient-to-br from-emerald-50/20 to-transparent"
+            : "bg-gradient-to-br from-red-50/20 to-transparent"
+        }`}></div>
+      </CardContent>
+    </Card>
 
-                {/* Profit Margin Card - Green if positive, Red if negative */}
-                <Card
-                  className={`group relative bg-white/95 backdrop-blur-sm border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
-                    salesStats.avgProfitMargin >= 0
-                      ? "border-emerald-200/60 shadow-lg shadow-emerald-100/20"
-                      : "border-red-200/60 shadow-lg shadow-red-100/20"
-                  }`}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-600 mb-1">Avg Profit Margin</p>
-                        <p className="text-xs text-slate-500 mb-3">last preview</p>
-                        <p
-                          className={`text-2xl font-bold ${
-                            salesStats.avgProfitMargin >= 0 ? "text-emerald-700" : "text-red-700"
-                          }`}
-                        >
-                          {formatPercent2(salesStats.avgProfitMargin)}
-                        </p>
-                      </div>
-                      <div
-                        className={`p-3 rounded-xl border ${
-                          salesStats.avgProfitMargin >= 0
-                            ? "bg-emerald-50 border-emerald-100"
-                            : "bg-red-50 border-red-100"
-                        }`}
-                      >
-                        <Percent
-                          className={`w-5 h-5 ${salesStats.avgProfitMargin >= 0 ? "text-emerald-600" : "text-red-600"}`}
-                        />
-                      </div>
-                    </div>
-                    <div
-                      className={`mt-4 h-1 rounded-full ${
-                        salesStats.avgProfitMargin >= 0
-                          ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
-                          : "bg-gradient-to-r from-red-500 to-red-400"
-                      }`}
-                    ></div>
-                  </CardContent>
-                </Card>
-              </div>
-            ) : null}
-            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-amber-600" />
-                    Sales History
-                  </CardTitle>
+    {/* Profit Margin Card - Dynamic Green/Red */}
+    <Card
+      className={`group relative bg-white/95 backdrop-blur-lg border-2 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 ${
+        salesStats.avgProfitMargin >= 0
+          ? "border-emerald-200/60 shadow-xl shadow-emerald-100/30"
+          : "border-red-200/60 shadow-xl shadow-red-100/30"
+      }`}
+    >
+      <CardContent className="p-8">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-bold text-gray-600 mb-2 uppercase tracking-wider">Avg Profit Margin</p>
+            <p className={`text-xs mb-4 font-semibold px-2 py-1 rounded-full inline-block ${
+              salesStats.avgProfitMargin >= 0 
+                ? "text-emerald-600 bg-emerald-50" 
+                : "text-red-600 bg-red-50"
+            }`}>
+              last preview
+            </p>
+            <p className={`text-3xl font-black group-hover:scale-110 transition-transform ${
+              salesStats.avgProfitMargin >= 0 ? "text-emerald-700" : "text-red-700"
+            }`}>
+              {formatPercent2(salesStats.avgProfitMargin)}
+            </p>
+          </div>
+          <div className={`p-4 rounded-xl border-2 shadow-lg group-hover:shadow-xl transition-all ${
+            salesStats.avgProfitMargin >= 0
+              ? "bg-gradient-to-br from-emerald-100 to-green-200 border-emerald-200"
+              : "bg-gradient-to-br from-red-100 to-rose-200 border-red-200"
+          }`}>
+            <Percent className={`w-6 h-6 ${
+              salesStats.avgProfitMargin >= 0 ? "text-emerald-600" : "text-red-600"
+            }`} />
+          </div>
+        </div>
+        <div className={`mt-6 h-2 rounded-full shadow-inner ${
+          salesStats.avgProfitMargin >= 0
+            ? "bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-400"
+            : "bg-gradient-to-r from-red-500 via-rose-400 to-red-400"
+        }`}></div>
+        <div className={`absolute inset-0 rounded-xl pointer-events-none ${
+          salesStats.avgProfitMargin >= 0
+            ? "bg-gradient-to-br from-emerald-50/20 to-transparent"
+            : "bg-gradient-to-br from-red-50/20 to-transparent"
+        }`}></div>
+      </CardContent>
+    </Card>
+  </div>
+) : null}
 
-                  {/* Pagination Controls */}
-                  <div className="flex items-center gap-3">
-                    <div className="hidden sm:flex items-center text-sm text-gray-600">
-                      <span className="mr-2">Rows per page:</span>
-                      <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-                        <SelectTrigger className="h-8 w-[82px]">
-                          <SelectValue placeholder="10" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {[5, 10, 20, 50, 100].map((n) => (
-                            <SelectItem key={n} value={String(n)}>
-                              {n}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+{/* Enhanced Sales History Table */}
+<Card className="bg-white/95 backdrop-blur-lg border border-gray-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+  <CardHeader className="bg-gradient-to-r from-green-50/90 to-emerald-50/90 border-b-2 border-green-200/50 backdrop-blur-sm">
+    <div className="flex items-center justify-between">
+      <CardTitle className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+        <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl shadow-lg">
+          <DollarSign className="w-6 h-6 text-white" />
+        </div>
+        <span className="bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent">
+          Sales History
+        </span>
+      </CardTitle>
 
-                    <div className="text-xs sm:text-sm text-gray-600">
-                      {sales.length === 0 ? "0 of 0" : `${startIdx + 1}-${endIdx} of ${sales.length}`}
-                    </div>
+      {/* Enhanced Pagination Controls */}
+      <div className="flex items-center gap-4">
+        <div className="hidden sm:flex items-center text-sm text-gray-700 font-medium">
+          <span className="mr-3">Rows per page:</span>
+          <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+            <SelectTrigger className="h-9 w-[90px] bg-white border-green-200 hover:border-green-300 transition-colors shadow-sm">
+              <SelectValue placeholder="10" />
+            </SelectTrigger>
+            <SelectContent>
+              {[5, 10, 20, 50, 100].map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        disabled={page <= 1}
-                        className="h-8"
-                        aria-label="Previous page"
-                        type="button"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={page >= totalPages}
-                        className="h-8"
-                        aria-label="Next page"
-                        type="button"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </Button>
-                    </div>
+        <div className="text-sm text-gray-700 font-semibold bg-gray-50 px-3 py-1.5 rounded-lg">
+          {sales.length === 0 ? "0 of 0" : `${startIdx + 1}-${endIdx} of ${sales.length}`}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="h-9 w-9 p-0 bg-white hover:bg-green-50 border-green-200 hover:border-green-300 disabled:opacity-50 transition-all shadow-sm"
+            aria-label="Previous page"
+            type="button"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+            className="h-9 w-9 p-0 bg-white hover:bg-green-50 border-green-200 hover:border-green-300 disabled:opacity-50 transition-all shadow-sm"
+            aria-label="Next page"
+            type="button"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  </CardHeader>
+  <CardContent className="p-0">
+    <div className="overflow-x-auto">
+      <table className="w-full">
+        <thead className="bg-gradient-to-r from-gray-50/90 to-green-50/40 border-b-2 border-green-200/30 sticky top-0 z-10">
+          <tr>
+            <th className="px-8 py-5 text-left text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                Product
+              </span>
+            </th>
+            <th className="px-8 py-5 text-right text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                Quantity
+              </span>
+            </th>
+            <th className="px-8 py-5 text-center text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                Date
+              </span>
+            </th>
+            <th className="px-8 py-5 text-center text-xs font-bold text-gray-800 uppercase tracking-wider">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                User
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100/50">
+          {isLoading ? (
+            <tr>
+              <td colSpan={4} className="px-8 py-16 text-center">
+                <div className="flex items-center justify-center gap-4">
+                  <div className="animate-spin h-8 w-8 border-3 border-emerald-500 border-t-transparent rounded-full"></div>
+                  <span className="text-gray-600 font-semibold text-lg">Loading sales...</span>
+                </div>
+              </td>
+            </tr>
+          ) : sales.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="px-8 py-16 text-center align-middle min-h-[300px]">
+                <div className="flex flex-col items-center justify-center gap-4 min-h-[220px] h-full w-full">
+                  <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-emerald-200 rounded-full flex items-center justify-center mb-3 shadow-lg">
+                    <DollarSign className="w-10 h-10 text-green-600" strokeWidth={1.5} />
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-gray-800 font-bold text-xl">No sales found</p>
+                    <p className="text-green-600 text-base font-medium">Add your first sale to get started</p>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50/80">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Product</th>
-                        <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Quantity</th>
-                        <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">Date</th>
-                        <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">User</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {isLoading ? (
-                        <tr>
-                          <td colSpan={6} className="px-6 py-12 text-center">
-                            <div className="flex items-center justify-center gap-3">
-                              <div className="animate-spin h-5 w-5 border-2 border-amber-500 border-t-transparent rounded-full"></div>
-                              <span className="text-gray-600">Loading sales...</span>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : sales.length === 0 ? (
-                        <tr>
-                          <td colSpan={6} className="px-6 py-12 text-center align-middle min-h-[300px]">
-                            <div className="flex flex-col items-center justify-center gap-3 min-h-[220px] h-full w-full">
-                              <DollarSign className="w-12 h-12 text-gray-300 mb-2" />
-                              <div className="flex flex-col items-center">
-                                <p className="text-gray-500 font-medium text-center">No sales found</p>
-                                <p className="text-gray-400 text-sm text-center">Add your first sale to get started</p>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : (
-                        paginatedSales.map((sale) => {
-                          const product = sale.product?.name || sale.product_name || "-"
-                          const qty = sale.quantity ?? sale.quantitySold ?? ""
-                          const date = sale.saleDate || sale.sale_date || sale.date
-                          let formattedDate
-                          if (date) {
-                            formattedDate = new Date(date).toLocaleDateString()
-                          } else {
-                            // Show only today's date (not time) if no date is provided
-                            const today = new Date()
-                            formattedDate = today.toLocaleDateString()
-                          }
-                          return (
-                            <tr key={sale.id} className="hover:bg-gray-50/50 transition-colors duration-150 bg-white">
-                              <td className="px-6 py-4 font-medium text-gray-900">{product}</td>
-                              <td className="px-6 py-4 text-right font-semibold text-gray-900">{qty}</td>
-                              <td className="px-6 py-4 text-center text-xs text-gray-700">{formattedDate}</td>
-                              <td className="px-6 py-4 text-center text-xs text-gray-700">{sale.user?.name || "-"}</td>
-                            </tr>
-                          )
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-
+              </td>
+            </tr>
+          ) : (
+            paginatedSales.map((sale, index) => {
+              const product = sale.product?.name || sale.product_name || "-"
+              const qty = sale.quantity ?? sale.quantitySold ?? ""
+              const date = sale.saleDate || sale.sale_date || sale.date
+              let formattedDate
+              if (date) {
+                formattedDate = new Date(date).toLocaleDateString()
+              } else {
+                const today = new Date()
+                formattedDate = today.toLocaleDateString()
+              }
+              return (
+                <tr 
+                  key={sale.id} 
+                  className={`group hover:bg-gradient-to-r hover:from-green-50/50 hover:to-emerald-50/30 transition-all duration-300 border-b border-gray-100/50 hover:border-green-200/60 ${
+                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
+                  }`}
+                >
+                  <td className="px-8 py-6 border-r border-gray-100/40">
+                    <div className="flex items-center gap-4">
+                      <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-sm"></div>
+                      <span className="font-bold text-gray-900 text-base group-hover:text-green-800 transition-colors">
+                        {product}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-8 py-6 text-right font-bold text-gray-900 text-lg border-r border-gray-100/40">
+                    <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-bold group-hover:bg-blue-100 transition-colors">
+                      {qty}
+                    </span>
+                  </td>
+                  <td className="px-8 py-6 text-center border-r border-gray-100/40">
+                    <div className="bg-gray-50 rounded-lg px-3 py-2 inline-block group-hover:bg-green-50 transition-colors">
+                      <span className="text-sm text-gray-700 font-semibold group-hover:text-green-700">
+                        {formattedDate}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-8 py-6 text-center">
+                    <div className="bg-gray-50 rounded-lg px-3 py-2 inline-block group-hover:bg-green-50 transition-colors">
+                      <span className="text-sm text-gray-700 font-semibold group-hover:text-green-700">
+                        {sale.user?.name || "-"}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              )
+            })
+          )}
+        </tbody>
+      </table>
+    </div>
+  </CardContent>
+</Card>
             {/* Manual Add Sale Modal */}
             <Dialog open={showModal} onOpenChange={(open) => !open && setShowModal(false)}>
               <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
                 <DialogHeader className="pb-6">
                   <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                    <div className="p-2 bg-amber-100 rounded-lg">
-                      <Plus className="w-5 h-5 text-amber-600" />
+                    <div className="p-2 rounded-lg">
+                      <Plus className="w-5 h-5 text-[#175e3b]" />
                     </div>
                     Add Sale
                   </DialogTitle>
@@ -1137,7 +1212,7 @@ export default function Sales() {
                       onValueChange={(value) => setFormData((prev) => ({ ...prev, productId: value }))}
                     >
                       <SelectTrigger
-                        className={`h-12 ${formErrors.productId ? "border-red-300 focus:ring-red-500" : "border-gray-300 focus:ring-amber-500 focus:border-amber-500"}`}
+                        className={`h-12 ${formErrors.productId ? "border-red-300 focus:ring-red-500" : "border-[#175e3b]"}`}
                       >
                         <SelectValue placeholder="Choose a product..." />
                       </SelectTrigger>
@@ -1168,7 +1243,7 @@ export default function Sales() {
                       value={formData.quantity}
                       onChange={(e) => setFormData((prev) => ({ ...prev, quantity: e.target.value }))}
                       placeholder="Enter quantity..."
-                      className={`h-12 ${formErrors.quantity ? "border-red-300 focus:ring-red-500" : "border-gray-300 focus:ring-amber-500 focus:border-amber-500"}`}
+                      className={`h-12 ${formErrors.quantity ? "border-red-300 focus:ring-red-500" : "border-[#175e3b]"}`}
                     />
                     {formErrors.quantity && (
                       <p className="text-red-500 text-sm flex items-center gap-1">
@@ -1192,7 +1267,7 @@ export default function Sales() {
                   <Button
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-6 py-2.5 shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700  text-white px-6 py-2.5 shadow-lg hover:shadow-xl transition-all duration-200"
                     type="button"
                   >
                     {isSubmitting && (

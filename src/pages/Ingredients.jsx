@@ -128,9 +128,9 @@ const [csvCopied, setCsvCopied] = useState(false)
           </div>
           <button
             onClick={() => setShowSuccessToast(false)}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1 rounded-full transition-colors bg-[#175E3B] hover:bg-[#175E3B]/90"
           >
-            <X className="w-4 h-4 text-gray-400" />
+            <X className="w-4 h-4 text-white" />
           </button>
         </motion.div>
       )}
@@ -156,9 +156,9 @@ const [csvCopied, setCsvCopied] = useState(false)
           </div>
           <button
             onClick={() => setShowErrorToast(false)}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+            className="p-1 rounded-full transition-colors bg-[#175E3B] hover:bg-[#175E3B]/90 flex-shrink-0"
           >
-            <X className="w-4 h-4 text-gray-400" />
+            <X className="w-4 h-4 text-white" />
           </button>
         </motion.div>
       )}
@@ -540,27 +540,26 @@ Chocolate,kg,2,80,3,SupplierD`
                 className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
               >
                 <div>
-                  <h1 className="text-3xl font-bold text-amber-900 tracking-tight">Ingredient Management</h1>
-                  <p className="text-amber-700 mt-1 text-sm">Optimize your coffee shop's inventory with ease</p>
+                  <h1 className="text-3xl font-bold text-[#175E3B] tracking-tight">Ingredient Management</h1>
+                  <p className="text-[#175E3B] mt-1 text-sm">Optimize your coffee shop's inventory with ease</p>
                 </div>
              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               {/* CSV Guidelines Button */}
   <Button
     onClick={() => setShowGuidelinesModal(true)}
-      variant="outline"
-    className="bg-white/80 hover:bg-white text-amber-700 border-amber-200 hover:border-amber-300 px-4 py-2 rounded-xl flex items-center gap-2 hover:shadow-md transition-all"
+    className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-4 py-2 rounded-xl flex items-center gap-2  transition-all"
     type="button"
   >
-    <FileText className="w-4 h-4 mr-2" />
+    <FileText className="w-4 h-4 mr-2 text-white" />
     CSV Guidelines
   </Button>
 
   <Button
     onClick={() => setShowAddModal(true)}
-    className="w-full sm:w-auto bg-gradient-to-r from-[#6B4226] to-[#5a3620] text-white px-6 py-2 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg transition-all shadow-sm"
+    className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2 rounded-xl flex items-center justify-center gap-2 hover:bg-[#175E3B]/90 transition-all shadow-sm"
     disabled={isSubmitting}
   >
-    <Plus className="w-4 h-4 mr-2" />
+    <Plus className="w-4 h-4 mr-2 text-white" />
     Add Ingredient
   </Button>
 
@@ -568,14 +567,14 @@ Chocolate,kg,2,80,3,SupplierD`
   {/* Export CSV Button */}
   <Button
     onClick={exportToCSV}
-    className="w-full sm:w-auto bg-gradient-to-r from-[#6B4226] to-[#5a3620] text-white px-6 py-2 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg transition-all shadow-sm"
+    className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2 rounded-xl flex items-center justify-center gap-2 hover:bg-[#175E3B]/90 transition-all shadow-sm"
     disabled={isSubmitting}
     type="button"
   >
     {isSubmitting ? (
-      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+      <Loader2 className="w-4 h-4 mr-2 animate-spin text-white" />
     ) : (
-      <Download className="w-4 h-4 mr-2" />
+      <Download className="w-4 h-4 mr-2 text-white" />
     )}
     Export CSV
   </Button>
@@ -591,16 +590,16 @@ Chocolate,kg,2,80,3,SupplierD`
   />
   <label htmlFor="csv-upload" className="w-full sm:w-auto cursor-pointer">
     <Button
-      className="w-full sm:w-auto bg-gradient-to-r from-[#55341E] to-[#6B4226] text-white px-6 py-2 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg transition-all shadow-sm"
+      className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2 rounded-xl flex items-center justify-center gap-2 hover:bg-[#175E3B]/90 transition-all shadow-sm"
       disabled={csvImporting}
       type="button"
       asChild
     >
       <span>
         {csvImporting ? (
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          <Loader2 className="w-4 h-4 mr-2 animate-spin text-white" />
         ) : (
-          <Upload className="w-4 h-4 mr-2" />
+          <Upload className="w-4 h-4 mr-2 text-white" />
         )}
         {csvImporting ? "Importing..." : "Import CSV"}
       </span>
@@ -630,127 +629,184 @@ Chocolate,kg,2,80,3,SupplierD`
               </Card>
 
               {/* Table */}
-              <Card className="bg-white/90 backdrop-blur-md border-amber-100">
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead className="bg-amber-100/50 border-b sticky top-0 z-10">
-                        <tr>
-                          {[
-                            "Name",
-                            "Unit",
-                            "Quantity",
-                            "Purchase Price",
-                            "Waste %",
-                            "Supplier",
-                            "Cost Per Subunit",
-                            "Actions",
-                          ].map((header) => (
-                            <th key={header} className="text-left p-4 font-semibold text-amber-900 tracking-tight">
-                              {header}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <AnimatePresence>
-                          {isLoading ? (
-                            <tr>
-                              <td colSpan={8} className="px-6 py-12 text-center">
-                                <div className="flex items-center justify-center gap-3">
-                                  <div className="animate-spin h-5 w-5 border-2 border-amber-500 border-t-transparent rounded-full"></div>
-                                  <span className="text-gray-600">Loading ingredients...</span>
-                                </div>
-                              </td>
-                            </tr>
-                          ) : filteredIngredients.length === 0 ? (
-                            <tr>
-                              <td colSpan={8} className="p-10 text-center">
-                                <div className="flex flex-col items-center justify-center gap-2">
-                                  <Package className="w-10 h-10 text-gray-400 mb-1" strokeWidth={1.5} />
-                                  <span className="text-lg font-semibold text-gray-700">No ingredients found</span>
-                                  <span className="text-amber-600 text-sm">
-                                    Add your first ingredient to get started!
-                                  </span>
-                                </div>
-                              </td>
-                            </tr>
-                          ) : (
-                            filteredIngredients.map((ingredient) => (
-                              <motion.tr
-                                key={ingredient.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.3 }}
-                                className="border-b hover:bg-amber-50/30 transition-all duration-200"
-                              >
-                                <td className="p-4 font-medium text-gray-900">{ingredient.name}</td>
-                                <td className="p-4">{ingredient.unit}</td>
-                                <td className="p-4">{ingredient.quantity}</td>
-                                <td className="p-4">${ingredient.purchase_price}</td>
-                                <td className="p-4">{ingredient.waste_percent}%</td>
-                                <td className="p-4">{ingredient.supplier}</td>
-                                <td className="p-4">{getCostValue(ingredient)}</td>
-                                <td className="p-4">
-                                  <div className="flex justify-center gap-2">
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                                          <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => handleEdit(ingredient)}
-                                            disabled={isSubmitting}
-                                            className="hover:bg-amber-100"
-                                          >
-                                            <Pencil className="w-4 h-4 text-amber-600" />
-                                          </Button>
-                                        </motion.div>
-                                      </TooltipTrigger>
-                                      <TooltipContent>Edit ingredient</TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                                          <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => handleDelete(ingredient.id)}
-                                            disabled={isSubmitting}
-                                            className="hover:bg-red-100"
-                                          >
-                                            <Trash2 className="w-4 h-4 text-red-600" />
-                                          </Button>
-                                        </motion.div>
-                                      </TooltipTrigger>
-                                      <TooltipContent>Delete ingredient</TooltipContent>
-                                    </Tooltip>
-                                  </div>
-                                </td>
-                              </motion.tr>
-                            ))
-                          )}
-                        </AnimatePresence>
-                      </tbody>
-                    </table>
+<Card className="bg-white/95 backdrop-blur-lg border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+  <CardContent className="p-0">
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead className="bg-gradient-to-r from-green-50 to-green-100/80 border-b-2 border-green-200 sticky top-0 z-10">
+          <tr>
+            {[
+              "Name",
+              "Unit", 
+              "Quantity",
+              "Purchase Price",
+              "Waste %",
+              "Supplier",
+              "Cost Per Subunit",
+              "Actions",
+            ].map((header) => (
+              <th key={header} className="text-left p-5 font-bold text-gray-800 tracking-wide text-xs uppercase border-r border-green-100/50 last:border-r-0">
+                <div className="flex items-center gap-2">
+                  <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                    {header}
+                  </span>
+                </div>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+          <AnimatePresence>
+            {isLoading ? (
+              <tr>
+                <td colSpan={8} className="px-6 py-16 text-center">
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="animate-spin h-6 w-6 border-3 border-emerald-500 border-t-transparent rounded-full"></div>
+                    <span className="text-gray-500 font-medium">Loading ingredients...</span>
                   </div>
-                </CardContent>
-              </Card>
+                </td>
+              </tr>
+            ) : filteredIngredients.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="p-12 text-center">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mb-2">
+                      <Package className="w-8 h-8 text-green-600" strokeWidth={1.5} />
+                    </div>
+                    <span className="text-xl font-bold text-gray-800">No ingredients found</span>
+                    <span className="text-green-600 text-base font-medium">
+                      Add your first ingredient to get started!
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filteredIngredients.map((ingredient, index) => (
+                <motion.tr
+                  key={ingredient.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  transition={{ 
+                    duration: 0.4, 
+                    delay: index * 0.05,
+                    ease: "easeOut" 
+                  }}
+                  className="group hover:bg-gradient-to-r hover:from-green-50/50 hover:to-emerald-50/30 transition-all duration-300 border-b border-gray-100/80 hover:border-green-200/60"
+                >
+                  <td className="p-5 font-semibold text-gray-900 border-r border-gray-100/50">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full opacity-60 group-hover:opacity-100 transition-opacity"></div>
+                      <span className="group-hover:text-green-800 transition-colors">
+                        {ingredient.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="p-5 text-gray-700 border-r border-gray-100/50 font-medium">
+                    <span className="px-2 py-1 bg-gray-50 rounded-md text-xs font-semibold text-gray-600 group-hover:bg-green-50 group-hover:text-green-700 transition-all">
+                      {ingredient.unit}
+                    </span>
+                  </td>
+                  <td className="p-5 text-gray-700 border-r border-gray-100/50 font-medium">
+                    {ingredient.quantity}
+                  </td>
+                  <td className="p-5 border-r border-gray-100/50">
+                    <span className="text-green-700 font-bold text-base">
+                      ${ingredient.purchase_price}
+                    </span>
+                  </td>
+                  <td className="p-5 border-r border-gray-100/50">
+                    <div className="flex items-center gap-2">
+                      <div className="w-12 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all duration-500"
+                          style={{ width: `${Math.min(ingredient.waste_percent, 100)}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-gray-700 font-semibold text-sm">
+                        {ingredient.waste_percent}%
+                      </span>
+                    </div>
+                  </td>
+                  <td className="p-5 text-gray-700 border-r border-gray-100/50 font-medium">
+                    <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold group-hover:bg-blue-100 transition-colors">
+                      {ingredient.supplier}
+                    </span>
+                  </td>
+                  <td className="p-5 border-r border-gray-100/50">
+                    <span className="text-emerald-600 font-bold">
+                      {getCostValue(ingredient)}
+                    </span>
+                  </td>
+                  <td className="p-5">
+                    <div className="flex justify-center gap-3">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <motion.div 
+                            whileHover={{ scale: 1.05 }} 
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleEdit(ingredient)}
+                              disabled={isSubmitting}
+                              className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-md hover:shadow-lg transition-all duration-300 border-0 h-9 w-9 p-0 rounded-lg"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                          </motion.div>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-gray-800 text-white border-0 shadow-xl">
+                          Edit ingredient
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <motion.div 
+                            whileHover={{ scale: 1.05 }} 
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDelete(ingredient.id)}
+                              disabled={isSubmitting}
+                              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md hover:shadow-lg transition-all duration-300 border-0 h-9 w-9 p-0 rounded-lg"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </motion.div>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-gray-800 text-white border-0 shadow-xl">
+                          Delete ingredient
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </td>
+                </motion.tr>
+              ))
+            )}
+          </AnimatePresence>
+        </tbody>
+      </table>
+    </div>
+  </CardContent>
+</Card>
 
               {/* Add/Edit Modal */}
               <AnimatePresence>
                 {showAddModal && (
                   <Dialog open={showAddModal} onOpenChange={(open) => !open && resetForm()}>
-                    <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-md border-amber-100">
+                    <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-md border-[#175e3b]">
                       <DialogHeader>
-                        <DialogTitle className="text-amber-900 text-xl tracking-tight">
+                        <DialogTitle className="text-[#175e3b] text-xl tracking-tight">
                           {editingIngredient ? "Edit Ingredient" : "Add New Ingredient"}
                         </DialogTitle>
                       </DialogHeader>
                       <div className="space-y-5 py-4">
                         <div>
-                          <Label htmlFor="name" className="text-amber-900 font-medium">
+                          <Label htmlFor="name" className="text-[#175e3b] font-medium">
                             Name *
                           </Label>
                           <Input
@@ -758,12 +814,12 @@ Chocolate,kg,2,80,3,SupplierD`
                             value={formData.name}
                             onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                             placeholder="e.g., Oat Milk"
-                            className={`mt-1 ${formErrors.name ? "border-red-500" : "border-amber-200 focus:ring-amber-500"} transition-all duration-200`}
+                            className={`mt-1 ${formErrors.name ? "border-red-500" : "border-[#175e3b]"} transition-all duration-200`}
                           />
                           {formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}
                         </div>
                         <div>
-                          <Label htmlFor="unit" className="text-amber-900 font-medium">
+                          <Label htmlFor="unit" className="text-[#175e3b] font-medium">
                             Unit *
                           </Label>
                           <Select
@@ -771,7 +827,7 @@ Chocolate,kg,2,80,3,SupplierD`
                             onValueChange={(value) => setFormData((prev) => ({ ...prev, unit: value }))}
                           >
                             <SelectTrigger
-                              className={`mt-1 ${formErrors.unit ? "border-red-500" : "border-amber-200 focus:ring-amber-500"}`}
+                              className={`mt-1 ${formErrors.unit ? "border-red-500" : "border-[#175e3b] "}`}
                             >
                               <SelectValue placeholder="Select unit" />
                             </SelectTrigger>
@@ -786,7 +842,7 @@ Chocolate,kg,2,80,3,SupplierD`
                           {formErrors.unit && <p className="text-red-500 text-xs mt-1">{formErrors.unit}</p>}
                         </div>
                         <div>
-                          <Label htmlFor="quantity" className="text-amber-900 font-medium">
+                          <Label htmlFor="quantity" className="text-[#175e3b] font-medium">
                             Quantity *
                           </Label>
                           <Input
@@ -796,12 +852,12 @@ Chocolate,kg,2,80,3,SupplierD`
                             value={formData.quantity}
                             onChange={(e) => setFormData((prev) => ({ ...prev, quantity: e.target.value }))}
                             placeholder="e.g., 2"
-                            className={`mt-1 ${formErrors.quantity ? "border-red-500" : "border-amber-200 focus:ring-amber-500"}`}
+                            className={`mt-1 ${formErrors.quantity ? "border-red-500" : "border-[#175e3b]"}`}
                           />
                           {formErrors.quantity && <p className="text-red-500 text-xs mt-1">{formErrors.quantity}</p>}
                         </div>
                         <div>
-                          <Label htmlFor="purchase_price" className="text-amber-900 font-medium">
+                          <Label htmlFor="purchase_price" className="text-[#175e3b] font-medium">
                             Purchase Price ($) *
                           </Label>
                           <Input
@@ -811,14 +867,14 @@ Chocolate,kg,2,80,3,SupplierD`
                             value={formData.purchase_price}
                             onChange={(e) => setFormData((prev) => ({ ...prev, purchase_price: e.target.value }))}
                             placeholder="0.00"
-                            className={`mt-1 ${formErrors.purchase_price ? "border-red-500" : "border-amber-200 focus:ring-amber-500"}`}
+                            className={`mt-1 ${formErrors.purchase_price ? "border-red-500" : "border-[#175e3b]"}`}
                           />
                           {formErrors.purchase_price && (
                             <p className="text-red-500 text-xs mt-1">{formErrors.purchase_price}</p>
                           )}
                         </div>
                         <div>
-                          <Label htmlFor="waste_percent" className="text-amber-900 font-medium">
+                          <Label htmlFor="waste_percent" className="text-[#175e3b] font-medium">
                             Waste % *
                           </Label>
                           <Input
@@ -828,14 +884,14 @@ Chocolate,kg,2,80,3,SupplierD`
                             value={formData.waste_percent}
                             onChange={(e) => setFormData((prev) => ({ ...prev, waste_percent: e.target.value }))}
                             placeholder="0"
-                            className={`mt-1 ${formErrors.waste_percent ? "border-red-500" : "border-amber-200 focus:ring-amber-500"}`}
+                            className={`mt-1 ${formErrors.waste_percent ? "border-red-500" : "border-[#175e3b]"}`}
                           />
                           {formErrors.waste_percent && (
                             <p className="text-red-500 text-xs mt-1">{formErrors.waste_percent}</p>
                           )}
                         </div>
                         <div>
-                          <Label htmlFor="supplier" className="text-amber-900 font-medium">
+                          <Label htmlFor="supplier" className="text-[#175e3b] font-medium">
                             Supplier *
                           </Label>
                           <Select
@@ -843,7 +899,7 @@ Chocolate,kg,2,80,3,SupplierD`
                             onValueChange={(value) => setFormData((prev) => ({ ...prev, supplier: value }))}
                           >
                             <SelectTrigger
-                              className={`mt-1 ${formErrors.supplier ? "border-red-500" : "border-amber-200 focus:ring-amber-500"}`}
+                              className={`mt-1 ${formErrors.supplier ? "border-red-500" : "border-[#175e3b]"}`}
                             >
                               <SelectValue placeholder="Select supplier" />
                             </SelectTrigger>
@@ -862,19 +918,19 @@ Chocolate,kg,2,80,3,SupplierD`
                         <Button
                           variant="outline"
                           onClick={resetForm}
-                          className="border-amber-300 hover:bg-amber-100 transition-all duration-200 bg-transparent"
+                          className="border-[#175E3B] text-[#175E3B] hover:bg-[#175E3B]/10 transition-all duration-200 bg-transparent"
                           disabled={isSubmitting}
                         >
                           Cancel
                         </Button>
                         <Button
                           onClick={handleSubmit}
-                          className="bg-amber-600 hover:bg-amber-700 transition-all duration-200"
+                          className="bg-[#175E3B] hover:bg-[#175E3B]/90 transition-all duration-200 text-white"
                           disabled={isSubmitting}
                         >
                           {isSubmitting ? (
                             <>
-                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin text-white" />
                               Processing...
                             </>
                           ) : (
@@ -1079,7 +1135,7 @@ Chocolate,kg,2,80,3,SupplierD`}
         <DialogFooter className="pt-6">
           <Button
             onClick={() => setShowGuidelinesModal(false)}
-            className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 px-6"
+            className="bg-[#175E3B] hover:bg-[#175E3B]/90 transition-all duration-200 px-6 text-white"
           >
             Got it!
           </Button>

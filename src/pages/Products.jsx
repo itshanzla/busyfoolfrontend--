@@ -498,7 +498,7 @@ export default function Products() {
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-purple-700 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#175E3B] flex items-center justify-center">
                   <Shuffle className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -506,8 +506,8 @@ export default function Products() {
                   <p className="text-sm text-gray-500">{milkSwapProduct.name}</p>
                 </div>
               </div>
-              <button onClick={handleClose} className="p-2 hover:bg-gray-100 rounded-xl">
-                <X className="w-5 h-5 text-gray-600" />
+              <button onClick={handleClose} className="p-2 bg-[#175E3B] hover:bg-[#175E3B]/90 rounded-xl">
+                <X className="w-5 h-5 text-white" />
               </button>
             </div>
 
@@ -546,7 +546,7 @@ export default function Products() {
                         setSelectedOriginalIngredient(e.target.value)
                         setLocalError("")
                       }}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all bg-white"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-transparent transition-all bg-white"
                     >
                       <option value="">Select ingredient to replace</option>
                       {productIngredients.map((ingredient) => (
@@ -558,7 +558,7 @@ export default function Products() {
                   </div>
 
                   <div className="flex items-center justify-center py-2">
-                    <ArrowLeftRight className="w-6 h-6 text-purple-600" />
+                    <ArrowLeftRight className="w-6 h-6 text-[#175E3B]" />
                   </div>
 
                   <div>
@@ -569,7 +569,7 @@ export default function Products() {
                         setSelectedNewIngredient(e.target.value)
                         setLocalError("")
                       }}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all bg-white"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl  focus:border-transparent transition-all bg-white"
                     >
                       <option value="">Select replacement ingredient</option>
                       {allIngredients.map((ingredient) => (
@@ -593,7 +593,7 @@ export default function Products() {
                         setUpcharge(e.target.value)
                         setLocalError("")
                       }}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl  focus:border-transparent transition-all"
                       placeholder="0.00"
                     />
                     <p className="text-xs text-gray-500 mt-1">Additional charge to customer for premium ingredient</p>
@@ -605,16 +605,16 @@ export default function Products() {
                 <button
                   onClick={handleCalculateSwap}
                   disabled={localLoading || !selectedOriginalIngredient || !selectedNewIngredient}
-                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-[#175E3B] hover:bg-[#175E3B]/90 text-white py-3 px-4 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {localLoading ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <RefreshCw className="w-4 h-4 animate-spin text-white" />
                       Calculating...
                     </>
                   ) : (
                     <>
-                      <Shuffle className="w-4 h-4" />
+                      <Shuffle className="w-4 h-4 text-white" />
                       Calculate Swap Impact
                     </>
                   )}
@@ -626,8 +626,8 @@ export default function Products() {
               <div className="space-y-6">
                 {/* Results Header */}
                 <div className="text-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center mx-auto mb-4">
-                    <Shuffle className="w-8 h-8 text-purple-600" />
+                  <div className="w-16 h-16 rounded-full bg-[#175E3B]/10 flex items-center justify-center mx-auto mb-4">
+                    <Shuffle className="w-8 h-8 text-[#175E3B]" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Swap Analysis Complete</h3>
                   <p className="text-gray-600">Here's how the ingredient swap would affect your margins</p>
@@ -645,7 +645,7 @@ export default function Products() {
                           {Number(localResult.originalMargin || 0).toFixed(2)}%
                         </p>
                       </div>
-                      <div className="bg-white rounded-lg p-3 border-l-4 border-purple-400">
+                      <div className="bg-white rounded-lg p-3 border-l-4 border-green-600">
                         <span className="text-xs text-gray-500">New Margin</span>
                         <p
                           className={`text-lg font-bold ${
@@ -712,15 +712,15 @@ export default function Products() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setStep(0)}
-                    className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                    className="flex-1 px-4 py-3 border border-[#175E3B] text-[#175E3B] rounded-xl hover:bg-[#175E3B]/10 transition-colors font-medium"
                   >
                     Try Different Swap
                   </button>
                   <button
                     onClick={handleClose}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-3 bg-[#175E3B] hover:bg-[#175E3B]/90 text-white rounded-xl transition-all font-medium flex items-center justify-center gap-2"
                   >
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle className="w-4 h-4 text-white" />
                     Done
                   </button>
                 </div>
@@ -827,16 +827,16 @@ export default function Products() {
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6B4226] to-[#5a3620] flex items-center justify-center">
-                  <Calculator className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 rounded-xl bg-[#175E3B]/10 flex items-center justify-center">
+                  <Calculator className="w-5 h-5 text-[#175E3B]" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">What-If Analysis</h2>
                   <p className="text-sm text-gray-500">{whatIfProduct.name}</p>
                 </div>
               </div>
-              <button onClick={handleClose} className="p-2 hover:bg-gray-100 rounded-xl">
-                <X className="w-5 h-5 text-gray-600" />
+              <button onClick={handleClose} className="p-2 bg-[#175E3B] hover:bg-[#175E3B]/90 rounded-xl">
+                <X className="w-5 h-5 text-white" />
               </button>
             </div>
 
@@ -885,7 +885,7 @@ export default function Products() {
                       setLocalPrice(e.target.value)
                       setLocalError("")
                     }}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent transition-all text-lg font-semibold"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all text-lg font-semibold"
                     placeholder="Enter new price"
                     autoFocus
                   />
@@ -924,16 +924,16 @@ export default function Products() {
                     isNaN(Number.parseFloat(localPrice)) ||
                     Number.parseFloat(localPrice) <= 0
                   }
-                  className="w-full bg-gradient-to-r from-[#6B4226] to-[#5a3620] text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-[#175E3B] hover:bg-[#175E3B]/90 text-white py-3 px-4 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {localLoading ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <RefreshCw className="w-4 h-4 animate-spin text-white" />
                       Analyzing...
                     </>
                   ) : (
                     <>
-                      <Calculator className="w-4 h-4" />
+                      <Calculator className="w-4 h-4 text-white" />
                       Analyze Impact
                     </>
                   )}
@@ -1093,7 +1093,7 @@ export default function Products() {
                   </button>
                   <button
                     onClick={handleApplyChanges}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-3 bg-[#175E3B] text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2"
                   >
                     <CheckCircle className="w-4 h-4" />
                     Apply Changes
@@ -1352,7 +1352,7 @@ export default function Products() {
             type="text"
             value={localForm.name}
             onChange={(e) => setLocalForm((f) => ({ ...f, name: e.target.value }))}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent transition-all"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all"
           />
         </div>
         <div>
@@ -1360,7 +1360,7 @@ export default function Products() {
           <select
             value={localForm.category}
             onChange={(e) => setLocalForm((f) => ({ ...f, category: e.target.value }))}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent transition-all bg-white"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all bg-white"
           >
             <option value="">Select category</option>
             <option value="Coffee">Coffee</option>
@@ -1376,7 +1376,7 @@ export default function Products() {
             step="0.01"
             value={localForm.sell_price}
             onChange={(e) => setLocalForm((f) => ({ ...f, sell_price: e.target.value }))}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent transition-all"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all"
           />
         </div>
       </div>
@@ -1393,7 +1393,7 @@ export default function Products() {
             placeholder="Search by name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent transition-all"
+            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all"
           />
         </div>
         <div className="max-h-48 overflow-y-auto border border-gray-100 rounded-xl p-2 bg-gray-50">
@@ -1638,12 +1638,12 @@ export default function Products() {
                 <div key={label} className="flex-1 flex flex-col items-center">
                   <div
                     className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-white transition-all ${
-                      step === idx ? "bg-[#6B4226] scale-110 shadow-lg" : "bg-gray-300"
+                      step === idx ? "bg-[#175E3B] scale-110 shadow-lg" : "bg-gray-300"
                     }`}
                   >
                     {idx + 1}
                   </div>
-                  <span className={`mt-2 text-xs font-medium ${step === idx ? "text-[#6B4226]" : "text-gray-400"}`}>
+                  <span className={`mt-2 text-xs font-medium ${step === idx ? "text-[#175E3B]" : "text-gray-400"}`}>
                     {label}
                   </span>
                 </div>
@@ -1677,7 +1677,7 @@ export default function Products() {
                 {step < steps.length - 1 && (
                   <button
                     onClick={handleNext}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-[#6B4226] to-[#5a3620] text-white rounded-xl hover:shadow-lg transition-all font-medium"
+                    className="flex-1 px-4 py-3 bg-[#175E3B] text-white rounded-xl hover:shadow-lg transition-all font-medium"
                   >
                     Next
                   </button>
@@ -1685,7 +1685,7 @@ export default function Products() {
                 {step === steps.length - 1 && (
                   <button
                     onClick={handleSubmit}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-[#6B4226] to-[#5a3620] text-white rounded-xl hover:shadow-lg transition-all font-medium"
+                    className="flex-1 px-4 py-3 bg-[#175E3B] text-white rounded-xl hover:shadow-lg transition-all font-medium"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Saving..." : "Save Changes"}
@@ -1973,7 +1973,7 @@ export default function Products() {
             placeholder="Enter product name"
             value={localForm.name}
             onChange={(e) => setLocalForm((f) => ({ ...f, name: e.target.value }))}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent transition-all"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all"
           />
         </div>
         <div>
@@ -1981,7 +1981,7 @@ export default function Products() {
           <select
             value={localForm.category}
             onChange={(e) => setLocalForm((f) => ({ ...f, category: e.target.value }))}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent transition-all bg-white"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all bg-white"
           >
             <option value="">Select category</option>
             <option value="Coffee">Coffee</option>
@@ -1998,7 +1998,7 @@ export default function Products() {
             placeholder="0.00"
             value={localForm.sell_price}
             onChange={(e) => setLocalForm((f) => ({ ...f, sell_price: e.target.value }))}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent transition-all"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all"
           />
         </div>
       </div>
@@ -2015,7 +2015,7 @@ export default function Products() {
             placeholder="Search by name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent transition-all"
+            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all"
           />
         </div>
         <div className="max-h-48 overflow-y-auto border border-gray-100 rounded-xl p-2 bg-gray-50">
@@ -2218,12 +2218,12 @@ export default function Products() {
                 <div key={label} className="flex-1 flex flex-col items-center">
                   <div
                     className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-white transition-all ${
-                      step === idx ? "bg-[#6B4226] scale-110 shadow-lg" : "bg-gray-300"
+                      step === idx ? "bg-[#175E3B] scale-110 shadow-lg" : "bg-gray-300"
                     }`}
                   >
                     {idx + 1}
                   </div>
-                  <span className={`mt-2 text-xs font-medium ${step === idx ? "text-[#6B4226]" : "text-gray-400"}`}>
+                  <span className={`mt-2 text-xs font-medium ${step === idx ? "text-[#175E3B]" : "text-gray-400"}`}>
                     {label}
                   </span>
                 </div>
@@ -2257,7 +2257,7 @@ export default function Products() {
                 {step < steps.length - 1 && (
                   <button
                     onClick={handleNext}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-[#6B4226] to-[#5a3620] text-white rounded-xl hover:shadow-lg transition-all font-medium"
+                    className="flex-1 px-4 py-3 bg-[#175E3B] text-white rounded-xl hover:shadow-lg transition-all font-medium"
                   >
                     Next
                   </button>
@@ -2265,7 +2265,7 @@ export default function Products() {
                 {step === steps.length - 1 && (
                   <button
                     onClick={handleSubmit}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-[#6B4226] to-[#5a3620] text-white rounded-xl hover:shadow-lg transition-all font-medium"
+                    className="flex-1 px-4 py-3 bg-[#175E3B] text-white rounded-xl hover:shadow-lg transition-all font-medium"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Adding..." : "Add Product"}
@@ -2416,7 +2416,7 @@ export default function Products() {
             <div className="flex justify-between items-start mb-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-bold text-lg text-gray-900 group-hover:text-[#6B4226] transition-colors">
+                  <h3 className="font-bold text-lg text-gray-900 group-hover:text-[#175E3B] transition-colors">
                     {product.name}
                   </h3>
                   {getTrendingIcon(product.trending)}
@@ -2434,23 +2434,23 @@ export default function Products() {
               <div className="flex gap-1">
                 <button
                   type="button"
-                  className="p-2 rounded-xl opacity-0 group-hover:opacity-100"
+                  className="p-2 rounded-xl opacity-0 group-hover:opacity-100 bg-[#175E3B] hover:bg-[#175E3B]/90"
                   onClick={(e) => {
                     e.preventDefault();
                     handleEditProduct(product);
                   }}
                   disabled={isBeingEdited}
                 >
-                  <Edit className="w-4 h-4 text-gray-600" />
+                  <Edit className="w-4 h-4 text-white" />
                 </button>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="p-2 hover:bg-gray-100 rounded-xl transition-colors opacity-0 group-hover:opacity-100"
+                  className="p-2 rounded-xl opacity-0 group-hover:opacity-100 bg-[#175E3B] hover:bg-[#175E3B]/90"
                   onClick={() => handleDeleteProduct(product.id)}
                   disabled={isBeingEdited}
                 >
-                  <Trash2 className="w-4 h-4 text-red-500" />
+                  <Trash2 className="w-4 h-4 text-white" />
                 </motion.button>
               </div>
             </div>
@@ -2566,7 +2566,7 @@ export default function Products() {
                       className="flex justify-between items-center p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-[#6B4226] rounded-full"></div>
+                        <div className="w-2 h-2 bg-[#175E3B] rounded-full"></div>
                         <div>
                           <span className="font-medium text-sm text-gray-800">{ingredient.name ?? "Unknown"}</span>
                           <p className="text-xs text-gray-500">
@@ -2574,7 +2574,7 @@ export default function Products() {
                           </p>
                         </div>
                       </div>
-                      <span className="font-bold text-sm text-[#6B4226] bg-[#6B4226]/5 px-2 py-1 rounded">
+                      <span className="font-bold text-sm text-[#175E3B] bg-[#175E3B]/5 px-2 py-1 rounded">
                         {ingredient.line_cost !== undefined ? `$${Number(ingredient.line_cost).toFixed(2)}` : "$0.00"}
                       </span>
                     </div>
@@ -2588,27 +2588,27 @@ export default function Products() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-[#6B4226] text-white py-2 px-4 rounded-xl text-sm font-semibold hover:bg-[#5a3620] transition-all duration-200 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                className="bg-[#175E3B] text-white py-2 px-4 rounded-xl text-sm font-semibold hover:bg-[#175E3B]/90 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
                 onClick={() => {
                   setWhatIfProduct(product)
                   setShowWhatIfModal(true)
                 }}
                 disabled={isBeingEdited}
               >
-                <Calculator className="w-4 h-4" />
+                <Calculator className="w-4 h-4 text-white" />
                 What-If
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-purple-600 text-white py-2 px-4 rounded-xl text-sm font-semibold hover:bg-purple-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                className="bg-[#175E3B] text-white py-2 px-4 rounded-xl text-sm font-semibold hover:bg-[#175E3B]/90 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
                 onClick={() => {
                   setMilkSwapProduct(product)
                   setShowMilkSwapModal(true)
                 }}
                 disabled={isBeingEdited}
               >
-                <Shuffle className="w-4 h-4" />
+                <Shuffle className="w-4 h-4 text-white" />
                 Swap
               </motion.button>
             </div>
@@ -2720,7 +2720,7 @@ export default function Products() {
                         title="What-If Analysis"
                         disabled={isBeingEdited}
                       >
-                        <Calculator className="w-4 h-4 text-[#6B4226]" />
+                        <Calculator className="w-4 h-4 text-[#175E3B]" />
                       </button>
                       <button
                         className="p-1 hover:bg-gray-100 rounded disabled:opacity-50"
@@ -2731,7 +2731,7 @@ export default function Products() {
                         title="Ingredient Swap"
                         disabled={isBeingEdited}
                       >
-                        <Shuffle className="w-4 h-4 text-purple-600" />
+                        <Shuffle className="w-4 h-4 text-[#175E3B]" />
                       </button>
                       <button
                         className="p-1 hover:bg-gray-100 rounded disabled:opacity-50"
@@ -2829,7 +2829,7 @@ export default function Products() {
               className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
             >
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-[#6B4226] to-[#8B4513] bg-clip-text text-transparent">
+                <h1 className="text-4xl font-bold text-black bg-clip-text text-transparent">
                   Products
                 </h1>
                 <p className="text-gray-600 text-sm mt-1">Smart margin tracking for your coffee shop</p>
@@ -2839,7 +2839,7 @@ export default function Products() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowAddProduct(true)}
-                  className="bg-gradient-to-r from-[#6B4226] to-[#5a3620] text-white px-6 py-2 rounded-xl flex items-center gap-2 hover:shadow-lg transition-all shadow-sm"
+                  className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2 rounded-xl flex items-center gap-2 hover:shadow-lg transition-all shadow-sm"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
@@ -2859,8 +2859,8 @@ export default function Products() {
                   icon: Coffee,
                   label: "Total Products",
                   value: products.length,
-                  color: "from-[#6B4226] to-[#5a3620]",
-                  bgColor: "from-[#6B4226]/10 to-[#5a3620]/10",
+                  color: "from-[#175E3B] to-[#5a3620]",
+                  bgColor: "from-[#175E3B]/10 to-[#5a3620]/10",
             
                 },
                 {
@@ -2915,14 +2915,14 @@ export default function Products() {
                     placeholder="Search products, ingredients, or categories..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent transition-all placeholder-gray-400 text-sm"
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all placeholder-gray-400 text-sm"
                   />
                 </div>
                 <div className="flex gap-3 flex-wrap lg:flex-nowrap">
                   <select
                     value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value)}
-                    className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent text-sm min-w-[140px] bg-white"
+                    className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent text-sm min-w-[140px] bg-white"
                   >
                     {categories.map((category) => (
                       <option key={category} value={category}>
@@ -2933,7 +2933,7 @@ export default function Products() {
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent text-sm min-w-[130px] bg-white"
+                    className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent text-sm min-w-[130px] bg-white"
                   >
                     {statuses.map((status) => (
                       <option key={status} value={status}>
@@ -2944,7 +2944,7 @@ export default function Products() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#6B4226] focus:border-transparent text-sm min-w-[140px] bg-white"
+                    className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent text-sm min-w-[140px] bg-white"
                   >
                     <option value="margin">Sort by Margin</option>
                     <option value="sales">Sort by Sales</option>
@@ -2956,7 +2956,7 @@ export default function Products() {
                     <button
                       onClick={() => setViewMode("cards")}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                        viewMode === "cards" ? "bg-white text-[#6B4226] shadow-sm" : "text-gray-600 hover:text-gray-800"
+                        viewMode === "cards" ? "bg-white text-[#175E3B] shadow-sm" : "text-gray-600 hover:text-gray-800"
                       }`}
                     >
                       Cards
@@ -2964,7 +2964,7 @@ export default function Products() {
                     <button
                       onClick={() => setViewMode("table")}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                        viewMode === "table" ? "bg-white text-[#6B4226] shadow-sm" : "text-gray-600 hover:text-gray-800"
+                        viewMode === "table" ? "bg-white text-[#175E3B] shadow-sm" : "text-gray-600 hover:text-gray-800"
                       }`}
                     >
                       Table
@@ -3053,7 +3053,7 @@ export default function Products() {
                   )}
                   <button
                     onClick={() => setShowAddProduct(true)}
-                    className="bg-gradient-to-r from-[#6B4226] to-[#5a3620] text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all font-medium flex items-center gap-2"
+                    className="bg-gradient-to-r from-[#175E3B] to-[#5a3620] text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all font-medium flex items-center gap-2"
                   >
                     <Plus className="w-5 h-5" />
                     Add Your First Product

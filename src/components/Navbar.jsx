@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useLocation } from "react-router-dom"
+import { useTheme } from "../contexts/ThemeContext"
 import { apiClient } from "@/lib/api"
 
 import {
@@ -19,33 +20,19 @@ import {
   Leaf,
   Receipt,
   TrendingUp,
+  Sun,
+  Moon,
 } from "lucide-react"
 
 const profileMenuItems = [
   // {
   //   id: 1,
-  //   icon: User,
-  //   label: "My Profile",
-  //   action: () => console.log("Navigate to profile")
+  //   icon: Sun,
+  //   label: "Dark Mode",
+  //   description: "Toggle dark/light theme",
+  //   toggle: true,
+  //   action: () => console.log("Toggle dark mode"),
   // },
-  // {
-  //   id: 2,
-  //   icon: Settings,
-  //   label: "Account Settings",
-  //   action: () => console.log("Navigate to settings")
-  // },
-  // {
-  //   id: 3,
-  //   icon: CreditCard,
-  //   label: "Billing & Plans",
-  //   action: () => console.log("Navigate to billing")
-  // },
-  // {
-  //   id: 6,
-  //   icon: HelpCircle,
-  //   label: "Help & Support",
-  //   action: () => console.log("Navigate to help")
-  // }
 ]
 
 const dummyNotifications = [
@@ -101,7 +88,6 @@ const dummyNotifications = [
   },
 ]
 
-// Enhanced dynamic page configuration based on your actual routes
 const pageConfig = {
   "/": {
     title: "Sign Up",
@@ -162,22 +148,15 @@ const pageConfig = {
   },
 }
 
-// Get page information with fallback
 const getPageInfo = (currentPath) => {
-  // Direct match
   if (pageConfig[currentPath]) {
     return pageConfig[currentPath]
   }
 
-  // Try to match parent routes for dynamic segments
   const pathSegments = currentPath.split("/").filter(Boolean)
 
-  // Check for dynamic routes like /products/123/edit
   if (pathSegments.length >= 2) {
-    const possibleRoutes = [
-      `/${pathSegments[0]}/${pathSegments[1]}`, // /products/edit
-      `/${pathSegments[0]}`, // /products
-    ]
+    const possibleRoutes = [`/${pathSegments[0]}/${pathSegments[1]}`, `/${pathSegments[0]}`]
 
     for (const route of possibleRoutes) {
       if (pageConfig[route]) {
@@ -186,7 +165,6 @@ const getPageInfo = (currentPath) => {
     }
   }
 
-  // Single segment check
   if (pathSegments.length >= 1) {
     const singleRoute = `/${pathSegments[0]}`
     if (pageConfig[singleRoute]) {
@@ -194,7 +172,6 @@ const getPageInfo = (currentPath) => {
     }
   }
 
-  // Fallback for auth pages or unknown routes
   return {
     title: "Dashboard",
     icon: Home,
@@ -207,7 +184,7 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [notifications, setNotifications] = useState(dummyNotifications)
-  const [darkMode, setDarkMode] = useState(false)
+  const { isDarkMode, toggleTheme } = useTheme()
   const [userData, setUserData] = useState(null)
   const [loadingUser, setLoadingUser] = useState(true)
   const notificationRef = useRef(null)
@@ -246,7 +223,6 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
             joinDate: data.joinDate || "",
           })
         } else {
-          // fallback to localStorage
           const userStr = localStorage.getItem("user")
           let user = null
           if (userStr) {
@@ -283,16 +259,15 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
 
   const handleProfileAction = (item) => {
     if (item.toggle && item.label === "Dark Mode") {
-      setDarkMode(!darkMode)
+      toggleTheme()
     } else {
       item.action()
     }
     setShowProfile(false)
   }
 
-  // Enhanced mobile menu toggle handler
   const handleMenuToggle = () => {
-    console.log("Menu button clicked!") // Debug log
+    console.log("Menu button clicked!")
     if (onToggleSidebar) {
       onToggleSidebar()
     } else {
@@ -301,77 +276,72 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-100">
+    <header
+        className={`sticky top-0 z-40 shadow-sm border-b transition-colors duration-300 ${
+          isDarkMode ? "bg-theme-surface border-theme-border-light" : "bg-theme-surface border-theme-border"
+        }`}
+    >
       <div className="flex items-center justify-between px-4 sm:px-6 py-4">
         <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-          {/* Enhanced Mobile Menu Button */}
           <button
-            className={`md:hidden flex-shrink-0 p-2 rounded-lg transition-all duration-200 hover:bg-gray-100 active:bg-gray-200 ${
-              isSidebarOpen ? "bg-[#6B4226]/10" : ""
-            }`}
+            className={`md:hidden flex-shrink-0 p-2 rounded-lg transition-all duration-200 ${
+              isDarkMode ? "hover:bg-theme-secondary active:bg-theme-secondary" : "hover:bg-gray-100 active:bg-gray-200"
+            } ${isSidebarOpen ? "bg-[#6B4226]/10" : ""}`}
             onClick={handleMenuToggle}
             aria-label="Toggle sidebar"
             type="button"
           >
-            <Menu
-              className={`w-6 h-6 transition-colors duration-200 ${
-                isSidebarOpen ? "text-[#6B4226]" : "text-[#6B4226]"
-              }`}
-            />
+              <Menu
+                className={`w-6 h-6 transition-colors duration-200 text-[#175E3B]`}
+              />
           </button>
 
-          {/* Enhanced Dynamic Page Header */}
           <div className="min-w-0 flex-1">
-            {/* Only show header for authenticated pages (not login/signup) */}
             {!["/login", "/signup", "/"].includes(currentPath) && (
               <>
                 <div className="flex items-center gap-3 mb-1">
-                  <div className="flex-shrink-0 p-2 bg-[#6B4226]/10 rounded-lg">
-                    <PageIcon className="w-5 h-5 text-[#6B4226]" />
-                  </div>
+                    <div className="flex-shrink-0 p-2 bg-[#175E3B]/10 rounded-lg">
+                      <PageIcon className="w-5 h-5 text-[#175E3B]" />
+                    </div>
                   <div className="min-w-0 flex-1">
-                    <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[#6B4226] truncate">
+                    <h1
+                        className={`text-lg sm:text-xl lg:text-2xl font-bold truncate transition-colors duration-300 text-[#175E3B]`}
+                    >
                       {pageInfo.title}
                     </h1>
                   </div>
                 </div>
-
-                {/* Breadcrumb Navigation */}
-                {/* <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-500 mb-1">
-                  {pageInfo.breadcrumb.map((crumb, index) => (
-                    <React.Fragment key={index}>
-                      {index > 0 && <span className="mx-1">/</span>}
-                      <span className={index === pageInfo.breadcrumb.length - 1 ? 'text-[#6B4226] font-medium' : 'hover:text-[#6B4226] cursor-pointer'}>
-                        {crumb}
-                      </span>
-                    </React.Fragment>
-                  ))}
-                </div> */}
-
-                {/* Subtitle */}
-                {/* <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">
-                  {pageInfo.subtitle}
-                </p> */}
               </>
             )}
 
-            {/* Show simple title for auth pages */}
             {["/login", "/signup", "/"].includes(currentPath) && (
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[#6B4226]">{pageInfo.title}</h1>
+                <h1
+                  className={`text-lg sm:text-xl lg:text-2xl font-bold transition-colors duration-300 text-[#175E3B]`}
+                >
+                  {pageInfo.title}
+                </h1>
             )}
           </div>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-          {/* Hide notifications and profile for auth pages */}
           {!["/login", "/signup", "/"].includes(currentPath) && (
             <>
-              {/* Notifications Dropdown */}
+              {/* <button
+                onClick={toggleTheme}
+                className={`p-2 rounded-lg transition-all duration-300 ${
+                    isDarkMode ? "hover:bg-theme-secondary text-[#175E3B]" : "hover:bg-gray-100 text-[#175E3B]"
+                }`}
+                aria-label="Toggle theme"
+              >
+                  {isDarkMode ? <Sun className="w-5 h-5 text-[#175E3B]" /> : <Moon className="w-5 h-5 text-[#175E3B]" />}
+              </button> */}
 
-              {/* Profile Dropdown */}
               <div className="relative" ref={profileRef}>
                 <button
-                  className="relative p-1 hover:bg-gray-100 rounded-full transition-colors duration-200"
+                  className={`relative bg-gray-200 p-1 rounded-full transition-colors duration-200 ${
+                      isDarkMode ? "hover:bg-theme-secondary" : "hover:bg-gray-100"
+                  }`}
                   onClick={() => setShowProfile(!showProfile)}
                 >
                   <img
@@ -381,7 +351,11 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
                     style={!userData || !userData.avatar ? { display: "none" } : {}}
                   />
                   {(!userData || !userData.avatar) && (
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm sm:text-lg">
+                    <div
+                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-lg transition-colors duration-300 ${
+                          isDarkMode ? "bg-theme-secondary text-[#175E3B]" : "bg-gray-200 text-[#175E3B]"
+                        }`}
+                    >
                       {userData && userData.name
                         ? userData.name
                             .split(" ")
@@ -395,9 +369,10 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
                 </button>
 
                 {showProfile && (
-                  <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden animate-in slide-in-from-top-2 duration-200 max-w-[90vw] sm:max-w-none">
-                    {/* Profile Header */}
-                    <div className="bg-gradient-to-r from-[#6B4226] to-[#8B5A3B] text-white p-3 sm:p-4">
+                  <div
+                      className={`absolute right-0 mt-2 w-72 sm:w-80 rounded-lg shadow-2xl border overflow-hidden animate-in slide-in-from-top-2 duration-200 max-w-[90vw] sm:max-w-none transition-colors duration-300 bg-[#175E3B] border-[#175E3B]`}
+                  >
+                    <div className="bg-[#175E3B] text-white p-3 sm:p-4">
                       <div className="flex items-center gap-3">
                         <div className="relative">
                           <img
@@ -407,7 +382,7 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
                             style={!userData || !userData.avatar ? { display: "none" } : {}}
                           />
                           {(!userData || !userData.avatar) && (
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg sm:text-xl">
+                              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 flex items-center justify-center text-[#175E3B] font-bold text-lg sm:text-xl">
                               {userData && userData.name
                                 ? userData.name
                                     .split(" ")
@@ -421,22 +396,21 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
                           <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 border-2 border-white rounded-full"></div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base sm:text-lg truncate">
-                            {userData ? userData.name : loadingUser ? "Loading..." : "-"}
-                          </h3>
-                          <p className="text-xs sm:text-sm opacity-90 truncate">{userData ? userData.email : ""}</p>
-                          <p className="text-xs opacity-75 mt-1">{userData ? userData.role : ""}</p>
+                            <h3 className="font-semibold text-base sm:text-lg truncate text-white">
+                              {userData ? userData.name : loadingUser ? "Loading..." : "-"}
+                            </h3>
+                            <p className="text-xs sm:text-sm opacity-90 truncate text-white">{userData ? userData.email : ""}</p>
+                            <p className="text-xs opacity-75 mt-1 text-white">{userData ? userData.role : ""}</p>
                         </div>
                         <button
                           onClick={() => setShowProfile(false)}
-                          className="p-1 hover:bg-white/20 rounded-full transition-colors flex-shrink-0"
+                            className="p-1 hover:bg-white/20 rounded-full transition-colors flex-shrink-0 text-white"
                         >
                           <X className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
 
-                    {/* Menu Items */}
                     <div className="py-2">
                       {profileMenuItems.map((item) => {
                         const IconComponent = item.icon
@@ -444,41 +418,54 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
                           <button
                             key={item.id}
                             onClick={() => handleProfileAction(item)}
-                            className="w-full flex items-center gap-3 px-3 sm:px-4 py-3 hover:bg-gray-50 transition-colors text-left group"
+                              className={`w-full flex items-center gap-3 px-3 sm:px-4 py-3 transition-colors text-left group bg-[#175E3B] hover:bg-[#175E3B]/90`}
                           >
-                            <div className="flex-shrink-0 p-1.5 sm:p-2 rounded-lg bg-gray-100 text-gray-600 group-hover:bg-[#6B4226] group-hover:text-white transition-colors">
-                              <IconComponent className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            </div>
+                            <div
+                                className={`flex-shrink-0 p-1.5 sm:p-2 rounded-lg transition-colors bg-white text-[#175E3B] group-hover:bg-[#175E3B] group-hover:text-white`}
+                              >
+                                <IconComponent className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
-                                <span className="font-medium text-gray-900 text-sm sm:text-base">{item.label}</span>
+                                  <span
+                                    className={`font-medium text-sm sm:text-base transition-colors duration-300 text-white`}
+                                  >
+                                    {item.label}
+                                  </span>
                                 {item.toggle && item.label === "Dark Mode" && (
                                   <div
-                                    className={`w-8 h-4 sm:w-10 sm:h-5 rounded-full transition-colors ${
-                                      darkMode ? "bg-[#6B4226]" : "bg-gray-300"
-                                    }`}
+                                      className={`w-8 h-4 sm:w-10 sm:h-5 rounded-full transition-colors bg-white`}
                                   >
                                     <div
-                                      className={`w-3 h-3 sm:w-4 sm:h-4 bg-white rounded-full shadow-sm transition-transform mt-0.5 ${
-                                        darkMode ? "translate-x-4 sm:translate-x-5" : "translate-x-0.5"
-                                      }`}
-                                    ></div>
+                                        className={`w-3 h-3 sm:w-4 sm:h-4 bg-white rounded-full shadow-sm transition-transform mt-0.5 ${
+                                          isDarkMode ? "translate-x-4 sm:translate-x-5" : "translate-x-0.5"
+                                        }`}
+                                      ></div>
                                   </div>
                                 )}
                               </div>
-                              <p className="text-xs sm:text-sm text-gray-500 mt-0.5 line-clamp-1">{item.description}</p>
+                              <p
+                                  className={`text-xs sm:text-sm mt-0.5 line-clamp-1 transition-colors duration-300 text-white`}
+                                >
+                                  {item.description}
+                                </p>
                             </div>
                           </button>
                         )
                       })}
                     </div>
 
-                    {/* Footer */}
-                    <div className="border-t border-gray-100 bg-gray-50">
-                      <div className="px-3 sm:px-4 py-3">
-                        <p className="text-xs text-gray-500 mb-3">{userData ? userData.joinDate : ""}</p>
+                    <div
+                        className={`border-t transition-colors duration-300 border-white bg-white`}
+                      >
+                        <div className="px-3 sm:px-4 py-3">
+                          <p
+                            className={`text-xs transition-colors duration-300 text-white`}
+                          >
+                            {userData ? userData.joinDate : ""}
+                          </p>
+                        </div>
                       </div>
-                    </div>
                   </div>
                 )}
               </div>

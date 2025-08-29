@@ -41,7 +41,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
         className={`
           fixed top-0 left-0 z-50
           w-64 h-full min-h-screen
-          bg-[#2c1a0e]/90 backdrop-blur-xl
+          bg-[#175E3B] backdrop-blur-xl
           border-r border-[#ffffff1a] shadow-2xl text-white
           transform transition-transform duration-300
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
@@ -72,8 +72,8 @@ export const Sidebar = ({ isOpen, onClose }) => {
                 `group flex items-center gap-4 px-4 py-3 rounded-xl font-medium text-sm tracking-wide transition-all
                 ${
                   isActive
-                    ? "bg-[#55341E] text-yellow-300 shadow-inner shadow-yellow-400/10"
-                    : "text-white hover:bg-[#3a2416] hover:text-yellow-200"
+                    ? "bg-[#10B981] text-white shadow-inner shadow-yellow-400/10"
+                    : "text-white hover:bg-[#10B981] hover:text-white"
                 }`
               }
             >

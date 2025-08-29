@@ -271,7 +271,7 @@ export default function Stock() {
              
            <Button
   onClick={() => setShowPurchaseModal(true)}
-  className="bg-gradient-to-r from-[#6B4226] to-[#5a3620] hover:from-[#5a3620] hover:to-[#4a2d1a] text-white px-6 py-2 rounded-xl flex items-center gap-2 hover:shadow-lg transition-all shadow-sm"
+  className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2 rounded-xl flex items-center gap-2 hover:shadow-lg transition-all shadow-sm"
   disabled={isPurchaseSubmitting}
 >
   <DollarSign className="w-4 h-4 mr-2" />
@@ -284,7 +284,7 @@ export default function Stock() {
                 <DialogHeader className="pb-6">
                   <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
                     <div className="p-2 bg-blue-100 rounded-lg">
-                      <DollarSign className="w-5 h-5 text-blue-600" />
+                      <DollarSign className="w-5 h-5 text-[#175e3b]" />
                     </div>
                     Add Purchase
                   </DialogTitle>
@@ -307,7 +307,7 @@ export default function Stock() {
                         }));
                       }}
                     >
-                      <SelectTrigger className={`h-12 ${purchaseFormErrors.ingredientId ? "border-red-300 focus:ring-red-500" : "border-gray-300 focus:ring-amber-500 focus:border-amber-500"}`}>
+                      <SelectTrigger className={`h-12 ${purchaseFormErrors.ingredientId ? "border-red-300 focus:ring-red-500" : "border-[#175e3b]"}`}>
                         <SelectValue placeholder="Choose an ingredient..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -337,7 +337,7 @@ export default function Stock() {
                         value={purchaseFormData.quantity}
                         onChange={e => setPurchaseFormData(prev => ({ ...prev, quantity: e.target.value }))}
                         placeholder="Enter quantity..."
-                        className={`h-12 ${purchaseFormErrors.quantity ? "border-red-300 focus:ring-red-500" : "border-gray-300 focus:ring-amber-500 focus:border-amber-500"}`}
+                        className={`h-12 ${purchaseFormErrors.quantity ? "border-red-300 focus:ring-red-500" : "border-[#175e3b]"}`}
                       />
                       {purchaseFormErrors.quantity && <p className="text-red-500 text-sm flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" />
@@ -352,7 +352,7 @@ export default function Stock() {
                         id="purchase_unit"
                         value={purchaseFormData.unit}
                         readOnly
-                        className={`h-12 bg-gray-100 cursor-not-allowed ${purchaseFormErrors.unit ? "border-red-300 focus:ring-red-500" : "border-gray-300 focus:ring-amber-500 focus:border-amber-500"}`}
+                        className={`h-12 bg-gray-100 cursor-not-allowed ${purchaseFormErrors.unit ? "border-red-300 focus:ring-red-500" : "border-[#175e3b]"}`}
                       />
                       {purchaseFormErrors.unit && <p className="text-red-500 text-sm flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" />
@@ -374,7 +374,7 @@ export default function Stock() {
                       value={purchaseFormData.purchasePrice}
                       onChange={e => setPurchaseFormData(prev => ({ ...prev, purchasePrice: e.target.value }))}
                       placeholder="0.00"
-                      className={`h-12 ${purchaseFormErrors.purchasePrice ? "border-red-300 focus:ring-red-500" : "border-gray-300 focus:ring-amber-500 focus:border-amber-500"}`}
+                      className={`h-12 ${purchaseFormErrors.purchasePrice ? "border-red-300 focus:ring-red-500" : "border-[#175e3b]"}`}
                     />
                     {purchaseFormErrors.purchasePrice && <p className="text-red-500 text-sm flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />
@@ -393,7 +393,7 @@ export default function Stock() {
                       type="datetime-local"
                       value={purchaseFormData.purchase_date}
                       onChange={e => setPurchaseFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
-                      className={`h-12 ${purchaseFormErrors.purchase_date ? "border-red-300 focus:ring-red-500" : "border-gray-300 focus:ring-amber-500 focus:border-amber-500"}`}
+                      className={`h-12 ${purchaseFormErrors.purchase_date ? "border-red-300 focus:ring-red-500" : "border-[#175e3b]"}`}
                     />
                     {purchaseFormErrors.purchase_date && <p className="text-red-500 text-sm flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />
@@ -458,7 +458,7 @@ export default function Stock() {
     setIsPurchaseSubmitting(false);
   }}
   disabled={isPurchaseSubmitting}
-  className="bg-gradient-to-r from-[#6B4226] to-[#5a3620] hover:from-[#5a3620] hover:to-[#4a2d1a] text-white px-6 py-2.5 shadow-lg hover:shadow-xl transition-all duration-200"
+  className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2.5 shadow-lg hover:shadow-xl transition-all duration-200"
 >
   {isPurchaseSubmitting && (
     <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
@@ -468,114 +468,183 @@ export default function Stock() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
-                <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                  <Package className="w-5 h-5 text-amber-600" />
-                  Stock Inventory
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50/80">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Ingredient Name</th>
-                        <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Quantity</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Unit</th>
-                        <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Purchase Price</th>
-                        <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Total Purchase Price</th>
-                        <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Waste %</th>
-                        <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Remaining Qty</th>
-                        <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">Purchased At</th>
-                        <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">Updated At</th>
-                        {/* <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">Actions</th> */}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {isLoading ? (
-                        <tr>
-                          <td colSpan={6} className="px-6 py-12 text-center">
-                            <div className="flex items-center justify-center gap-3">
-                              <div className="animate-spin h-5 w-5 border-2 border-amber-500 border-t-transparent rounded-full"></div>
-                              <span className="text-gray-600">Loading stock items...</span>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : stockItems.length === 0 ? (
-                        <tr>
-                          <td colSpan={6} className="px-6 py-12 text-center align-middle min-h-[300px]">
-                            <div className="flex flex-col items-center justify-center gap-3 min-h-[220px] h-full w-full">
-                              <Package className="w-12 h-12 text-gray-300 mb-2" />
-                              <div className="flex flex-col items-center">
-                                <p className="text-gray-500 font-medium text-center">No stock items found</p>
-                                <p className="text-gray-400 text-sm text-center">Add your first stock item to get started</p>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : stockItems.map((item, index) => (
-                        <tr key={item.id} className={`hover:bg-gray-50/50 transition-colors duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-amber-100 rounded-lg">
-                                <Package className="w-4 h-4 text-amber-600" />
-                              </div>
-                              <span className="font-medium text-gray-900">{item.ingredient?.name || "Unknown Ingredient"}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-right font-semibold text-gray-900">{item.purchased_quantity}</td>
-                          <td className="px-6 py-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              {item.unit}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-right font-semibold text-green-600">
-                            {item.purchase_price_per_unit !== undefined && item.purchase_price_per_unit !== null
-                              ? `$${Number(item.purchase_price_per_unit).toFixed(2)}`
-                              : '-'}
-                          </td>
-                          <td className="px-6 py-4 text-right font-semibold text-blue-700">
-                            {item.total_purchased_price !== undefined && item.total_purchased_price !== null
-                              ? `$${Number(item.total_purchased_price).toFixed(2)}`
-                              : (item.purchase_price_per_unit !== undefined && item.purchase_price_per_unit !== null && item.purchased_quantity !== undefined && item.purchased_quantity !== null
-                                ? `$${(Number(item.purchase_price_per_unit) * Number(item.purchased_quantity)).toFixed(2)}`
-                                : '-')}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              Number(item.waste_percent) > 15 
-                                ? 'bg-red-100 text-red-800' 
-                                : Number(item.waste_percent) > 10 
-                                ? 'bg-yellow-100 text-yellow-800' 
-                                : 'bg-green-100 text-green-800'
-                            }`}>
-                              {item.waste_percent}%
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-right font-semibold text-gray-900">{item.remaining_quantity ?? '-'}</td>
-                          <td className="px-6 py-4 text-center text-xs text-gray-700">{item.purchased_at ? new Date(item.purchased_at).toLocaleString() : '-'}</td>
-                          <td className="px-6 py-4 text-center text-xs text-gray-700">{item.updated_at ? new Date(item.updated_at).toLocaleString() : '-'}</td>
-                          {/* <td className="px-6 py-4 text-center">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleEdit(item)} 
-                              disabled={isSubmitting}
-                              className="hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-colors duration-150"
-                            >
-                              <Edit3 className="w-3 h-3 mr-1" />
-                              Edit
-                            </Button>
-                          </td> */}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+           {/* Stock Inventory Table */}
+<Card className="bg-white/95 backdrop-blur-lg border border-gray-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+  <CardHeader className="bg-gradient-to-r from-green-50/80 to-emerald-50/80 border-b-2 border-green-200/50 backdrop-blur-sm">
+    <CardTitle className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+      <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl shadow-lg">
+        <Package className="w-6 h-6 text-white" />
+      </div>
+      <span className="bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent">
+        Stock Inventory
+      </span>
+    </CardTitle>
+  </CardHeader>
+  <CardContent className="p-0">
+    <div className="overflow-x-auto">
+      <table className="w-full">
+        <thead className="bg-gradient-to-r from-gray-50/90 to-green-50/40 border-b-2 border-green-200/30 sticky top-0 z-10">
+          <tr>
+            <th className="px-6 py-5 text-left text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                Ingredient Name
+              </span>
+            </th>
+            <th className="px-6 py-5 text-right text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                Quantity
+              </span>
+            </th>
+            <th className="px-6 py-5 text-left text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                Unit
+              </span>
+            </th>
+            <th className="px-6 py-5 text-right text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                Purchase Price
+              </span>
+            </th>
+            <th className="px-6 py-5 text-right text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                Total Purchase Price
+              </span>
+            </th>
+            <th className="px-6 py-5 text-right text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                Waste %
+              </span>
+            </th>
+            <th className="px-6 py-5 text-right text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                Remaining Qty
+              </span>
+            </th>
+            <th className="px-6 py-5 text-center text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                Purchased At
+              </span>
+            </th>
+            <th className="px-6 py-5 text-center text-xs font-bold text-gray-800 uppercase tracking-wider">
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                Updated At
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100/50">
+          {isLoading ? (
+            <tr>
+              <td colSpan={9} className="px-6 py-16 text-center">
+                <div className="flex items-center justify-center gap-4">
+                  <div className="animate-spin h-8 w-8 border-3 border-emerald-500 border-t-transparent rounded-full"></div>
+                  <span className="text-gray-600 font-semibold text-lg">Loading stock items...</span>
                 </div>
-              </CardContent>
-            </Card>
-
+              </td>
+            </tr>
+          ) : stockItems.length === 0 ? (
+            <tr>
+              <td colSpan={9} className="px-6 py-16 text-center align-middle min-h-[300px]">
+                <div className="flex flex-col items-center justify-center gap-4 min-h-[220px] h-full w-full">
+                  <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-emerald-200 rounded-full flex items-center justify-center mb-3 shadow-lg">
+                    <Package className="w-10 h-10 text-green-600" strokeWidth={1.5} />
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-gray-800 font-bold text-xl">No stock items found</p>
+                    <p className="text-green-600 text-base font-medium">Add your first stock item to get started</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          ) : stockItems.map((item, index) => (
+            <tr 
+              key={item.id} 
+              className={`group hover:bg-gradient-to-r hover:from-green-50/50 hover:to-emerald-50/30 transition-all duration-300 border-b border-gray-100/50 hover:border-green-200/60 ${
+                index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
+              }`}
+            >
+              <td className="px-6 py-5 border-r border-gray-100/40">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-gradient-to-br from-emerald-100 to-green-200 rounded-xl shadow-md group-hover:shadow-lg transition-all">
+                    <Package className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-gray-900 text-base group-hover:text-green-800 transition-colors">
+                      {item.ingredient?.name || "Unknown Ingredient"}
+                    </span>
+                    <div className="w-8 h-0.5 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full mt-1 opacity-60 group-hover:opacity-100 transition-opacity"></div>
+                  </div>
+                </div>
+              </td>
+              <td className="px-6 py-5 text-right font-bold text-gray-900 text-lg border-r border-gray-100/40">
+                {item.purchased_quantity}
+              </td>
+              <td className="px-6 py-5 border-r border-gray-100/40">
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 shadow-sm group-hover:shadow-md transition-all">
+                  {item.unit}
+                </span>
+              </td>
+              <td className="px-6 py-5 text-right font-bold text-emerald-600 text-lg border-r border-gray-100/40">
+                {item.purchase_price_per_unit !== undefined && item.purchase_price_per_unit !== null
+                  ? `${Number(item.purchase_price_per_unit).toFixed(2)}`
+                  : <span className="text-gray-400 font-medium">-</span>}
+              </td>
+              <td className="px-6 py-5 text-right font-bold text-blue-700 text-lg border-r border-gray-100/40">
+                {item.total_purchased_price !== undefined && item.total_purchased_price !== null
+                  ? `${Number(item.total_purchased_price).toFixed(2)}`
+                  : (item.purchase_price_per_unit !== undefined && item.purchase_price_per_unit !== null && item.purchased_quantity !== undefined && item.purchased_quantity !== null
+                    ? `${(Number(item.purchase_price_per_unit) * Number(item.purchased_quantity)).toFixed(2)}`
+                    : <span className="text-gray-400 font-medium">-</span>)}
+              </td>
+              <td className="px-6 py-5 text-right border-r border-gray-100/40">
+                <div className="flex items-center justify-end gap-3">
+                  <div className="w-16 h-2.5 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                    <div 
+                      className={`h-full transition-all duration-500 ${
+                        Number(item.waste_percent) > 15 
+                          ? 'bg-gradient-to-r from-red-400 to-red-600' 
+                          : Number(item.waste_percent) > 10 
+                          ? 'bg-gradient-to-r from-amber-400 to-orange-500' 
+                          : 'bg-gradient-to-r from-green-400 to-emerald-500'
+                      }`}
+                      style={{ width: `${Math.min(Number(item.waste_percent), 100)}%` }}
+                    ></div>
+                  </div>
+                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold shadow-sm ${
+                    Number(item.waste_percent) > 15 
+                      ? 'bg-gradient-to-r from-red-100 to-red-200 text-red-800' 
+                      : Number(item.waste_percent) > 10 
+                      ? 'bg-gradient-to-r from-amber-100 to-orange-200 text-orange-800' 
+                      : 'bg-gradient-to-r from-green-100 to-emerald-200 text-green-800'
+                  }`}>
+                    {item.waste_percent}%
+                  </span>
+                </div>
+              </td>
+              <td className="px-6 py-5 text-right font-bold text-gray-900 text-lg border-r border-gray-100/40">
+                {item.remaining_quantity ?? <span className="text-gray-400 font-medium">-</span>}
+              </td>
+              <td className="px-6 py-5 text-center border-r border-gray-100/40">
+                <div className="bg-gray-50 rounded-lg px-3 py-2 inline-block group-hover:bg-green-50 transition-colors">
+                  <span className="text-xs text-gray-600 font-semibold group-hover:text-green-700">
+                    {item.purchased_at ? new Date(item.purchased_at).toLocaleString() : '-'}
+                  </span>
+                </div>
+              </td>
+              <td className="px-6 py-5 text-center">
+                <div className="bg-gray-50 rounded-lg px-3 py-2 inline-block group-hover:bg-green-50 transition-colors">
+                  <span className="text-xs text-gray-600 font-semibold group-hover:text-green-700">
+                    {item.updated_at ? new Date(item.updated_at).toLocaleString() : '-'}
+                  </span>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </CardContent>
+</Card>
             {/* Modal Dialog */}
             <Dialog open={showModal} onOpenChange={open => !open && setShowModal(false)}>
               <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
