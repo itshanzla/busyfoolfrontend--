@@ -293,8 +293,8 @@ export default function Signup() {
                     <User className="absolute left-5 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-emerald-600 transition-all duration-300" />
                     <Input
                       id="name"
-                      className={`pl-14 h-16 bg-white/80 border-2 rounded-xl transition-all duration-300 focus:border-emerald-500 focus:bg-white hover:bg-white/90 focus:shadow-lg text-lg font-medium ${
-                        errors.name ? "border-red-400 focus:border-red-500 shadow-red-100" : "border-gray-200 focus:shadow-emerald-100"
+                       className={`pl-14 h-16 bg-white/80 border-2 rounded-xl transition-all duration-300 focus:border-emerald-500 focus:bg-white hover:bg-white/90 focus:shadow-lg text-lg font-medium !text-gray-900 placeholder:text-gray-500 ${
+                        errors.email ? "border-red-400 focus:border-red-500 shadow-red-100" : "border-gray-200 focus:shadow-emerald-100"
                       }`}
                       placeholder="Enter your full name"
                       {...register("name", { required: "Name is required" })}
@@ -322,7 +322,7 @@ export default function Signup() {
                     <Input
                       id="email"
                       type="email"
-                      className={`pl-14 h-16 bg-white/80 border-2 rounded-xl transition-all duration-300 focus:border-emerald-500 focus:bg-white hover:bg-white/90 focus:shadow-lg text-lg font-medium ${
+                      className={`pl-14 h-16 bg-white/80 border-2 rounded-xl transition-all duration-300 focus:border-emerald-500 focus:bg-white hover:bg-white/90 focus:shadow-lg text-lg font-medium !text-gray-900 placeholder:text-gray-500 ${
                         errors.email ? "border-red-400 focus:border-red-500 shadow-red-100" : "border-gray-200 focus:shadow-emerald-100"
                       }`}
                       placeholder="your@email.com"
@@ -357,8 +357,8 @@ export default function Signup() {
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      className={`pl-14 pr-16 h-16 bg-white/80 border-2 rounded-xl transition-all duration-300 focus:border-emerald-500 focus:bg-white hover:bg-white/90 focus:shadow-lg text-lg font-medium ${
-                        errors.password ? "border-red-400 focus:border-red-500 shadow-red-100" : "border-gray-200 focus:shadow-emerald-100"
+                      className={`pl-14 h-16 bg-white/80 border-2 rounded-xl transition-all duration-300 focus:border-emerald-500 focus:bg-white hover:bg-white/90 focus:shadow-lg text-lg font-medium !text-gray-900 placeholder:text-gray-500 ${
+                        errors.email ? "border-red-400 focus:border-red-500 shadow-red-100" : "border-gray-200 focus:shadow-emerald-100"
                       }`}
                       placeholder="Enter your password"
                       {...register("password", {
@@ -396,8 +396,8 @@ export default function Signup() {
                     <Input
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
-                      className={`pl-14 pr-16 h-16 bg-white/80 border-2 rounded-xl transition-all duration-300 focus:border-emerald-500 focus:bg-white hover:bg-white/90 focus:shadow-lg text-lg font-medium ${
-                        errors.confirmPassword ? "border-red-400 focus:border-red-500 shadow-red-100" : "border-gray-200 focus:shadow-emerald-100"
+                      className={`pl-14 h-16 bg-white/80 border-2 rounded-xl transition-all duration-300 focus:border-emerald-500 focus:bg-white hover:bg-white/90 focus:shadow-lg text-lg font-medium !text-gray-900 placeholder:text-gray-500 ${
+                        errors.email ? "border-red-400 focus:border-red-500 shadow-red-100" : "border-gray-200 focus:shadow-emerald-100"
                       }`}
                       placeholder="Confirm your password"
                       {...register("confirmPassword", {

@@ -271,7 +271,7 @@ export default function Login() {
                     <Input
                       id="email"
                       type="email"
-                      className={`pl-14 h-16 bg-white/80 border-2 rounded-xl transition-all duration-300 focus:border-emerald-500 focus:bg-white hover:bg-white/90 focus:shadow-lg text-lg font-medium ${
+                       className={`pl-14 h-16 bg-white/80 border-2 rounded-xl transition-all duration-300 focus:border-emerald-500 focus:bg-white hover:bg-white/90 focus:shadow-lg text-lg font-medium !text-gray-900 placeholder:text-gray-500 ${
                         errors.email ? "border-red-400 focus:border-red-500 shadow-red-100" : "border-gray-200 focus:shadow-emerald-100"
                       }`}
                       placeholder="your@email.com"
@@ -314,8 +314,8 @@ export default function Login() {
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      className={`pl-14 pr-16 h-16 bg-white/80 border-2 rounded-xl transition-all duration-300 focus:border-emerald-500 focus:bg-white hover:bg-white/90 focus:shadow-lg text-lg font-medium ${
-                        errors.password ? "border-red-400 focus:border-red-500 shadow-red-100" : "border-gray-200 focus:shadow-emerald-100"
+                       className={`pl-14 h-16 bg-white/80 border-2 rounded-xl transition-all duration-300 focus:border-emerald-500 focus:bg-white hover:bg-white/90 focus:shadow-lg text-lg font-medium !text-gray-900 placeholder:text-gray-500 ${
+                        errors.email ? "border-red-400 focus:border-red-500 shadow-red-100" : "border-gray-200 focus:shadow-emerald-100"
                       }`}
                       placeholder="Enter your password"
                       {...register("password", {
