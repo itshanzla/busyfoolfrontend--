@@ -2829,7 +2829,7 @@ export default function Products() {
               className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
             >
               <div>
-                <h1 className="text-4xl font-bold text-black bg-clip-text text-transparent">
+                <h1 className="text-4xl font-bold text-[#175E3B] bg-clip-text ">
                   Products
                 </h1>
                 <p className="text-gray-600 text-sm mt-1">Smart margin tracking for your coffee shop</p>

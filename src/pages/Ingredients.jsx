@@ -610,23 +610,71 @@ Chocolate,kg,2,80,3,SupplierD`
               </motion.div>
 
               {/* Filters */}
-              <Card className="mb-6 bg-white/90 backdrop-blur-md sticky top-0 z-10 border-amber-100">
-                <CardContent className="p-4">
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="flex-1">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-600 w-4 h-4" />
-                        <Input
-                          placeholder="Search ingredients..."
-                          value={search}
-                          onChange={(e) => setSearch(e.target.value)}
-                          className="pl-10 border-amber-200 focus:ring-amber-500 transition-all duration-200 hover:border-amber-300"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+             <Card className="mb-6 sticky top-0 z-10 border-green-200" 
+      style={{
+        background: 'linear-gradient(135deg, #F0FDF4, #ECFDF5)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '16px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.08)',
+        border: '1px solid #175E3B'
+      }}>
+  <CardContent className="p-6">
+    <div className="mb-2 border-transparent">
+      <h2 className="text-xl font-semibold text-[#175E3B] mb-1 tracking-tight">
+        Find Ingredients
+      </h2>
+      <p className="text-sm text-[#C7C7C7] m-0">
+        Search through our ingredient database
+      </p>
+    </div>
+    
+    <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex-1">
+        <div className="relative bg-transparent">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#175E3B] w-5 h-5 z-10" />
+          <Input
+            placeholder="Type to search ingredients..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-14 pr-12 py-4 border-2 border-[#D1D5DB] rounded-xl font-medium 
+                       transition-all duration-300 ease-out
+                       hover:border-[#10B981] hover:shadow-lg hover:-translate-y-0.5
+                       focus:border-[#10B981] focus:ring-4 focus:ring-[#10B981]/20 
+                       focus:shadow-lg focus:-translate-y-0.5
+                       bg-white text-[#111827]"
+            style={{
+              fontSize: '16px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+            }}
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 
+                         w-6 h-6 rounded-full bg-[#6B7280] text-white text-sm font-bold
+                         hover:bg-[#EF4444] hover:scale-110 transition-all duration-300
+                         flex items-center justify-center"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+    
+    {search && (
+      <div className="mt-4 p-4 bg-[#F0FDF4] rounded-lg border border-[#10B981]/20 
+                      animate-in slide-in-from-top-2 duration-300">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-[#C7C7C7]">Searching for:</span>
+          <span className="font-semibold text-[#10B981] text-sm">"{search}"</span>
+          <div className="w-1 h-1 bg-[#10B981] rounded-full animate-pulse"></div>
+        </div>
+      </div>
+    )}
+  </CardContent>
+</Card>
 
               {/* Table */}
 <Card className="bg-white/95 backdrop-blur-lg border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
