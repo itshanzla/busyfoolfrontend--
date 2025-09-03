@@ -277,8 +277,8 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
 
   return (
     <header
-        className={`sticky top-0 z-40 shadow-sm border-b transition-colors duration-300 ${
-          isDarkMode ? "bg-theme-surface border-theme-border-light" : "bg-theme-surface border-theme-border"
+        className={` top-0 z-40 shadow-sm border-b transition-colors duration-300 ${
+          isDarkMode ? "bg-white border-theme-border-light" : "bg-theme-surface border-theme-border"
         }`}
     >
       <div className="flex items-center justify-between px-4 sm:px-6 py-4">
