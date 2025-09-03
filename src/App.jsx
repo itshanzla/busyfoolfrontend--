@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
-import { ThemeProvider } from "./contexts/ThemeContext"
 import Signup from "./pages/SignUp"
 import Login from "./pages/Login"
 import ForgotPassword from "./pages/ForgotPassword"
@@ -37,121 +36,120 @@ function PublicRoute({ children }) {
 
 function App() {
   return (
-    <ThemeProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Root route: redirect based on login status */}
-          <Route
-            path="/"
-            element={isLoggedIn() ? <Navigate to="/welcome" replace /> : <Navigate to="/signup" replace />}
-          />
+    <BrowserRouter>
+      <Routes>
+        {/* Root route: redirect based on login status */}
+        <Route
+          path="/"
+          element={isLoggedIn() ? <Navigate to="/welcome" replace /> : <Navigate to="/signup" replace />}
+        />
 
-          {/* Public routes: only accessible if not logged in */}
-          <Route
-            path="/signup"
-            element={
-              <PublicRoute>
-                <Signup />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/forgot-password"
-            element={
-              <PublicRoute>
-                <ForgotPassword />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/reset-password"
-            element={
-              <PublicRoute>
-                <ResetPassword />
-              </PublicRoute>
-            }
-          />
+        {/* Public routes: only accessible if not logged in */}
+        <Route
+          path="/signup"
+          element={
+            <PublicRoute>
+              <Signup />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicRoute>
+              <ForgotPassword />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <PublicRoute>
+              <ResetPassword />
+            </PublicRoute>
+          }
+        />
 
-          {/* Protected routes: only accessible if logged in */}
-          <Route
-            path="/welcome"
-            element={
-              <ProtectedRoute>
-                <Welcome />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mapper"
-            element={
-              <ProtectedRoute>
-                <DragDropCSVPopup />
-              </ProtectedRoute>
-            }
-          />
+        {/* Protected routes: only accessible if logged in */}
+        <Route
+          path="/welcome"
+          element={
+            <ProtectedRoute>
+              <Welcome />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mapper"
+          element={
+            <ProtectedRoute>
+              <DragDropCSVPopup />
+            </ProtectedRoute>
+          }
+        />
 
-          <Route
-            path="/products"
-            element={
-              <ProtectedRoute>
-                <Products />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/ingredients"
-            element={
-              <ProtectedRoute>
-                <Ingredients />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/stock"
-            element={
-              <ProtectedRoute>
-                <Stock />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/purchases"
-            element={
-              <ProtectedRoute>
-                <Purchase />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/sales"
-            element={
-              <ProtectedRoute>
-                <Sales />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+        <Route
+          path="/products"
+          element={
+            <ProtectedRoute>
+              <Products />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ingredients"
+          element={
+            <ProtectedRoute>
+              <Ingredients />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stock"
+          element={
+            <ProtectedRoute>
+              <Stock />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/purchases"
+          element={
+            <ProtectedRoute>
+              <Purchase />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales"
+          element={
+            <ProtectedRoute>
+              <Sales />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
 
-          {/* Catch-all: redirect to root */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+        {/* Catch-all: redirect to root */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
-export default App
+
+export default App  
