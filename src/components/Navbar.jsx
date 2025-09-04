@@ -207,7 +207,7 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
           setUserData({
             name: data.fullName || data.name || data.username || data.email || "-",
             email: data.email || "-",
-            avatar: data.avatar || null,
+            profilePicture: data.profilePicture || null,
             role: data.role || "",
             joinDate: data.joinDate || "",
           })
@@ -220,7 +220,7 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
           setUserData({
             name: user?.name || user?.username || user?.email || "-",
             email: user?.email || user?.username || user?.name || "-",
-            avatar: user?.avatar || null,
+            profilePicture: user?.profilePicture || null,
             role: user?.role || "",
             joinDate: user?.joinDate || "",
           })
@@ -308,23 +308,11 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
                   onClick={() => setShowProfile(!showProfile)}
                 >
                   <img
-                    src={userData && userData.avatar ? userData.avatar : undefined}
+                    src={userData && userData.profilePicture ? userData.profilePicture : "/placeholder.svg"}
                     alt={userData ? userData.name : "User"}
                     className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover bg-gray-200"
-                    style={!userData || !userData.avatar ? { display: "none" } : {}}
+                    onError={e => { e.target.onerror = null; e.target.src = "/placeholder.svg"; }}
                   />
-                  {(!userData || !userData.avatar) && (
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-lg bg-gray-200 text-[#175E3B]">
-                      {userData && userData.name
-                        ? userData.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .slice(0, 2)
-                            .toUpperCase()
-                        : "?"}
-                    </div>
-                  )}
                 </button>
 
                 {showProfile && (
@@ -333,23 +321,11 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen = false }) => {
                       <div className="flex items-center gap-3">
                         <div className="relative">
                           <img
-                            src={userData && userData.avatar ? userData.avatar : undefined}
+                            src={userData && userData.profilePicture ? userData.profilePicture : "/placeholder.svg"}
                             alt={userData ? userData.name : "User"}
                             className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover bg-gray-200"
-                            style={!userData || !userData.avatar ? { display: "none" } : {}}
+                            onError={e => { e.target.onerror = null; e.target.src = "/placeholder.svg"; }}
                           />
-                          {(!userData || !userData.avatar) && (
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 flex items-center justify-center text-[#175E3B] font-bold text-lg sm:text-xl">
-                              {userData && userData.name
-                                ? userData.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")
-                                    .slice(0, 2)
-                                    .toUpperCase()
-                                : "?"}
-                            </div>
-                          )}
                           <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 border-2 border-white rounded-full"></div>
                         </div>
                         <div className="flex-1 min-w-0">

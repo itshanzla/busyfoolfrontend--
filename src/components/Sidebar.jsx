@@ -12,7 +12,7 @@ const navItems = [
   { name: "Sales", icon: Receipt, path: "/sales" },
   //  { name: "Daily Sales", icon: Receipt, path: "/dailysales" },
 
-  // { name: "My Profile", icon: BarChart3, path: "/profile" }
+  { name: "My Profile", icon: Receipt, path: "/profile" }
   // { name: "What-If", icon: BarChart3, path: "/what-if" },
 ]
 export const Sidebar = ({ isOpen, onClose }) => {

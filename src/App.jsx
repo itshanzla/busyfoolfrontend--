@@ -12,6 +12,7 @@ import Sales from "./pages/Sales"
 import Dashboard from "./pages/Dashboard"
 
 import DragDropCSVPopup from "./components/DragDropCSVPopup"
+import Profile from "./pages/Profile"
 
 // Helper to check if user is logged in
 function isLoggedIn() {
@@ -84,6 +85,15 @@ function App() {
           element={
             <ProtectedRoute>
               <Welcome />
+            </ProtectedRoute>
+          }
+        />
+
+         <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />
