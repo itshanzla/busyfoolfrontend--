@@ -31,6 +31,7 @@ import {
   ArrowLeftRight,
   Info,
   Loader2,
+  Upload,
 } from "lucide-react"
 
 export default function Products() {
@@ -74,6 +75,7 @@ export default function Products() {
     category: "",
     sell_price: "",
     ingredients: [],
+    image: null,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingProductId, setEditingProductId] = useState(null) // Track which product is being edited
@@ -89,6 +91,7 @@ export default function Products() {
     category: "",
     sell_price: "",
     ingredients: [],
+    image: null,
   })
   const [allIngredients, setAllIngredients] = useState([])
   const [ingredients, setIngredients] = useState([]) // For table view
@@ -1131,8 +1134,8 @@ export default function Products() {
 
   // Map product ingredients to match ingredient selection UI for edit modal
   const handleEditProduct = (product) => {
-  // Capture scroll position
-  window._productScrollY = window.scrollY;
+    // Capture scroll position
+    window._productScrollY = window.scrollY
     setSelectedProduct(product)
     // Map and deduplicate ingredients by id
     const rawIngredients = Array.isArray(product.ingredients)
@@ -1151,6 +1154,7 @@ export default function Products() {
       category: product.category || "",
       sell_price: product.sell_price || "",
       ingredients: dedupedIngredients,
+      image: null,
     })
     setShowEditProduct(true)
   }
@@ -1209,20 +1213,37 @@ export default function Products() {
         unit: ing.selectedUnit || ing.unit,
         is_optional: !!ing.is_optional,
       }))
-    const payload = {
-      name: editFormData.name,
-      category: editFormData.category,
-      sell_price: Number.parseFloat(editFormData.sell_price),
-      ingredients: selectedIngredients,
+
+    let requestBody
+    const headers = {
+      Authorization: `Bearer ${token}`,
     }
+
+    if (editFormData.image) {
+      // Use FormData for multipart/form-data
+      const formDataObj = new FormData()
+      formDataObj.append("name", editFormData.name)
+      formDataObj.append("category", editFormData.category)
+      formDataObj.append("sell_price", Number.parseFloat(editFormData.sell_price))
+      formDataObj.append("ingredients", JSON.stringify(selectedIngredients))
+      formDataObj.append("image", editFormData.image)
+      requestBody = formDataObj
+    } else {
+      // Use JSON for regular data
+      headers["Content-Type"] = "application/json"
+      requestBody = JSON.stringify({
+        name: editFormData.name,
+        category: editFormData.category,
+        sell_price: Number.parseFloat(editFormData.sell_price),
+        ingredients: selectedIngredients,
+      })
+    }
+
     try {
       const response = await fetch(`https://busy-fool-backend.vercel.app/products/${selectedProduct.id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
+        headers: headers,
+        body: requestBody,
       })
 
       if (response.ok) {
@@ -1276,14 +1297,15 @@ export default function Products() {
     // Restore scroll position on mount
     React.useEffect(() => {
       if (window._productScrollY !== undefined) {
-        window.scrollTo({ top: window._productScrollY });
+        window.scrollTo({ top: window._productScrollY })
       }
-    }, []);
+    }, [])
     const [step, setStep] = React.useState(0)
     const [search, setSearch] = React.useState("")
     const [localForm, setLocalForm] = React.useState(editFormData)
     const [error, setError] = React.useState("")
     const [success, setSuccess] = React.useState(false)
+    const [imagePreview, setImagePreview] = React.useState(null)
 
     // Sync localForm to parent state on submit
     React.useEffect(() => {
@@ -1292,14 +1314,40 @@ export default function Products() {
         setLocalForm(editFormData)
         setError("")
         setSuccess(false)
+        if (selectedProduct.image) {
+          setImagePreview(`https://busy-fool-backend.vercel.app/uploads/${selectedProduct.image}`)
+        } else {
+          setImagePreview(null)
+        }
       }
       if (!showEditProduct) {
         setStep(0)
         setLocalForm(editFormData)
         setError("")
         setSuccess(false)
+        setImagePreview(null)
       }
     }, [showEditProduct, selectedProduct, editFormData])
+
+    const handleImageUpload = (e) => {
+      const file = e.target.files[0]
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          // 5MB limit
+          setError("Image size must be less than 5MB")
+          return
+        }
+        if (!["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type)) {
+          setError("Please select a valid image file (JPG, PNG, GIF, WEBP)")
+          return
+        }
+        setLocalForm((f) => ({ ...f, image: file }))
+        const reader = new FileReader()
+        reader.onload = (e) => setImagePreview(e.target.result)
+        reader.readAsDataURL(file)
+        setError("")
+      }
+    }
 
     // Helper to update ingredient in localForm
     const updateIngredient = (ingredientId, changes) => {
@@ -1378,6 +1426,42 @@ export default function Products() {
             onChange={(e) => setLocalForm((f) => ({ ...f, sell_price: e.target.value }))}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+          <div className="space-y-3">
+            {imagePreview && (
+              <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-gray-200">
+                <img
+                  src={imagePreview || "/placeholder.svg"}
+                  alt="Product preview"
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImagePreview(null)
+                    setLocalForm((f) => ({ ...f, image: null }))
+                  }}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+            <div className="flex items-center justify-center w-full">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                  <p className="mb-2 text-sm text-gray-500">
+                    <span className="font-semibold">Click to upload</span> or drag and drop
+                  </p>
+                  <p className="text-xs text-gray-500">PNG, JPG, GIF, WEBP (MAX. 5MB)</p>
+                </div>
+                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -1561,20 +1645,37 @@ export default function Products() {
           unit: ing.selectedUnit || ing.unit,
           is_optional: !!ing.is_optional,
         }))
-      const payload = {
-        name: localForm.name,
-        category: localForm.category,
-        sell_price: Number.parseFloat(localForm.sell_price),
-        ingredients: selectedIngredients,
+
+      let requestBody
+      const headers = {
+        Authorization: `Bearer ${token}`,
       }
+
+      if (localForm.image) {
+        // Use FormData for multipart/form-data
+        const formDataObj = new FormData()
+        formDataObj.append("name", localForm.name)
+        formDataObj.append("category", localForm.category)
+        formDataObj.append("sell_price", Number.parseFloat(localForm.sell_price))
+        formDataObj.append("ingredients", JSON.stringify(selectedIngredients))
+        formDataObj.append("image", localForm.image)
+        requestBody = formDataObj
+      } else {
+        // Use JSON for regular data
+        headers["Content-Type"] = "application/json"
+        requestBody = JSON.stringify({
+          name: localForm.name,
+          category: localForm.category,
+          sell_price: Number.parseFloat(localForm.sell_price),
+          ingredients: selectedIngredients,
+        })
+      }
+
       try {
         const response = await fetch(`https://busy-fool-backend.vercel.app/products/${selectedProduct.id}`, {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
+          headers: headers,
+          body: requestBody,
         })
         if (response.ok) {
           const updated = await response.json()
@@ -1715,23 +1816,38 @@ export default function Products() {
       is_optional: !!ing.is_optional,
     }))
 
-    const payload = {
-      name: formData.name,
-      category: formData.category,
-      sell_price: Number.parseFloat(formData.sell_price),
-      ingredients: selectedIngredients,
+    let requestBody
+    const headers = {
+      Authorization: `Bearer ${token}`,
     }
 
-    console.log("Adding product with payload:", payload)
+    if (formData.image) {
+      // Use FormData for multipart/form-data
+      const formDataObj = new FormData()
+      formDataObj.append("name", formData.name)
+      formDataObj.append("category", formData.category)
+      formDataObj.append("sell_price", Number.parseFloat(formData.sell_price))
+      formDataObj.append("ingredients", JSON.stringify(selectedIngredients))
+      formDataObj.append("image", formData.image)
+      requestBody = formDataObj
+    } else {
+      // Use JSON for regular data
+      headers["Content-Type"] = "application/json"
+      requestBody = JSON.stringify({
+        name: formData.name,
+        category: formData.category,
+        sell_price: Number.parseFloat(formData.sell_price),
+        ingredients: selectedIngredients,
+      })
+    }
+
+    console.log("Adding product with payload:", formData.image ? "FormData with image" : "JSON data")
 
     try {
       const response = await fetch("https://busy-fool-backend.vercel.app/products", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
+        headers: headers,
+        body: requestBody,
       })
 
       console.log("Add product response status:", response.status)
@@ -1749,6 +1865,7 @@ export default function Products() {
           category: "",
           sell_price: "",
           ingredients: [],
+          image: null,
         })
 
         setShowAddProduct(false)
@@ -1944,13 +2061,13 @@ export default function Products() {
     })
   }, [])
 
-  // New AddProductModal: Multi-step, modern UX with stock validation
-  const AddProductModal = useCallback(() => {
+  const AddProductModal = () => {
     const [step, setStep] = useState(0)
     const [search, setSearch] = useState("")
     const [localForm, setLocalForm] = useState(formData)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState(false)
+    const [imagePreview, setImagePreview] = useState(null)
 
     React.useEffect(() => {
       if (showAddProduct) {
@@ -1958,8 +2075,29 @@ export default function Products() {
         setLocalForm(formData)
         setError("")
         setSuccess(false)
+        setImagePreview(null)
       }
     }, [showAddProduct, formData])
+
+    const handleImageUpload = (e) => {
+      const file = e.target.files[0]
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          // 5MB limit
+          setError("Image size must be less than 5MB")
+          return
+        }
+        if (!["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type)) {
+          setError("Please select a valid image file (JPG, PNG, GIF, WEBP)")
+          return
+        }
+        setLocalForm((f) => ({ ...f, image: file }))
+        const reader = new FileReader()
+        reader.onload = (e) => setImagePreview(e.target.result)
+        reader.readAsDataURL(file)
+        setError("")
+      }
+    }
 
     if (!showAddProduct) return null
 
@@ -2000,6 +2138,42 @@ export default function Products() {
             onChange={(e) => setLocalForm((f) => ({ ...f, sell_price: e.target.value }))}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+          <div className="space-y-3">
+            {imagePreview && (
+              <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-gray-200">
+                <img
+                  src={imagePreview || "/placeholder.svg"}
+                  alt="Product preview"
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImagePreview(null)
+                    setLocalForm((f) => ({ ...f, image: null }))
+                  }}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+            <div className="flex items-center justify-center w-full">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                  <p className="mb-2 text-sm text-gray-500">
+                    <span className="font-semibold">Click to upload</span> or drag and drop
+                  </p>
+                  <p className="text-xs text-gray-500">PNG, JPG, GIF, WEBP (MAX. 5MB)</p>
+                </div>
+                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -2277,20 +2451,7 @@ export default function Products() {
         </motion.div>
       </div>
     )
-  }, [
-    showAddProduct,
-    formData,
-    isSubmitting,
-    allIngredients,
-    setShowAddProduct,
-    setProducts,
-    setFormData,
-    stockData,
-    getAvailableStock,
-    getStockUnit,
-    checkStockExceeded,
-    handleAddProduct,
-  ])
+  }
 
   // Enhanced Product Card with loading state - MEMOIZED to prevent re-renders and FIXED animations
   const EnhancedProductCard = React.memo(({ product }) => {
@@ -2413,6 +2574,20 @@ export default function Products() {
             }`}
           ></div>
           <div className="p-6 pb-4">
+            {product.image && (
+              <div className="mb-4">
+                <div className="w-full h-48 rounded-xl overflow-hidden bg-gray-100">
+                  <img
+                    src={`https://busy-fool-backend.vercel.app/uploads/${product.image}`}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = "none"
+                    }}
+                  />
+                </div>
+              </div>
+            )}
             <div className="flex justify-between items-start mb-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
@@ -2436,8 +2611,8 @@ export default function Products() {
                   type="button"
                   className="p-2 rounded-xl opacity-0 group-hover:opacity-100 bg-[#175E3B] hover:bg-[#175E3B]/90"
                   onClick={(e) => {
-                    e.preventDefault();
-                    handleEditProduct(product);
+                    e.preventDefault()
+                    handleEditProduct(product)
                   }}
                   disabled={isBeingEdited}
                 >
@@ -2454,6 +2629,7 @@ export default function Products() {
                 </motion.button>
               </div>
             </div>
+
             <div className="mb-4">
               <span
                 className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
@@ -2829,9 +3005,7 @@ export default function Products() {
               className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
             >
               <div>
-                <h1 className="text-4xl font-bold text-[#175E3B] bg-clip-text ">
-                  Products
-                </h1>
+                <h1 className="text-4xl font-bold text-[#175E3B] bg-clip-text ">Products</h1>
                 <p className="text-gray-600 text-sm mt-1">Smart margin tracking for your coffee shop</p>
               </div>
               <div className="flex gap-3">
@@ -2861,7 +3035,6 @@ export default function Products() {
                   value: products.length,
                   color: "from-[#175E3B] to-[#5a3620]",
                   bgColor: "from-[#175E3B]/10 to-[#5a3620]/10",
-            
                 },
                 {
                   icon: TrendingUp,
@@ -2869,7 +3042,6 @@ export default function Products() {
                   value: products.filter((p) => p.status === "profitable").length,
                   color: "from-green-600 to-green-700",
                   bgColor: "from-green-50 to-emerald-50",
-                  
                 },
                 {
                   icon: AlertCircle,
