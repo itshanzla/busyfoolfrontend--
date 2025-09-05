@@ -1,25 +1,30 @@
-"use client"
-
 import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Coffee, Mail, ArrowLeft, Send, CheckCircle, XCircle, AlertCircle } from "lucide-react"
-import { apiClient } from "@/lib/api"
+
 export default function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const [toastMsg, setToastMsg] = useState("")
   const [toastType, setToastType] = useState("success") // success, error, info
   const [emailSent, setEmailSent] = useState(false)
+  const [email, setEmail] = useState("")
+  const [emailError, setEmailError] = useState("")
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    getValues,
-  } = useForm()
+  // Theme colors from JSON
+  const theme = {
+    background: "#FAFBFC",
+    surface: "#FFFFFF",
+    primary: "#175E3B",
+    primaryVariant: "#059669",
+    secondary: "#F0FDF4",
+    tertiary: "#6B7280",
+    textPrimary: "#111827",
+    textSecondary: "#B5B5B5",
+    border: "#E5E7EB",
+    success: "#10B981",
+    error: "#EF4444",
+    gradient: ["#F0FDF4", "#ECFDF5"]
+  }
 
   const showToastMessage = (message, type = "success") => {
     setToastMsg(message)
@@ -28,19 +33,29 @@ export default function ForgotPassword() {
     setTimeout(() => setShowToast(false), 5000)
   }
 
-  const onSubmit = async (data) => {
+  const validateEmail = (email) => {
+    const emailRegex = /^\S+@\S+$/i
+    if (!email) {
+      return "Email is required"
+    }
+    if (!emailRegex.test(email)) {
+      return "Invalid email address"
+    }
+    return ""
+  }
+
+  const onSubmit = async (e) => {
+    e.preventDefault()
+    const error = validateEmail(email)
+    setEmailError(error)
+    
+    if (error) return
+
     setIsLoading(true)
     try {
-      const response = await apiClient.post("/auth/forgot-password", {
-        email: data.email,
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        showToastMessage(errorData.message || "Failed to send reset email", "error")
-        return
-      }
-
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
       // Success - email sent
       setEmailSent(true)
       showToastMessage("Password reset email sent! Check your inbox.", "success")
@@ -54,50 +69,79 @@ export default function ForgotPassword() {
   const getToastIcon = () => {
     switch (toastType) {
       case "success":
-        return <CheckCircle className="w-6 h-6 text-green-600" />
+        return <CheckCircle className="w-6 h-6" style={{ color: theme.success }} />
       case "error":
-        return <XCircle className="w-6 h-6 text-red-600" />
+        return <XCircle className="w-6 h-6" style={{ color: theme.error }} />
       case "info":
         return <AlertCircle className="w-6 h-6 text-blue-600" />
       default:
-        return <CheckCircle className="w-6 h-6 text-green-600" />
+        return <CheckCircle className="w-6 h-6" style={{ color: theme.success }} />
     }
   }
 
   const getToastColors = () => {
     switch (toastType) {
       case "success":
-        return "border-green-500 bg-green-50"
+        return {
+          backgroundColor: "rgba(16, 185, 129, 0.1)",
+          borderLeftColor: theme.success
+        }
       case "error":
-        return "border-red-500 bg-red-50"
+        return {
+          backgroundColor: "rgba(239, 68, 68, 0.1)",
+          borderLeftColor: theme.error
+        }
       case "info":
-        return "border-blue-500 bg-blue-50"
+        return {
+          backgroundColor: "rgba(59, 130, 246, 0.1)",
+          borderLeftColor: "#3B82F6"
+        }
       default:
-        return "border-green-500 bg-green-50"
+        return {
+          backgroundColor: "rgba(16, 185, 129, 0.1)",
+          borderLeftColor: theme.success
+        }
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 flex items-center justify-center px-4 py-8 relative overflow-hidden">
+    <div 
+      className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden"
+      style={{
+        background: `linear-gradient(135deg, ${theme.gradient[0]} 0%, ${theme.gradient[1]} 100%)`
+      }}
+    >
       {/* Toast Notification */}
       {showToast && (
         <div
           className={`fixed top-6 right-6 z-50 transition-all duration-300 ${showToast ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full"}`}
         >
-          <div className={`flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl border-l-4 ${getToastColors()}`}>
+          <div 
+            className="flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl border-l-4"
+            style={{
+              backgroundColor: getToastColors().backgroundColor,
+              borderLeftColor: getToastColors().borderLeftColor,
+              border: `1px solid ${theme.border}`
+            }}
+          >
             <div
-              className={`rounded-full p-2 ${toastType === "success" ? "bg-green-100" : toastType === "error" ? "bg-red-100" : "bg-blue-100"}`}
+              className="rounded-full p-2"
+              style={{
+                backgroundColor: toastType === "success" ? "rgba(16, 185, 129, 0.2)" : 
+                                toastType === "error" ? "rgba(239, 68, 68, 0.2)" : 
+                                "rgba(59, 130, 246, 0.2)"
+              }}
             >
               {getToastIcon()}
             </div>
             <div className="flex-1">
-              <p className="text-sm text-gray-700">{toastMsg}</p>
+              <p className="text-sm" style={{ color: theme.textPrimary }}>{toastMsg}</p>
             </div>
             <button
               onClick={() => setShowToast(false)}
               className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             >
-              <XCircle className="w-5 h-5 text-gray-400" />
+              <XCircle className="w-5 h-5" style={{ color: theme.tertiary }} />
             </button>
           </div>
         </div>
@@ -105,74 +149,124 @@ export default function ForgotPassword() {
 
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-200/20 to-orange-300/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-red-200/20 to-pink-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-yellow-200/10 to-amber-300/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse"
+             style={{ backgroundColor: "rgba(16, 185, 129, 0.1)" }}></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl animate-pulse delay-1000"
+             style={{ backgroundColor: "rgba(5, 150, 105, 0.1)" }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse delay-500"
+             style={{ backgroundColor: "rgba(240, 253, 244, 0.3)" }}></div>
       </div>
 
       <div className="w-full max-w-md relative">
-        <div className="bg-white/80 backdrop-blur-xl shadow-2xl border border-white/20 rounded-3xl p-8 transform transition-all duration-700 hover:shadow-3xl">
+        <div 
+          className="backdrop-blur-xl shadow-2xl rounded-3xl p-8 transform transition-all duration-700 hover:shadow-3xl"
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            border: `1px solid ${theme.border}20`
+          }}
+        >
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-6">
-              <div className="p-3 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl">
-                <Coffee className="w-8 h-8 text-amber-600" />
+              <div 
+                className="p-3 rounded-2xl"
+                style={{ backgroundColor: theme.secondary }}
+              >
+                <Coffee className="w-8 h-8" style={{ color: theme.primary }} />
               </div>
             </div>
 
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-800 to-orange-700 bg-clip-text text-transparent mb-3">
+            <h1 
+              className="text-3xl font-bold mb-3"
+              style={{
+                background: `linear-gradient(to right, ${theme.primary}, ${theme.primaryVariant})`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
+            >
               Forgot Password?
             </h1>
 
             {!emailSent ? (
-              <p className="text-gray-600">
+              <p style={{ color: theme.tertiary }}>
                 Enter your email address and we'll send you a link to reset your password.
               </p>
             ) : (
-              <p className="text-gray-600">
+              <p style={{ color: theme.tertiary }}>
                 We've sent a password reset link to{" "}
-                <span className="font-semibold text-amber-700">{getValues("email")}</span>
+                <span className="font-semibold" style={{ color: theme.primary }}>{email}</span>
               </p>
             )}
           </div>
 
           {!emailSent ? (
             /* Email Form */
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-6">
               <div className="group">
-                <Label htmlFor="email" className="text-gray-700 font-medium mb-2 block">
+                <label 
+                  htmlFor="email" 
+                  className="font-medium mb-2 block"
+                  style={{ color: theme.textPrimary }}
+                >
                   Email Address
-                </Label>
+                </label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-amber-600 transition-colors" />
-                  <Input
+                  <Mail 
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors" 
+                    style={{ color: theme.tertiary }}
+                  />
+                  <input
                     id="email"
                     type="email"
-                    className={`pl-12 h-14 bg-white/70 border-2 rounded-xl transition-all duration-300 focus:border-amber-500 focus:bg-white hover:bg-white/90 ${
-                      errors.email ? "border-red-400 focus:border-red-500" : "border-gray-200"
-                    }`}
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value)
+                      if (emailError) setEmailError("")
+                    }}
+                    className="w-full pl-12 h-14 border-2 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2"
+                    style={{
+                      backgroundColor: "rgba(255, 255, 255, 0.8)",
+                      borderColor: emailError ? theme.error : theme.border,
+                      color: theme.textPrimary
+                    }}
+                    onFocus={(e) => {
+                      if (!emailError) {
+                        e.target.style.borderColor = theme.success
+                        e.target.style.boxShadow = `0 0 0 2px rgba(16, 185, 129, 0.2)`
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (!emailError) {
+                        e.target.style.borderColor = theme.border
+                        e.target.style.boxShadow = 'none'
+                      }
+                    }}
                     placeholder="your@email.com"
-                    {...register("email", {
-                      required: "Email is required",
-                      pattern: {
-                        value: /^\S+@\S+$/i,
-                        message: "Invalid email address",
-                      },
-                    })}
                   />
-                  {errors.email && (
-                    <div className="flex items-center mt-2 text-red-500 text-sm">
+                  {emailError && (
+                    <div className="flex items-center mt-2 text-sm" style={{ color: theme.error }}>
                       <XCircle className="w-4 h-4 mr-1" />
-                      {errors.email.message}
+                      {emailError}
                     </div>
                   )}
                 </div>
               </div>
 
-              <Button
+              <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-14 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white text-lg font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                onClick={onSubmit}
+                className="w-full h-14 text-white text-lg font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                style={{
+                  backgroundColor: theme.success
+                }}
+                onMouseEnter={(e) => {
+                  if (!isLoading) e.target.style.backgroundColor = theme.primaryVariant
+                }}
+                onMouseLeave={(e) => {
+                  if (!isLoading) e.target.style.backgroundColor = theme.success
+                }}
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center space-x-2">
@@ -185,47 +279,75 @@ export default function ForgotPassword() {
                     <span>Send Reset Link</span>
                   </div>
                 )}
-              </Button>
-            </form>
+              </button>
+            </div>
           ) : (
             /* Success State */
             <div className="text-center space-y-6">
-              <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
+              <div 
+                className="p-4 border rounded-xl"
+                style={{
+                  backgroundColor: "rgba(16, 185, 129, 0.1)",
+                  borderColor: "rgba(16, 185, 129, 0.3)"
+                }}
+              >
                 <div className="flex items-center justify-center mb-3">
-                  <div className="p-2 bg-green-100 rounded-full">
-                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  <div 
+                    className="p-2 rounded-full"
+                    style={{ backgroundColor: "rgba(16, 185, 129, 0.2)" }}
+                  >
+                    <CheckCircle className="w-6 h-6" style={{ color: theme.success }} />
                   </div>
                 </div>
-                <p className="text-sm text-green-800">
+                <p className="text-sm" style={{ color: theme.primary }}>
                   Check your email for the password reset link. It may take a few minutes to arrive.
                 </p>
               </div>
 
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">Didn't receive the email? Check your spam folder or</p>
-                <Button
+                <p className="text-sm" style={{ color: theme.tertiary }}>
+                  Didn't receive the email? Check your spam folder or
+                </p>
+                <button
                   onClick={() => {
                     setEmailSent(false)
                     setIsLoading(false)
+                    setEmail("")
+                    setEmailError("")
                   }}
-                  variant="outline"
-                  className="w-full h-12 border-2 border-amber-200 text-amber-700 hover:bg-amber-50 hover:border-amber-300 rounded-xl transition-all duration-300"
+                  className="w-full h-12 border-2 rounded-xl transition-all duration-300"
+                  style={{
+                    borderColor: theme.border,
+                    color: theme.primaryVariant,
+                    backgroundColor: 'transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = theme.secondary
+                    e.target.style.borderColor = theme.success
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent'
+                    e.target.style.borderColor = theme.border
+                  }}
                 >
                   Try Again
-                </Button>
+                </button>
               </div>
             </div>
           )}
 
           {/* Back to Login */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <a
-              href="/login"
-              className="flex items-center justify-center space-x-2 text-amber-600 hover:text-amber-700 font-medium transition-colors group"
+          <div className="mt-8 pt-6 border-t" style={{ borderColor: theme.border }}>
+            <button
+              onClick={() => showToastMessage("Redirecting to login...", "info")}
+              className="flex items-center justify-center space-x-2 font-medium transition-colors group w-full"
+              style={{ color: theme.primaryVariant }}
+              onMouseEnter={(e) => e.target.style.color = theme.primary}
+              onMouseLeave={(e) => e.target.style.color = theme.primaryVariant}
             >
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
               <span>Back to Sign In</span>
-            </a>
+            </button>
           </div>
         </div>
       </div>
