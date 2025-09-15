@@ -1,7 +1,9 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Coffee, Mail, ArrowLeft, Send, CheckCircle, XCircle, AlertCircle } from "lucide-react"
 
 export default function ForgotPassword() {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const [toastMsg, setToastMsg] = useState("")
@@ -339,7 +341,7 @@ export default function ForgotPassword() {
           {/* Back to Login */}
           <div className="mt-8 pt-6 border-t" style={{ borderColor: theme.border }}>
             <button
-              onClick={() => showToastMessage("Redirecting to login...", "info")}
+              onClick={() => navigate("/login")}
               className="flex items-center justify-center space-x-2 font-medium transition-colors group w-full"
               style={{ color: theme.primaryVariant }}
               onMouseEnter={(e) => e.target.style.color = theme.primary}
