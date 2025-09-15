@@ -2,11 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Coffee, Lock, Eye, EyeOff, CheckCircle, XCircle, ArrowRight, Shield } from "lucide-react"
-import { apiClient } from "@/lib/api"
+import { Coffee, Lock, Eye, EyeOff, CheckCircle, XCircle, ArrowRight, Shield, ArrowLeft } from "lucide-react"
 
 export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false)
@@ -17,6 +13,22 @@ export default function ResetPassword() {
   const [toastType, setToastType] = useState("success")
   const [resetToken, setResetToken] = useState("")
   const [tokenValid, setTokenValid] = useState(true)
+
+  // Theme colors matching forgot password
+  const theme = {
+    background: "#FAFBFC",
+    surface: "#FFFFFF",
+    primary: "#175E3B",
+    primaryVariant: "#059669",
+    secondary: "#F0FDF4",
+    tertiary: "#6B7280",
+    textPrimary: "#111827",
+    textSecondary: "#B5B5B5",
+    border: "#E5E7EB",
+    success: "#10B981",
+    error: "#EF4444",
+    gradient: ["#F0FDF4", "#ECFDF5"]
+  }
 
   const {
     register,
@@ -55,9 +67,16 @@ export default function ResetPassword() {
 
     setIsLoading(true)
     try {
-      const response = await apiClient.post("/auth/reset-password", {
-        token: resetToken,
-        newPassword: data.password,
+      // Replace this with your actual API call
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token: resetToken,
+          newPassword: data.password,
+        }),
       })
 
       if (!response.ok) {
@@ -83,43 +102,71 @@ export default function ResetPassword() {
   const getToastIcon = () => {
     switch (toastType) {
       case "success":
-        return <CheckCircle className="w-6 h-6 text-green-600" />
+        return <CheckCircle className="w-6 h-6" style={{ color: theme.success }} />
       case "error":
-        return <XCircle className="w-6 h-6 text-red-600" />
+        return <XCircle className="w-6 h-6" style={{ color: theme.error }} />
       default:
-        return <CheckCircle className="w-6 h-6 text-green-600" />
+        return <CheckCircle className="w-6 h-6" style={{ color: theme.success }} />
     }
   }
 
   const getToastColors = () => {
     switch (toastType) {
       case "success":
-        return "border-green-500 bg-green-50"
+        return {
+          backgroundColor: "rgba(16, 185, 129, 0.1)",
+          borderLeftColor: theme.success
+        }
       case "error":
-        return "border-red-500 bg-red-50"
+        return {
+          backgroundColor: "rgba(239, 68, 68, 0.1)",
+          borderLeftColor: theme.error
+        }
       default:
-        return "border-green-500 bg-green-50"
+        return {
+          backgroundColor: "rgba(16, 185, 129, 0.1)",
+          borderLeftColor: theme.success
+        }
     }
   }
 
   if (!tokenValid) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 flex items-center justify-center px-4 py-8">
+      <div 
+        className="min-h-screen flex items-center justify-center px-4 py-8"
+        style={{
+          background: `linear-gradient(135deg, ${theme.gradient[0]} 0%, ${theme.gradient[1]} 100%)`
+        }}
+      >
         <div className="w-full max-w-md">
-          <div className="bg-white/80 backdrop-blur-xl shadow-2xl border border-white/20 rounded-3xl p-8 text-center">
-            <div className="p-3 bg-red-100 rounded-full w-fit mx-auto mb-4">
-              <XCircle className="w-8 h-8 text-red-600" />
+          <div 
+            className="backdrop-blur-xl shadow-2xl rounded-3xl p-8 text-center"
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              border: `1px solid ${theme.border}20`
+            }}
+          >
+            <div 
+              className="p-3 rounded-full w-fit mx-auto mb-4"
+              style={{ backgroundColor: "rgba(239, 68, 68, 0.1)" }}
+            >
+              <XCircle className="w-8 h-8" style={{ color: theme.error }} />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-3">Invalid Reset Link</h1>
-            <p className="text-gray-600 mb-6">
+            <h1 className="text-2xl font-bold mb-3" style={{ color: theme.textPrimary }}>
+              Invalid Reset Link
+            </h1>
+            <p className="mb-6" style={{ color: theme.tertiary }}>
               This password reset link is invalid or has expired. Please request a new one.
             </p>
-            <a
-              href="/forgot-password"
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-medium rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all duration-300"
+            <button
+              onClick={() => window.location.href = "/forgot-password"}
+              className="inline-flex items-center px-6 py-3 text-white font-medium rounded-xl transition-all duration-300"
+              style={{ backgroundColor: theme.success }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = theme.primaryVariant}
+              onMouseLeave={(e) => e.target.style.backgroundColor = theme.success}
             >
               Request New Link
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -127,24 +174,41 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 flex items-center justify-center px-4 py-8 relative overflow-hidden">
+    <div 
+      className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden"
+      style={{
+        background: `linear-gradient(135deg, ${theme.gradient[0]} 0%, ${theme.gradient[1]} 100%)`
+      }}
+    >
       {/* Toast Notification */}
       {showToast && (
         <div
           className={`fixed top-6 right-6 z-50 transition-all duration-300 ${showToast ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full"}`}
         >
-          <div className={`flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl border-l-4 ${getToastColors()}`}>
-            <div className={`rounded-full p-2 ${toastType === "success" ? "bg-green-100" : "bg-red-100"}`}>
+          <div 
+            className="flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl border-l-4"
+            style={{
+              backgroundColor: getToastColors().backgroundColor,
+              borderLeftColor: getToastColors().borderLeftColor,
+              border: `1px solid ${theme.border}`
+            }}
+          >
+            <div
+              className="rounded-full p-2"
+              style={{
+                backgroundColor: toastType === "success" ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)"
+              }}
+            >
               {getToastIcon()}
             </div>
             <div className="flex-1">
-              <p className="text-sm text-gray-700">{toastMsg}</p>
+              <p className="text-sm" style={{ color: theme.textPrimary }}>{toastMsg}</p>
             </div>
             <button
               onClick={() => setShowToast(false)}
               className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             >
-              <XCircle className="w-5 h-5 text-gray-400" />
+              <XCircle className="w-5 h-5" style={{ color: theme.tertiary }} />
             </button>
           </div>
         </div>
@@ -152,42 +216,86 @@ export default function ResetPassword() {
 
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-200/20 to-orange-300/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-red-200/20 to-pink-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-yellow-200/10 to-amber-300/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse"
+             style={{ backgroundColor: "rgba(16, 185, 129, 0.1)" }}></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl animate-pulse delay-1000"
+             style={{ backgroundColor: "rgba(5, 150, 105, 0.1)" }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse delay-500"
+             style={{ backgroundColor: "rgba(240, 253, 244, 0.3)" }}></div>
       </div>
 
       <div className="w-full max-w-md relative">
-        <div className="bg-white/80 backdrop-blur-xl shadow-2xl border border-white/20 rounded-3xl p-8 transform transition-all duration-700 hover:shadow-3xl">
+        <div 
+          className="backdrop-blur-xl shadow-2xl rounded-3xl p-8 transform transition-all duration-700 hover:shadow-3xl"
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            border: `1px solid ${theme.border}20`
+          }}
+        >
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-6">
-              <div className="p-3 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl">
-                <Coffee className="w-8 h-8 text-amber-600" />
+              <div 
+                className="p-3 rounded-2xl"
+                style={{ backgroundColor: theme.secondary }}
+              >
+                <Coffee className="w-8 h-8" style={{ color: theme.primary }} />
               </div>
             </div>
 
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-800 to-orange-700 bg-clip-text text-transparent mb-3">
+            <h1 
+              className="text-3xl font-bold mb-3"
+              style={{
+                background: `linear-gradient(to right, ${theme.primary}, ${theme.primaryVariant})`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
+            >
               Reset Password
             </h1>
 
-            <p className="text-gray-600">Enter your new password below to complete the reset process.</p>
+            <p style={{ color: theme.tertiary }}>
+              Enter your new password below to complete the reset process.
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             {/* New Password Field */}
             <div className="group">
-              <Label htmlFor="password" className="text-gray-700 font-medium mb-2 block">
+              <label 
+                htmlFor="password" 
+                className="font-medium mb-2 block"
+                style={{ color: theme.textPrimary }}
+              >
                 New Password
-              </Label>
+              </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-amber-600 transition-colors" />
-                <Input
+                <Lock 
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors" 
+                  style={{ color: theme.tertiary }}
+                />
+                <input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  className={`pl-12 pr-12 h-14 bg-white/70 border-2 rounded-xl transition-all duration-300 focus:border-amber-500 focus:bg-white hover:bg-white/90 ${
-                    errors.password ? "border-red-400 focus:border-red-500" : "border-gray-200"
-                  }`}
+                  className="w-full pl-12 pr-12 h-14 border-2 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2"
+                  style={{
+                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+                    borderColor: errors.password ? theme.error : theme.border,
+                    color: theme.textPrimary
+                  }}
+                  onFocus={(e) => {
+                    if (!errors.password) {
+                      e.target.style.borderColor = theme.success
+                      e.target.style.boxShadow = `0 0 0 2px rgba(16, 185, 129, 0.2)`
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (!errors.password) {
+                      e.target.style.borderColor = theme.border
+                      e.target.style.boxShadow = 'none'
+                    }
+                  }}
                   placeholder="Enter new password"
                   {...register("password", {
                     required: "Password is required",
@@ -200,13 +308,16 @@ export default function ResetPassword() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-amber-600 transition-colors flex items-center gap-1"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 transition-colors flex items-center gap-1"
+                  style={{ color: theme.tertiary }}
+                  onMouseEnter={(e) => e.target.style.color = theme.primaryVariant}
+                  onMouseLeave={(e) => e.target.style.color = theme.tertiary}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  <span className="text-xs font-medium text-gray-600">{showPassword ? "Hide" : "Show"}</span>
+                  <span className="text-xs font-medium">{showPassword ? "Hide" : "Show"}</span>
                 </button>
                 {errors.password && (
-                  <div className="flex items-center mt-2 text-red-500 text-sm">
+                  <div className="flex items-center mt-2 text-sm" style={{ color: theme.error }}>
                     <XCircle className="w-4 h-4 mr-1" />
                     {errors.password.message}
                   </div>
@@ -216,17 +327,39 @@ export default function ResetPassword() {
 
             {/* Confirm Password Field */}
             <div className="group">
-              <Label htmlFor="confirmPassword" className="text-gray-700 font-medium mb-2 block">
+              <label 
+                htmlFor="confirmPassword" 
+                className="font-medium mb-2 block"
+                style={{ color: theme.textPrimary }}
+              >
                 Confirm New Password
-              </Label>
+              </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-amber-600 transition-colors" />
-                <Input
+                <Lock 
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors" 
+                  style={{ color: theme.tertiary }}
+                />
+                <input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  className={`pl-12 pr-12 h-14 bg-white/70 border-2 rounded-xl transition-all duration-300 focus:border-amber-500 focus:bg-white hover:bg-white/90 ${
-                    errors.confirmPassword ? "border-red-400 focus:border-red-500" : "border-gray-200"
-                  }`}
+                  className="w-full pl-12 pr-12 h-14 border-2 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2"
+                  style={{
+                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+                    borderColor: errors.confirmPassword ? theme.error : theme.border,
+                    color: theme.textPrimary
+                  }}
+                  onFocus={(e) => {
+                    if (!errors.confirmPassword) {
+                      e.target.style.borderColor = theme.success
+                      e.target.style.boxShadow = `0 0 0 2px rgba(16, 185, 129, 0.2)`
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (!errors.confirmPassword) {
+                      e.target.style.borderColor = theme.border
+                      e.target.style.boxShadow = 'none'
+                    }
+                  }}
                   placeholder="Confirm new password"
                   {...register("confirmPassword", {
                     required: "Please confirm your password",
@@ -236,13 +369,16 @@ export default function ResetPassword() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-amber-600 transition-colors flex items-center gap-1"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 transition-colors flex items-center gap-1"
+                  style={{ color: theme.tertiary }}
+                  onMouseEnter={(e) => e.target.style.color = theme.primaryVariant}
+                  onMouseLeave={(e) => e.target.style.color = theme.tertiary}
                 >
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  <span className="text-xs font-medium text-gray-600">{showConfirmPassword ? "Hide" : "Show"}</span>
+                  <span className="text-xs font-medium">{showConfirmPassword ? "Hide" : "Show"}</span>
                 </button>
                 {errors.confirmPassword && (
-                  <div className="flex items-center mt-2 text-red-500 text-sm">
+                  <div className="flex items-center mt-2 text-sm" style={{ color: theme.error }}>
                     <XCircle className="w-4 h-4 mr-1" />
                     {errors.confirmPassword.message}
                   </div>
@@ -251,10 +387,18 @@ export default function ResetPassword() {
             </div>
 
             {/* Submit Button */}
-            <Button
+            <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-14 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white text-lg font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              onClick={handleSubmit(onSubmit)}
+              className="w-full h-14 text-white text-lg font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              style={{ backgroundColor: theme.success }}
+              onMouseEnter={(e) => {
+                if (!isLoading) e.target.style.backgroundColor = theme.primaryVariant
+              }}
+              onMouseLeave={(e) => {
+                if (!isLoading) e.target.style.backgroundColor = theme.success
+              }}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center space-x-2">
@@ -267,21 +411,43 @@ export default function ResetPassword() {
                   <ArrowRight className="w-5 h-5" />
                 </div>
               )}
-            </Button>
+            </button>
 
             {/* Security Notice */}
-            <div className="mt-6 p-4 bg-amber-50/50 border border-amber-200/50 rounded-xl">
+            <div 
+              className="mt-6 p-4 border rounded-xl"
+              style={{
+                backgroundColor: "rgba(16, 185, 129, 0.1)",
+                borderColor: "rgba(16, 185, 129, 0.3)"
+              }}
+            >
               <div className="flex items-start space-x-3">
-                <Shield className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <Shield className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: theme.success }} />
                 <div>
-                  <p className="text-sm text-amber-800 font-medium">Password Security</p>
-                  <p className="text-xs text-amber-700 mt-1">
+                  <p className="text-sm font-medium" style={{ color: theme.primary }}>
+                    Password Security
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: theme.primaryVariant }}>
                     Choose a strong password with at least 6 characters for better security.
                   </p>
                 </div>
               </div>
             </div>
-          </form>
+          </div>
+
+          {/* Back to Login */}
+          <div className="mt-8 pt-6 border-t" style={{ borderColor: theme.border }}>
+            <button
+              onClick={() => showToastMessage("Redirecting to login...", "success")}
+              className="flex items-center justify-center space-x-2 font-medium transition-colors group w-full"
+              style={{ color: theme.primaryVariant }}
+              onMouseEnter={(e) => e.target.style.color = theme.primary}
+              onMouseLeave={(e) => e.target.style.color = theme.primaryVariant}
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              <span>Back to Sign In</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
