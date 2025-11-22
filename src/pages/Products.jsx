@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react"
-import { Sidebar } from "../components/Sidebar"
-import { Navbar } from "../components/Navbar"
-import { motion, AnimatePresence } from "framer-motion"
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Sidebar } from "../components/Sidebar";
+import { Navbar } from "../components/Navbar";
+import { motion, AnimatePresence } from "framer-motion";
 
 import {
   Plus,
@@ -32,188 +32,198 @@ import {
   Info,
   Loader2,
   Upload,
-} from "lucide-react"
+} from "lucide-react";
 
 export default function Products() {
-  const [showSuccessToast, setShowSuccessToast] = useState(false)
-  const [showErrorToast, setShowErrorToast] = useState(false)
-  const [errorMessage, setErrorMessage] = useState("")
-  const [successMessage, setSuccessMessage] = useState("")
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   // What-If Modal State
-  const [showWhatIfModal, setShowWhatIfModal] = useState(false)
-  const [whatIfProduct, setWhatIfProduct] = useState(null)
-  const [whatIfPrice, setWhatIfPrice] = useState("")
-  const [whatIfLoading, setWhatIfLoading] = useState(false)
-  const [whatIfError, setWhatIfError] = useState("")
-  const [whatIfResult, setWhatIfResult] = useState(null)
+  const [showWhatIfModal, setShowWhatIfModal] = useState(false);
+  const [whatIfProduct, setWhatIfProduct] = useState(null);
+  const [whatIfPrice, setWhatIfPrice] = useState("");
+  const [whatIfLoading, setWhatIfLoading] = useState(false);
+  const [whatIfError, setWhatIfError] = useState("");
+  const [whatIfResult, setWhatIfResult] = useState(null);
 
   // Milk Swap Modal State
-  const [showMilkSwapModal, setShowMilkSwapModal] = useState(false)
-  const [milkSwapProduct, setMilkSwapProduct] = useState(null)
-  const [milkSwapLoading, setMilkSwapLoading] = useState(false)
-  const [milkSwapError, setMilkSwapError] = useState("")
-  const [milkSwapResult, setMilkSwapResult] = useState(null)
+  const [showMilkSwapModal, setShowMilkSwapModal] = useState(false);
+  const [milkSwapProduct, setMilkSwapProduct] = useState(null);
+  const [milkSwapLoading, setMilkSwapLoading] = useState(false);
+  const [milkSwapError, setMilkSwapError] = useState("");
+  const [milkSwapResult, setMilkSwapResult] = useState(null);
 
   // Inline What-If simulation state
-  const [simProductId, setSimProductId] = useState(null)
-  const [simPrice, setSimPrice] = useState("")
-  const [simLoading, setSimLoading] = useState(false)
-  const [simError, setSimError] = useState("")
-  const [simResult, setSimResult] = useState(null)
+  const [simProductId, setSimProductId] = useState(null);
+  const [simPrice, setSimPrice] = useState("");
+  const [simLoading, setSimLoading] = useState(false);
+  const [simError, setSimError] = useState("");
+  const [simResult, setSimResult] = useState(null);
 
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filterCategory, setFilterCategory] = useState("all")
-  const [filterStatus, setFilterStatus] = useState("all")
-  const [sortBy, setSortBy] = useState("margin")
-  const [showAddProduct, setShowAddProduct] = useState(false)
-  const [showEditProduct, setShowEditProduct] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("margin");
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [showEditProduct, setShowEditProduct] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [editFormData, setEditFormData] = useState({
     name: "",
     category: "",
     sell_price: "",
     ingredients: [],
     image: null,
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [editingProductId, setEditingProductId] = useState(null) // Track which product is being edited
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null); // Track which product is being edited
 
-  const [viewMode, setViewMode] = useState("cards") // cards or table
-  const [showQuickWins, setShowQuickWins] = useState(true)
+  const [viewMode, setViewMode] = useState("cards"); // cards or table
+  const [showQuickWins, setShowQuickWins] = useState(true);
 
   // Sample products data based on the brief
-  const [products, setProducts] = useState([])
-  const [isLoadingProducts, setIsLoadingProducts] = useState(true)
+  const [products, setProducts] = useState([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
     sell_price: "",
     ingredients: [],
     image: null,
-  })
-  const [allIngredients, setAllIngredients] = useState([])
-  const [ingredients, setIngredients] = useState([]) // For table view
-  const [editingIngredient, setEditingIngredient] = useState(null)
+  });
+  const [allIngredients, setAllIngredients] = useState([]);
+  const [ingredients, setIngredients] = useState([]); // For table view
+  const [editingIngredient, setEditingIngredient] = useState(null);
   const [ingredientEditData, setIngredientEditData] = useState({
     name: "",
     unit: "",
     cost_per_unit: "",
     cost_per_ml: "",
-  })
-  const [stockData, setStockData] = useState([]) // Add stock data state
+  });
+  const [stockData, setStockData] = useState([]); // Add stock data state
 
   // Helper function to convert units to a common base for comparison
   const convertToBaseUnit = useCallback((quantity, unit) => {
-    const qty = Number(quantity) || 0
+    const qty = Number(quantity) || 0;
     switch (unit?.toLowerCase()) {
       case "kg":
-        return qty * 1000 // Convert kg to g
+        return qty * 1000; // Convert kg to g
       case "l":
-        return qty * 1000 // Convert L to ml
+        return qty * 1000; // Convert L to ml
       case "g":
       case "ml":
       case "unit":
       default:
-        return qty // Already in base unit
+        return qty; // Already in base unit
     }
-  }, [])
+  }, []);
 
   // Helper function to check if selected quantity exceeds available stock (with unit conversion)
   const checkStockExceeded = useCallback(
     (selectedQuantity, selectedUnit, availableStock, stockUnit) => {
-      const selectedInBaseUnit = convertToBaseUnit(selectedQuantity, selectedUnit)
-      const availableInBaseUnit = convertToBaseUnit(availableStock, stockUnit)
-      return selectedInBaseUnit > availableInBaseUnit
+      const selectedInBaseUnit = convertToBaseUnit(
+        selectedQuantity,
+        selectedUnit
+      );
+      const availableInBaseUnit = convertToBaseUnit(availableStock, stockUnit);
+      return selectedInBaseUnit > availableInBaseUnit;
     },
-    [convertToBaseUnit],
-  )
+    [convertToBaseUnit]
+  );
 
   // Helper function to get ingredient price - FIXED to use dynamic API values
   const getIngredientPrice = useCallback((ingredient) => {
     // Use the dynamic values from the API response
     if (ingredient.unit === "ml" || ingredient.unit === "L") {
-      return Number(ingredient.cost_per_ml) || 0
+      return Number(ingredient.cost_per_ml) || 0;
     }
     if (ingredient.unit === "g" || ingredient.unit === "kg") {
-      return Number(ingredient.cost_per_gram) || 0
+      return Number(ingredient.cost_per_gram) || 0;
     }
     // For other units, use cost_per_unit
-    return Number(ingredient.cost_per_unit) || 0
-  }, [])
+    return Number(ingredient.cost_per_unit) || 0;
+  }, []);
 
   // Helper function to get available stock for an ingredient
   const getAvailableStock = useCallback(
     (ingredientId) => {
-      const stock = stockData.find((s) => s.ingredient?.id === ingredientId)
-      return stock ? Number(stock.remaining_quantity) || 0 : 0
+      const stock = stockData.find((s) => s.ingredient?.id === ingredientId);
+      return stock ? Number(stock.remaining_quantity) || 0 : 0;
     },
-    [stockData],
-  )
+    [stockData]
+  );
 
   // Helper function to get stock unit for an ingredient
   const getStockUnit = useCallback(
     (ingredientId) => {
-      const stock = stockData.find((s) => s.ingredient?.id === ingredientId)
-      return stock ? stock.unit || "unit" : "unit"
+      const stock = stockData.find((s) => s.ingredient?.id === ingredientId);
+      return stock ? stock.unit || "unit" : "unit";
     },
-    [stockData],
-  )
+    [stockData]
+  );
 
   // Helper function to toggle ingredient in form data
   const toggleIngredient = useCallback((ingredient, checked) => {
     setFormData((prev) => {
       if (checked) {
-        if (prev.ingredients.some((i) => i.id === ingredient.id)) return prev
+        if (prev.ingredients.some((i) => i.id === ingredient.id)) return prev;
         return {
           ...prev,
-          ingredients: [...prev.ingredients, { ...ingredient, selectedQuantity: 1, is_optional: false }],
-        }
+          ingredients: [
+            ...prev.ingredients,
+            { ...ingredient, selectedQuantity: 1, is_optional: false },
+          ],
+        };
       } else {
         return {
           ...prev,
           ingredients: prev.ingredients.filter((i) => i.id !== ingredient.id),
-        }
+        };
       }
-    })
-  }, [])
+    });
+  }, []);
 
   // Helper function to update ingredient in form data
   const updateIngredient = useCallback((ingredientId, changes) => {
     setFormData((prev) => {
-      const updated = prev.ingredients.map((i) => (i.id === ingredientId ? { ...i, ...changes } : i))
-      const deduped = updated.filter((ing, idx, arr) => arr.findIndex((ii) => ii.id === ing.id) === idx)
+      const updated = prev.ingredients.map((i) =>
+        i.id === ingredientId ? { ...i, ...changes } : i
+      );
+      const deduped = updated.filter(
+        (ing, idx, arr) => arr.findIndex((ii) => ii.id === ing.id) === idx
+      );
       return {
         ...prev,
         ingredients: deduped,
-      }
-    })
-  }, [])
+      };
+    });
+  }, []);
 
   // Show success toast with custom message
   const showSuccessMessage = useCallback((message) => {
-    setSuccessMessage(message)
-    setShowSuccessToast(true)
+    setSuccessMessage(message);
+    setShowSuccessToast(true);
     setTimeout(() => {
-      setShowSuccessToast(false)
-      setSuccessMessage("")
-    }, 4000)
-  }, [])
+      setShowSuccessToast(false);
+      setSuccessMessage("");
+    }, 4000);
+  }, []);
 
   // Show error toast with custom message
   const showErrorMessage = useCallback((message) => {
-    setErrorMessage(message)
-    setShowErrorToast(true)
+    setErrorMessage(message);
+    setShowErrorToast(true);
     setTimeout(() => {
-      setShowErrorToast(false)
-      setErrorMessage("")
-    }, 6000)
-  }, [])
+      setShowErrorToast(false);
+      setErrorMessage("");
+    }, 6000);
+  }, []);
 
   // Enhanced Error Toast Component with better styling and stock info
   const ErrorToast = () => {
-    if (!showErrorToast) return null
+    if (!showErrorToast) return null;
     return (
       <motion.div
         initial={{ opacity: 0, x: 300 }}
@@ -230,7 +240,9 @@ export default function Products() {
           <div className="mt-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center gap-2 mb-1">
               <Info className="w-4 h-4 text-blue-600" />
-              <span className="text-xs font-medium text-blue-800">Quick Fix</span>
+              <span className="text-xs font-medium text-blue-800">
+                Quick Fix
+              </span>
             </div>
             <p className="text-xs text-blue-700">
               • Check if all required fields are filled
@@ -246,8 +258,8 @@ export default function Products() {
           <X className="w-4 h-4 text-gray-400" />
         </button>
       </motion.div>
-    )
-  }
+    );
+  };
 
   // Enhanced Success Toast Component
   const SuccessToast = () => (
@@ -264,7 +276,9 @@ export default function Products() {
           </div>
           <div className="flex-1">
             <p className="font-semibold text-gray-900">Success!</p>
-            <p className="text-sm text-gray-600">{successMessage || "Operation completed successfully"}</p>
+            <p className="text-sm text-gray-600">
+              {successMessage || "Operation completed successfully"}
+            </p>
           </div>
           <button
             onClick={() => setShowSuccessToast(false)}
@@ -275,87 +289,91 @@ export default function Products() {
         </motion.div>
       )}
     </AnimatePresence>
-  )
+  );
 
   // Memoized data fetching to prevent excessive re-renders - UPDATED to use quantity_sold from products API
   const fetchProductsAndSales = useCallback(async () => {
-    const token = localStorage.getItem("accessToken")
+    const token = localStorage.getItem("accessToken");
     try {
       // Fetch products - now includes quantity_sold field
-      const productsRes = await fetch("https://busy-fool-backend.vercel.app/products", {
+      const productsRes = await fetch("http://localhost:3000/products", {
         headers: { Authorization: `Bearer ${token}` },
-      })
-      let productsData = []
+      });
+      let productsData = [];
       if (productsRes.ok) {
-        productsData = await productsRes.json()
+        productsData = await productsRes.json();
       }
 
       // Use quantity_sold from products API instead of calculating from sales
       const mergedProducts = productsData.map((product) => ({
         ...product,
         numberOfSales: Number(product.quantity_sold) || 0, // Use quantity_sold from API
-      }))
-      setProducts(mergedProducts)
+      }));
+      setProducts(mergedProducts);
     } catch (error) {
-      console.error("Error fetching products:", error)
-      showErrorMessage("Failed to load products. Please refresh the page.")
+      console.error("Error fetching products:", error);
+      showErrorMessage("Failed to load products. Please refresh the page.");
     }
-  }, [showErrorMessage])
+  }, [showErrorMessage]);
 
   const fetchIngredients = useCallback(async () => {
-    const token = localStorage.getItem("accessToken")
+    const token = localStorage.getItem("accessToken");
     try {
-      const response = await fetch("https://busy-fool-backend.vercel.app/ingredients", {
+      const response = await fetch("http://localhost:3000/ingredients", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
+      });
       if (response.ok) {
-        const data = await response.json()
-        setAllIngredients(data)
-        setIngredients(data)
+        const data = await response.json();
+        setAllIngredients(data);
+        setIngredients(data);
       }
     } catch (error) {
-      console.error("Error fetching ingredients:", error)
+      console.error("Error fetching ingredients:", error);
     }
-  }, [])
+  }, []);
 
   const fetchStock = useCallback(async () => {
-    const token = localStorage.getItem("accessToken")
+    const token = localStorage.getItem("accessToken");
     try {
-      const response = await fetch("https://busy-fool-backend.vercel.app/stock", {
+      const response = await fetch("http://localhost:3000/stock", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
+      });
       if (response.ok) {
-        const data = await response.json()
-        setStockData(data)
+        const data = await response.json();
+        setStockData(data);
       }
     } catch (error) {
-      console.error("Error fetching stock:", error)
+      console.error("Error fetching stock:", error);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    setIsLoadingProducts(true)
+    setIsLoadingProducts(true);
 
     const loadData = async () => {
-      await Promise.all([fetchProductsAndSales(), fetchIngredients(), fetchStock()])
-      setIsLoadingProducts(false)
-    }
+      await Promise.all([
+        fetchProductsAndSales(),
+        fetchIngredients(),
+        fetchStock(),
+      ]);
+      setIsLoadingProducts(false);
+    };
 
-    loadData()
-  }, [fetchProductsAndSales, fetchIngredients, fetchStock])
+    loadData();
+  }, [fetchProductsAndSales, fetchIngredients, fetchStock]);
 
   // Inline What-If handler
   const handleSimulate = async (productId) => {
-    setSimLoading(true)
-    setSimError("")
-    setSimResult(null)
+    setSimLoading(true);
+    setSimError("");
+    setSimResult(null);
     try {
-      const token = localStorage.getItem("accessToken")
-      const res = await fetch("https://busy-fool-backend.vercel.app/products/what-if", {
+      const token = localStorage.getItem("accessToken");
+      const res = await fetch("http://localhost:3000/products/what-if", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -365,82 +383,95 @@ export default function Products() {
           productIds: [productId],
           priceAdjustment: Number(simPrice) || 0,
         }),
-      })
+      });
       if (res.ok) {
-        const data = await res.json()
-        setSimResult(Array.isArray(data) ? data[0] : data)
+        const data = await res.json();
+        setSimResult(Array.isArray(data) ? data[0] : data);
       } else {
-        const err = await res.json()
-        setSimError(err.message || "Failed to calculate what-if")
+        const err = await res.json();
+        setSimError(err.message || "Failed to calculate what-if");
       }
     } catch (e) {
-      setSimError("An error occurred. Please try again.")
+      setSimError("An error occurred. Please try again.");
     }
-    setSimLoading(false)
-  }
+    setSimLoading(false);
+  };
 
   // Enhanced error handling function
   const handleApiError = (error, response) => {
-    console.log("API Error Details:", { error, response, status: response?.status })
+    console.log("API Error Details:", {
+      error,
+      response,
+      status: response?.status,
+    });
 
     // Check if it's a stock-related error
     if (response?.status === 400 && error?.message) {
-      const message = error.message.toLowerCase()
-      if (message.includes("no available stock") || message.includes("insufficient") || message.includes("stock")) {
-        showErrorMessage(error.message)
-        return true // Indicates we handled the error
+      const message = error.message.toLowerCase();
+      if (
+        message.includes("no available stock") ||
+        message.includes("insufficient") ||
+        message.includes("stock")
+      ) {
+        showErrorMessage(error.message);
+        return true; // Indicates we handled the error
       }
     }
 
     // Handle other errors
-    showErrorMessage(error?.message || "An error occurred. Please try again.")
-    return true
-  }
+    showErrorMessage(error?.message || "An error occurred. Please try again.");
+    return true;
+  };
 
   // Milk Swap Modal Component
   const MilkSwapModal = () => {
-    const [selectedOriginalIngredient, setSelectedOriginalIngredient] = useState("")
-    const [selectedNewIngredient, setSelectedNewIngredient] = useState("")
-    const [upcharge, setUpcharge] = useState("")
-    const [localLoading, setLocalLoading] = useState(false)
-    const [localError, setLocalError] = useState("")
-    const [localResult, setLocalResult] = useState(null)
-    const [step, setStep] = useState(0) // 0: selection, 1: result
+    const [selectedOriginalIngredient, setSelectedOriginalIngredient] =
+      useState("");
+    const [selectedNewIngredient, setSelectedNewIngredient] = useState("");
+    const [upcharge, setUpcharge] = useState("");
+    const [localLoading, setLocalLoading] = useState(false);
+    const [localError, setLocalError] = useState("");
+    const [localResult, setLocalResult] = useState(null);
+    const [step, setStep] = useState(0); // 0: selection, 1: result
 
     React.useEffect(() => {
       if (showMilkSwapModal && milkSwapProduct) {
-        setSelectedOriginalIngredient("")
-        setSelectedNewIngredient("")
-        setUpcharge("")
-        setLocalError("")
-        setLocalResult(null)
-        setStep(0)
+        setSelectedOriginalIngredient("");
+        setSelectedNewIngredient("");
+        setUpcharge("");
+        setLocalError("");
+        setLocalResult(null);
+        setStep(0);
       }
-    }, [showMilkSwapModal, milkSwapProduct])
+    }, [showMilkSwapModal, milkSwapProduct]);
 
     const handleCalculateSwap = async () => {
-      if (!milkSwapProduct || !selectedOriginalIngredient || !selectedNewIngredient) {
-        setLocalError("Please select both original and new ingredients.")
-        return
+      if (
+        !milkSwapProduct ||
+        !selectedOriginalIngredient ||
+        !selectedNewIngredient
+      ) {
+        setLocalError("Please select both original and new ingredients.");
+        return;
       }
 
       if (selectedOriginalIngredient === selectedNewIngredient) {
-        setLocalError("Please select different ingredients for the swap.")
-        return
+        setLocalError("Please select different ingredients for the swap.");
+        return;
       }
 
-      const upchargeValue = Number.parseFloat(upcharge) || 0
+      const upchargeValue = Number.parseFloat(upcharge) || 0;
       if (upchargeValue < 0) {
-        setLocalError("Upcharge cannot be negative.")
-        return
+        setLocalError("Upcharge cannot be negative.");
+        return;
       }
 
-      setLocalLoading(true)
-      setLocalError("")
+      setLocalLoading(true);
+      setLocalError("");
 
       try {
-        const token = localStorage.getItem("accessToken")
-        const res = await fetch("https://busy-fool-backend.vercel.app/products/milk-swap", {
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch("http://localhost:3000/products/milk-swap", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -452,35 +483,37 @@ export default function Products() {
             newIngredientId: selectedNewIngredient,
             upcharge: upchargeValue,
           }),
-        })
+        });
 
         if (res.ok) {
-          const result = await res.json()
-          setLocalResult(result)
-          setStep(1)
+          const result = await res.json();
+          setLocalResult(result);
+          setStep(1);
         } else {
-          const err = await res.json()
-          setLocalError(err.message || "Failed to calculate milk swap analysis.")
+          const err = await res.json();
+          setLocalError(
+            err.message || "Failed to calculate milk swap analysis."
+          );
         }
       } catch (e) {
-        setLocalError("An error occurred. Please try again.")
+        setLocalError("An error occurred. Please try again.");
       }
 
-      setLocalLoading(false)
-    }
+      setLocalLoading(false);
+    };
 
     const handleClose = () => {
-      setShowMilkSwapModal(false)
-      setMilkSwapProduct(null)
-      setSelectedOriginalIngredient("")
-      setSelectedNewIngredient("")
-      setUpcharge("")
-      setLocalError("")
-      setLocalResult(null)
-      setStep(0)
-    }
+      setShowMilkSwapModal(false);
+      setMilkSwapProduct(null);
+      setSelectedOriginalIngredient("");
+      setSelectedNewIngredient("");
+      setUpcharge("");
+      setLocalError("");
+      setLocalResult(null);
+      setStep(0);
+    };
 
-    if (!showMilkSwapModal || !milkSwapProduct) return null
+    if (!showMilkSwapModal || !milkSwapProduct) return null;
 
     // Get product ingredients for selection
     const productIngredients = Array.isArray(milkSwapProduct.ingredients)
@@ -488,12 +521,12 @@ export default function Products() {
           id: i.ingredient?.id || i.id,
           name: i.ingredient?.name || i.name,
         }))
-      : []
+      : [];
 
     // Get all available ingredients for new ingredient selection
     const availableIngredients = allIngredients.filter(
-      (ing) => !productIngredients.some((prodIng) => prodIng.id === ing.id),
-    )
+      (ing) => !productIngredients.some((prodIng) => prodIng.id === ing.id)
+    );
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -505,11 +538,18 @@ export default function Products() {
                   <Shuffle className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Ingredient Swap Analysis</h2>
-                  <p className="text-sm text-gray-500">{milkSwapProduct.name}</p>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Ingredient Swap Analysis
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    {milkSwapProduct.name}
+                  </p>
                 </div>
               </div>
-              <button onClick={handleClose} className="p-2 bg-[#175E3B] hover:bg-[#175E3B]/90 rounded-xl">
+              <button
+                onClick={handleClose}
+                className="p-2 bg-[#175E3B] hover:bg-[#175E3B]/90 rounded-xl"
+              >
                 <X className="w-5 h-5 text-white" />
               </button>
             </div>
@@ -518,7 +558,9 @@ export default function Products() {
               <div className="space-y-6">
                 {/* Current Product Info */}
                 <div className="bg-gray-50 rounded-xl p-4">
-                  <h3 className="font-semibold text-gray-800 mb-3">Current Product Details</h3>
+                  <h3 className="font-semibold text-gray-800 mb-3">
+                    Current Product Details
+                  </h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-gray-500">Current Price:</span>
@@ -529,9 +571,14 @@ export default function Products() {
                     <div>
                       <span className="text-gray-500">Current Margin:</span>
                       <p
-                        className={`font-semibold ${Number(milkSwapProduct.margin_percent || 0) >= 0 ? "text-green-600" : "text-red-600"}`}
+                        className={`font-semibold ${
+                          Number(milkSwapProduct.margin_percent || 0) >= 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
                       >
-                        {Number(milkSwapProduct.margin_percent || 0).toFixed(1)}%
+                        {Number(milkSwapProduct.margin_percent || 0).toFixed(1)}
+                        %
                       </p>
                     </div>
                   </div>
@@ -546,8 +593,8 @@ export default function Products() {
                     <select
                       value={selectedOriginalIngredient}
                       onChange={(e) => {
-                        setSelectedOriginalIngredient(e.target.value)
-                        setLocalError("")
+                        setSelectedOriginalIngredient(e.target.value);
+                        setLocalError("");
                       }}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-transparent transition-all bg-white"
                     >
@@ -565,19 +612,22 @@ export default function Products() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">New Ingredient (replacement)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      New Ingredient (replacement)
+                    </label>
                     <select
                       value={selectedNewIngredient}
                       onChange={(e) => {
-                        setSelectedNewIngredient(e.target.value)
-                        setLocalError("")
+                        setSelectedNewIngredient(e.target.value);
+                        setLocalError("");
                       }}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl  focus:border-transparent transition-all bg-white"
                     >
                       <option value="">Select replacement ingredient</option>
                       {allIngredients.map((ingredient) => (
                         <option key={ingredient.id} value={ingredient.id}>
-                          {ingredient.name} - ${getIngredientPrice(ingredient).toFixed(4)}
+                          {ingredient.name} - $
+                          {getIngredientPrice(ingredient).toFixed(4)}
                         </option>
                       ))}
                     </select>
@@ -585,7 +635,8 @@ export default function Products() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Upcharge ($) <span className="text-gray-400">(optional)</span>
+                      Upcharge ($){" "}
+                      <span className="text-gray-400">(optional)</span>
                     </label>
                     <input
                       type="number"
@@ -593,21 +644,29 @@ export default function Products() {
                       min="0"
                       value={upcharge}
                       onChange={(e) => {
-                        setUpcharge(e.target.value)
-                        setLocalError("")
+                        setUpcharge(e.target.value);
+                        setLocalError("");
                       }}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl  focus:border-transparent transition-all"
                       placeholder="0.00"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Additional charge to customer for premium ingredient</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Additional charge to customer for premium ingredient
+                    </p>
                   </div>
                 </div>
 
-                {localError && <p className="text-red-500 text-sm">{localError}</p>}
+                {localError && (
+                  <p className="text-red-500 text-sm">{localError}</p>
+                )}
 
                 <button
                   onClick={handleCalculateSwap}
-                  disabled={localLoading || !selectedOriginalIngredient || !selectedNewIngredient}
+                  disabled={
+                    localLoading ||
+                    !selectedOriginalIngredient ||
+                    !selectedNewIngredient
+                  }
                   className="w-full bg-[#175E3B] hover:bg-[#175E3B]/90 text-white py-3 px-4 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {localLoading ? (
@@ -632,27 +691,38 @@ export default function Products() {
                   <div className="w-16 h-16 rounded-full bg-[#175E3B]/10 flex items-center justify-center mx-auto mb-4">
                     <Shuffle className="w-8 h-8 text-[#175E3B]" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Swap Analysis Complete</h3>
-                  <p className="text-gray-600">Here's how the ingredient swap would affect your margins</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    Swap Analysis Complete
+                  </h3>
+                  <p className="text-gray-600">
+                    Here's how the ingredient swap would affect your margins
+                  </p>
                 </div>
 
                 {/* Results Comparison */}
                 <div className="space-y-4">
                   <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4">
-                    <h4 className="font-semibold text-gray-800 mb-3">Margin Comparison</h4>
+                    <h4 className="font-semibold text-gray-800 mb-3">
+                      Margin Comparison
+                    </h4>
 
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="bg-white rounded-lg p-3 border-l-4 border-gray-400">
-                        <span className="text-xs text-gray-500">Original Margin</span>
+                        <span className="text-xs text-gray-500">
+                          Original Margin
+                        </span>
                         <p className="text-lg font-bold text-gray-900">
                           {Number(localResult.originalMargin || 0).toFixed(2)}%
                         </p>
                       </div>
                       <div className="bg-white rounded-lg p-3 border-l-4 border-green-600">
-                        <span className="text-xs text-gray-500">New Margin</span>
+                        <span className="text-xs text-gray-500">
+                          New Margin
+                        </span>
                         <p
                           className={`text-lg font-bold ${
-                            Number(localResult.newMargin || 0) >= Number(localResult.originalMargin || 0)
+                            Number(localResult.newMargin || 0) >=
+                            Number(localResult.originalMargin || 0)
                               ? "text-green-600"
                               : "text-red-600"
                           }`}
@@ -665,13 +735,19 @@ export default function Products() {
                     {/* Upcharge Coverage */}
                     <div className="bg-white rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-600">Upcharge Coverage</span>
+                        <span className="text-sm font-medium text-gray-600">
+                          Upcharge Coverage
+                        </span>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            localResult.upchargeCovered ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                            localResult.upchargeCovered
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
                           }`}
                         >
-                          {localResult.upchargeCovered ? "Covered" : "Not Covered"}
+                          {localResult.upchargeCovered
+                            ? "Covered"
+                            : "Not Covered"}
                         </span>
                       </div>
                       <p className="text-xs text-gray-600">
@@ -684,24 +760,38 @@ export default function Products() {
 
                   {/* Impact Summary */}
                   <div className="bg-purple-50 rounded-xl p-4">
-                    <h4 className="font-semibold text-purple-800 mb-2">Impact Summary</h4>
+                    <h4 className="font-semibold text-purple-800 mb-2">
+                      Impact Summary
+                    </h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-purple-600">Margin Change:</span>
                         <span
                           className={`font-semibold ${
-                            Number(localResult.newMargin || 0) - Number(localResult.originalMargin || 0) >= 0
+                            Number(localResult.newMargin || 0) -
+                              Number(localResult.originalMargin || 0) >=
+                            0
                               ? "text-green-600"
                               : "text-red-600"
                           }`}
                         >
-                          {Number(localResult.newMargin || 0) - Number(localResult.originalMargin || 0) >= 0 ? "+" : ""}
-                          {(Number(localResult.newMargin || 0) - Number(localResult.originalMargin || 0)).toFixed(2)}%
+                          {Number(localResult.newMargin || 0) -
+                            Number(localResult.originalMargin || 0) >=
+                          0
+                            ? "+"
+                            : ""}
+                          {(
+                            Number(localResult.newMargin || 0) -
+                            Number(localResult.originalMargin || 0)
+                          ).toFixed(2)}
+                          %
                         </span>
                       </div>
                       {upcharge && Number.parseFloat(upcharge) > 0 && (
                         <div className="flex justify-between">
-                          <span className="text-purple-600">Applied Upcharge:</span>
+                          <span className="text-purple-600">
+                            Applied Upcharge:
+                          </span>
                           <span className="font-semibold text-gray-700">
                             +${Number.parseFloat(upcharge).toFixed(2)}
                           </span>
@@ -732,66 +822,69 @@ export default function Products() {
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   // What-If Modal Component
   const WhatIfModal = () => {
-    const [localPrice, setLocalPrice] = useState("")
-    const [localLoading, setLocalLoading] = useState(false)
-    const [localError, setLocalError] = useState("")
-    const [localResult, setLocalResult] = useState(null)
-    const [step, setStep] = useState(0) // 0: input, 1: result
+    const [localPrice, setLocalPrice] = useState("");
+    const [localLoading, setLocalLoading] = useState(false);
+    const [localError, setLocalError] = useState("");
+    const [localResult, setLocalResult] = useState(null);
+    const [step, setStep] = useState(0); // 0: input, 1: result
 
     React.useEffect(() => {
       if (showWhatIfModal && whatIfProduct) {
-        setLocalPrice(String(whatIfProduct.sell_price || ""))
-        setLocalError("")
-        setLocalResult(null)
-        setStep(0)
+        setLocalPrice(String(whatIfProduct.sell_price || ""));
+        setLocalError("");
+        setLocalResult(null);
+        setStep(0);
       }
-    }, [showWhatIfModal, whatIfProduct])
+    }, [showWhatIfModal, whatIfProduct]);
 
     const handleAnalyze = async () => {
       if (!whatIfProduct || !localPrice) {
-        setLocalError("Please enter a valid price.")
-        return
+        setLocalError("Please enter a valid price.");
+        return;
       }
 
-      const newPrice = Number.parseFloat(localPrice)
+      const newPrice = Number.parseFloat(localPrice);
       if (isNaN(newPrice) || newPrice <= 0) {
-        setLocalError("Please enter a valid price greater than 0.")
-        return
+        setLocalError("Please enter a valid price greater than 0.");
+        return;
       }
 
-      setLocalLoading(true)
-      setLocalError("")
+      setLocalLoading(true);
+      setLocalError("");
 
       try {
-        const token = localStorage.getItem("accessToken")
-        const res = await fetch(`https://busy-fool-backend.vercel.app/products/${whatIfProduct.id}/quick-action`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ new_sell_price: newPrice }),
-        })
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch(
+          `http://localhost:3000/products/${whatIfProduct.id}/quick-action`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ new_sell_price: newPrice }),
+          }
+        );
 
         if (res.ok) {
-          const result = await res.json()
-          setLocalResult(result)
-          setStep(1)
+          const result = await res.json();
+          setLocalResult(result);
+          setStep(1);
         } else {
-          const err = await res.json()
-          setLocalError(err.message || "Failed to calculate what-if analysis.")
+          const err = await res.json();
+          setLocalError(err.message || "Failed to calculate what-if analysis.");
         }
       } catch (e) {
-        setLocalError("An error occurred. Please try again.")
+        setLocalError("An error occurred. Please try again.");
       }
 
-      setLocalLoading(false)
-    }
+      setLocalLoading(false);
+    };
 
     const handleApplyChanges = () => {
       if (localResult) {
@@ -805,24 +898,24 @@ export default function Products() {
                   numberOfSales: p.numberOfSales, // Preserve the numberOfSales
                   quantity_sold: p.quantity_sold, // Preserve the quantity_sold
                 }
-              : p,
-          ),
-        )
-        setShowWhatIfModal(false)
-        showSuccessMessage("Price updated successfully!")
+              : p
+          )
+        );
+        setShowWhatIfModal(false);
+        showSuccessMessage("Price updated successfully!");
       }
-    }
+    };
 
     const handleClose = () => {
-      setShowWhatIfModal(false)
-      setWhatIfProduct(null)
-      setLocalPrice("")
-      setLocalError("")
-      setLocalResult(null)
-      setStep(0)
-    }
+      setShowWhatIfModal(false);
+      setWhatIfProduct(null);
+      setLocalPrice("");
+      setLocalError("");
+      setLocalResult(null);
+      setStep(0);
+    };
 
-    if (!showWhatIfModal || !whatIfProduct) return null
+    if (!showWhatIfModal || !whatIfProduct) return null;
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -834,11 +927,16 @@ export default function Products() {
                   <Calculator className="w-5 h-5 text-[#175E3B]" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">What-If Analysis</h2>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    What-If Analysis
+                  </h2>
                   <p className="text-sm text-gray-500">{whatIfProduct.name}</p>
                 </div>
               </div>
-              <button onClick={handleClose} className="p-2 bg-[#175E3B] hover:bg-[#175E3B]/90 rounded-xl">
+              <button
+                onClick={handleClose}
+                className="p-2 bg-[#175E3B] hover:bg-[#175E3B]/90 rounded-xl"
+              >
                 <X className="w-5 h-5 text-white" />
               </button>
             </div>
@@ -847,20 +945,30 @@ export default function Products() {
               <div className="space-y-6">
                 {/* Current Product Info */}
                 <div className="bg-gray-50 rounded-xl p-4">
-                  <h3 className="font-semibold text-gray-800 mb-3">Current Product Details</h3>
+                  <h3 className="font-semibold text-gray-800 mb-3">
+                    Current Product Details
+                  </h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-gray-500">Current Price:</span>
-                      <p className="font-semibold text-gray-900">${Number(whatIfProduct.sell_price || 0).toFixed(2)}</p>
+                      <p className="font-semibold text-gray-900">
+                        ${Number(whatIfProduct.sell_price || 0).toFixed(2)}
+                      </p>
                     </div>
                     <div>
                       <span className="text-gray-500">Total Cost:</span>
-                      <p className="font-semibold text-gray-900">${Number(whatIfProduct.total_cost || 0).toFixed(2)}</p>
+                      <p className="font-semibold text-gray-900">
+                        ${Number(whatIfProduct.total_cost || 0).toFixed(2)}
+                      </p>
                     </div>
                     <div>
                       <span className="text-gray-500">Current Margin:</span>
                       <p
-                        className={`font-semibold ${Number(whatIfProduct.margin_amount || 0) >= 0 ? "text-green-600" : "text-red-600"}`}
+                        className={`font-semibold ${
+                          Number(whatIfProduct.margin_amount || 0) >= 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
                       >
                         ${Number(whatIfProduct.margin_amount || 0).toFixed(2)}
                       </p>
@@ -868,7 +976,11 @@ export default function Products() {
                     <div>
                       <span className="text-gray-500">Margin %:</span>
                       <p
-                        className={`font-semibold ${Number(whatIfProduct.margin_percent || 0) >= 0 ? "text-green-600" : "text-red-600"}`}
+                        className={`font-semibold ${
+                          Number(whatIfProduct.margin_percent || 0) >= 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
                       >
                         {Number(whatIfProduct.margin_percent || 0).toFixed(1)}%
                       </p>
@@ -878,46 +990,72 @@ export default function Products() {
 
                 {/* New Price Input */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">New Sell Price ($)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    New Sell Price ($)
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     min="0.01"
                     value={localPrice}
                     onChange={(e) => {
-                      setLocalPrice(e.target.value)
-                      setLocalError("")
+                      setLocalPrice(e.target.value);
+                      setLocalError("");
                     }}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all text-lg font-semibold"
                     placeholder="Enter new price"
                     autoFocus
                   />
-                  {localError && <p className="text-red-500 text-sm mt-2">{localError}</p>}
+                  {localError && (
+                    <p className="text-red-500 text-sm mt-2">{localError}</p>
+                  )}
                 </div>
 
                 {/* Price Comparison */}
-                {localPrice && !isNaN(Number.parseFloat(localPrice)) && Number.parseFloat(localPrice) > 0 && (
-                  <div className="bg-blue-50 rounded-xl p-4">
-                    <h4 className="font-semibold text-blue-800 mb-2">Price Change Preview</h4>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-blue-600">Current → New:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold">${Number(whatIfProduct.sell_price || 0).toFixed(2)}</span>
-                        <ArrowRight className="w-4 h-4 text-blue-500" />
-                        <span className="font-semibold text-blue-700">${Number.parseFloat(localPrice).toFixed(2)}</span>
+                {localPrice &&
+                  !isNaN(Number.parseFloat(localPrice)) &&
+                  Number.parseFloat(localPrice) > 0 && (
+                    <div className="bg-blue-50 rounded-xl p-4">
+                      <h4 className="font-semibold text-blue-800 mb-2">
+                        Price Change Preview
+                      </h4>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-blue-600">Current → New:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">
+                            ${Number(whatIfProduct.sell_price || 0).toFixed(2)}
+                          </span>
+                          <ArrowRight className="w-4 h-4 text-blue-500" />
+                          <span className="font-semibold text-blue-700">
+                            ${Number.parseFloat(localPrice).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between text-sm mt-1">
+                        <span className="text-blue-600">Difference:</span>
+                        <span
+                          className={`font-semibold ${
+                            Number.parseFloat(localPrice) -
+                              Number(whatIfProduct.sell_price || 0) >=
+                            0
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {Number.parseFloat(localPrice) -
+                            Number(whatIfProduct.sell_price || 0) >=
+                          0
+                            ? "+"
+                            : ""}
+                          $
+                          {(
+                            Number.parseFloat(localPrice) -
+                            Number(whatIfProduct.sell_price || 0)
+                          ).toFixed(2)}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between text-sm mt-1">
-                      <span className="text-blue-600">Difference:</span>
-                      <span
-                        className={`font-semibold ${Number.parseFloat(localPrice) - Number(whatIfProduct.sell_price || 0) >= 0 ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {Number.parseFloat(localPrice) - Number(whatIfProduct.sell_price || 0) >= 0 ? "+" : ""}$
-                        {(Number.parseFloat(localPrice) - Number(whatIfProduct.sell_price || 0)).toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                  )}
 
                 <button
                   onClick={handleAnalyze}
@@ -951,14 +1089,20 @@ export default function Products() {
                   <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mx-auto mb-4">
                     <BarChart3 className="w-8 h-8 text-green-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Analysis Complete</h3>
-                  <p className="text-gray-600">Here's how the price change would affect your product</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    Analysis Complete
+                  </h3>
+                  <p className="text-gray-600">
+                    Here's how the price change would affect your product
+                  </p>
                 </div>
 
                 {/* Results Comparison */}
                 <div className="space-y-4">
                   <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4">
-                    <h4 className="font-semibold text-gray-800 mb-3">Updated Product Metrics</h4>
+                    <h4 className="font-semibold text-gray-800 mb-3">
+                      Updated Product Metrics
+                    </h4>
 
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="bg-white rounded-lg p-3">
@@ -968,7 +1112,9 @@ export default function Products() {
                         </p>
                       </div>
                       <div className="bg-white rounded-lg p-3">
-                        <span className="text-xs text-gray-500">Total Cost</span>
+                        <span className="text-xs text-gray-500">
+                          Total Cost
+                        </span>
                         <p className="text-lg font-bold text-gray-900">
                           ${Number(localResult.total_cost || 0).toFixed(2)}
                         </p>
@@ -977,14 +1123,16 @@ export default function Products() {
 
                     <div className="bg-white rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-600">New Profit Margin</span>
+                        <span className="text-sm font-medium text-gray-600">
+                          New Profit Margin
+                        </span>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-semibold ${
                             localResult.status === "profitable"
                               ? "bg-green-100 text-green-700"
                               : localResult.status === "losing money"
-                                ? "bg-red-100 text-red-700"
-                                : "bg-yellow-100 text-yellow-700"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-yellow-100 text-yellow-700"
                           }`}
                         >
                           {localResult.status}
@@ -993,23 +1141,44 @@ export default function Products() {
                       <div className="flex items-end justify-between">
                         <div>
                           <p
-                            className={`text-2xl font-bold ${Number(localResult.margin_percent || 0) >= 0 ? "text-green-600" : "text-red-600"}`}
+                            className={`text-2xl font-bold ${
+                              Number(localResult.margin_percent || 0) >= 0
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}
                           >
-                            {Number(localResult.margin_percent || 0) > 0 ? "+" : ""}
-                            {Number(localResult.margin_percent || 0).toFixed(1)}%
+                            {Number(localResult.margin_percent || 0) > 0
+                              ? "+"
+                              : ""}
+                            {Number(localResult.margin_percent || 0).toFixed(1)}
+                            %
                           </p>
                           <p className="text-sm text-gray-600">
-                            ${Number(localResult.margin_amount || 0) > 0 ? "+" : ""}
-                            {Number(localResult.margin_amount || 0).toFixed(2)} per sale
+                            $
+                            {Number(localResult.margin_amount || 0) > 0
+                              ? "+"
+                              : ""}
+                            {Number(localResult.margin_amount || 0).toFixed(2)}{" "}
+                            per sale
                           </p>
                         </div>
                         <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-1000 ${
-                              Number(localResult.margin_percent || 0) >= 0 ? "bg-green-400" : "bg-red-400"
+                              Number(localResult.margin_percent || 0) >= 0
+                                ? "bg-green-400"
+                                : "bg-red-400"
                             }`}
                             style={{
-                              width: `${Math.max(0, Math.min(100, (Number(localResult.margin_percent || 0) + 20) * 1.25))}%`,
+                              width: `${Math.max(
+                                0,
+                                Math.min(
+                                  100,
+                                  (Number(localResult.margin_percent || 0) +
+                                    20) *
+                                    1.25
+                                )
+                              )}%`,
                             }}
                           />
                         </div>
@@ -1019,64 +1188,83 @@ export default function Products() {
 
                   {/* Impact Summary */}
                   <div className="bg-blue-50 rounded-xl p-4">
-                    <h4 className="font-semibold text-blue-800 mb-2">Impact Summary</h4>
+                    <h4 className="font-semibold text-blue-800 mb-2">
+                      Impact Summary
+                    </h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-blue-600">Margin Change:</span>
                         <span
                           className={`font-semibold ${
-                            Number(localResult.margin_amount || 0) - Number(whatIfProduct.margin_amount || 0) >= 0
+                            Number(localResult.margin_amount || 0) -
+                              Number(whatIfProduct.margin_amount || 0) >=
+                            0
                               ? "text-green-600"
                               : "text-red-600"
                           }`}
                         >
-                          {Number(localResult.margin_amount || 0) - Number(whatIfProduct.margin_amount || 0) >= 0
+                          {Number(localResult.margin_amount || 0) -
+                            Number(whatIfProduct.margin_amount || 0) >=
+                          0
                             ? "+"
                             : ""}
                           $
-                          {(Number(localResult.margin_amount || 0) - Number(whatIfProduct.margin_amount || 0)).toFixed(
-                            2,
-                          )}
+                          {(
+                            Number(localResult.margin_amount || 0) -
+                            Number(whatIfProduct.margin_amount || 0)
+                          ).toFixed(2)}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-blue-600">Percentage Change:</span>
+                        <span className="text-blue-600">
+                          Percentage Change:
+                        </span>
                         <span
                           className={`font-semibold ${
-                            Number(localResult.margin_percent || 0) - Number(whatIfProduct.margin_percent || 0) >= 0
+                            Number(localResult.margin_percent || 0) -
+                              Number(whatIfProduct.margin_percent || 0) >=
+                            0
                               ? "text-green-600"
                               : "text-red-600"
                           }`}
                         >
-                          {Number(localResult.margin_percent || 0) - Number(whatIfProduct.margin_percent || 0) >= 0
+                          {Number(localResult.margin_percent || 0) -
+                            Number(whatIfProduct.margin_percent || 0) >=
+                          0
                             ? "+"
                             : ""}
                           {(
-                            Number(localResult.margin_percent || 0) - Number(whatIfProduct.margin_percent || 0)
+                            Number(localResult.margin_percent || 0) -
+                            Number(whatIfProduct.margin_percent || 0)
                           ).toFixed(1)}
                           %
                         </span>
                       </div>
                       {whatIfProduct.numberOfSales > 0 && (
                         <div className="flex justify-between">
-                          <span className="text-blue-600">Daily Impact ({whatIfProduct.numberOfSales} sales):</span>
+                          <span className="text-blue-600">
+                            Daily Impact ({whatIfProduct.numberOfSales} sales):
+                          </span>
                           <span
                             className={`font-semibold ${
-                              (Number(localResult.margin_amount || 0) - Number(whatIfProduct.margin_amount || 0)) *
+                              (Number(localResult.margin_amount || 0) -
+                                Number(whatIfProduct.margin_amount || 0)) *
                                 whatIfProduct.numberOfSales >=
                               0
                                 ? "text-green-600"
                                 : "text-red-600"
                             }`}
                           >
-                            {(Number(localResult.margin_amount || 0) - Number(whatIfProduct.margin_amount || 0)) *
+                            {(Number(localResult.margin_amount || 0) -
+                              Number(whatIfProduct.margin_amount || 0)) *
                               whatIfProduct.numberOfSales >=
                             0
                               ? "+"
                               : ""}
                             $
                             {(
-                              (Number(localResult.margin_amount || 0) - Number(whatIfProduct.margin_amount || 0)) *
+                              (Number(localResult.margin_amount || 0) -
+                                Number(whatIfProduct.margin_amount || 0)) *
                               whatIfProduct.numberOfSales
                             ).toFixed(2)}
                           </span>
@@ -1107,36 +1295,37 @@ export default function Products() {
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   // PATCH and DELETE handlers for products
   const handleDeleteProduct = async (id) => {
-    const token = localStorage.getItem("accessToken")
-    if (!window.confirm("Are you sure you want to delete this product?")) return
+    const token = localStorage.getItem("accessToken");
+    if (!window.confirm("Are you sure you want to delete this product?"))
+      return;
     try {
-      const response = await fetch(`https://busy-fool-backend.vercel.app/products/${id}`, {
+      const response = await fetch(`http://localhost:3000/products/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
-      })
+      });
       if (response.ok) {
-        setProducts((prev) => prev.filter((p) => p.id !== id))
-        showSuccessMessage("Product deleted successfully!")
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+        showSuccessMessage("Product deleted successfully!");
       } else {
-        const errorData = await response.json()
-        handleApiError(errorData, response)
+        const errorData = await response.json();
+        handleApiError(errorData, response);
       }
     } catch (e) {
-      console.error("Delete product error:", e)
-      showErrorMessage("Error deleting product. Please try again.")
+      console.error("Delete product error:", e);
+      showErrorMessage("Error deleting product. Please try again.");
     }
-  }
+  };
 
   // Map product ingredients to match ingredient selection UI for edit modal
   const handleEditProduct = (product) => {
     // Capture scroll position
-    window._productScrollY = window.scrollY
-    setSelectedProduct(product)
+    window._productScrollY = window.scrollY;
+    setSelectedProduct(product);
     // Map and deduplicate ingredients by id
     const rawIngredients = Array.isArray(product.ingredients)
       ? product.ingredients.map((i) => ({
@@ -1147,17 +1336,19 @@ export default function Products() {
           selectedUnit: i.selectedUnit,
           is_optional: i.is_optional || false,
         }))
-      : []
-    const dedupedIngredients = rawIngredients.filter((ing, idx, arr) => arr.findIndex((ii) => ii.id === ing.id) === idx)
+      : [];
+    const dedupedIngredients = rawIngredients.filter(
+      (ing, idx, arr) => arr.findIndex((ii) => ii.id === ing.id) === idx
+    );
     setEditFormData({
       name: product.name || "",
       category: product.category || "",
       sell_price: product.sell_price || "",
       ingredients: dedupedIngredients,
       image: null,
-    })
-    setShowEditProduct(true)
-  }
+    });
+    setShowEditProduct(true);
+  };
 
   const handleEditIngredientCheck = (ingredient, checked) => {
     if (checked) {
@@ -1171,83 +1362,93 @@ export default function Products() {
             is_optional: false,
           },
         ],
-      }))
+      }));
     } else {
       setEditFormData((prev) => ({
         ...prev,
         ingredients: prev.ingredients.filter((i) => i.id !== ingredient.id),
-      }))
+      }));
     }
-  }
+  };
 
   const handleEditIngredientQuantity = (ingredientId, value) => {
     setEditFormData((prev) => ({
       ...prev,
-      ingredients: prev.ingredients.map((i) => (i.id === ingredientId ? { ...i, selectedQuantity: value } : i)),
-    }))
-  }
+      ingredients: prev.ingredients.map((i) =>
+        i.id === ingredientId ? { ...i, selectedQuantity: value } : i
+      ),
+    }));
+  };
 
   const handleEditOptionalCheck = (ingredientId, checked) => {
     setEditFormData((prev) => ({
       ...prev,
-      ingredients: prev.ingredients.map((i) => (i.id === ingredientId ? { ...i, is_optional: checked } : i)),
-    }))
-  }
+      ingredients: prev.ingredients.map((i) =>
+        i.id === ingredientId ? { ...i, is_optional: checked } : i
+      ),
+    }));
+  };
 
   const handleEditProductSubmit = async () => {
-    if (!selectedProduct) return
-    setIsSubmitting(true)
-    setEditingProductId(selectedProduct.id) // Track which product is being edited
-    const token = localStorage.getItem("accessToken")
+    if (!selectedProduct) return;
+    setIsSubmitting(true);
+    setEditingProductId(selectedProduct.id); // Track which product is being edited
+    const token = localStorage.getItem("accessToken");
     // Deduplicate and map to backend schema
-    const seen = new Set()
+    const seen = new Set();
     const selectedIngredients = editFormData.ingredients
       .filter((ing) => {
-        if (!ing.id || seen.has(ing.id)) return false
-        seen.add(ing.id)
-        return true
+        if (!ing.id || seen.has(ing.id)) return false;
+        seen.add(ing.id);
+        return true;
       })
       .map((ing) => ({
         ingredientId: ing.id,
         quantity: Number(ing.selectedQuantity ?? ing.quantity ?? 1),
         unit: ing.selectedUnit || ing.unit,
         is_optional: !!ing.is_optional,
-      }))
+      }));
 
-    let requestBody
+    let requestBody;
     const headers = {
       Authorization: `Bearer ${token}`,
-    }
+    };
 
     if (editFormData.image) {
       // Use FormData for multipart/form-data
-      const formDataObj = new FormData()
-      formDataObj.append("name", editFormData.name)
-      formDataObj.append("category", editFormData.category)
-      formDataObj.append("sell_price", Number.parseFloat(editFormData.sell_price))
-      formDataObj.append("ingredients", JSON.stringify(selectedIngredients))
-      formDataObj.append("image", editFormData.image)
-      requestBody = formDataObj
+      const formDataObj = new FormData();
+      formDataObj.append("name", editFormData.name);
+      formDataObj.append("category", editFormData.category);
+      formDataObj.append(
+        "sell_price",
+        Number.parseFloat(editFormData.sell_price)
+      );
+      formDataObj.append("ingredients", JSON.stringify(selectedIngredients));
+      formDataObj.append("image", editFormData.image);
+      requestBody = formDataObj;
     } else {
       // Use JSON for regular data
-      headers["Content-Type"] = "application/json"
+      headers["Content-Type"] = "application/json";
       requestBody = JSON.stringify({
         name: editFormData.name,
         category: editFormData.category,
         sell_price: Number.parseFloat(editFormData.sell_price),
         ingredients: selectedIngredients,
-      })
+      });
     }
 
     try {
-      const response = await fetch(`https://busy-fool-backend.vercel.app/products/${selectedProduct.id}`, {
-        method: "PATCH",
-        headers: headers,
-        body: requestBody,
-      })
+      const response = await fetch(
+        `http://localhost:3000/products/${selectedProduct.id}`,
+        {
+          method: "PATCH",
+          headers: headers,
+          body: requestBody,
+        }
+      );
 
       if (response.ok) {
-        const updated = await response.json()
+        const updated = await response.json();
         // Remap updated.ingredients to include full details for UI
         if (Array.isArray(updated.ingredients)) {
           updated.ingredients = updated.ingredients.map((i) => {
@@ -1259,8 +1460,8 @@ export default function Products() {
               selectedQuantity: i.selectedQuantity ?? i.quantity ?? 1,
               is_optional: i.is_optional || false,
               line_cost: i.line_cost,
-            }
-          })
+            };
+          });
         }
 
         // PRESERVE numberOfSales and quantity_sold when updating
@@ -1272,102 +1473,112 @@ export default function Products() {
                   numberOfSales: p.numberOfSales, // Preserve the numberOfSales
                   quantity_sold: p.quantity_sold, // Preserve the quantity_sold
                 }
-              : p,
-          ),
-        )
+              : p
+          )
+        );
 
-        setShowEditProduct(false)
-        setSelectedProduct(null)
-        showSuccessMessage("Product updated successfully!")
+        setShowEditProduct(false);
+        setSelectedProduct(null);
+        showSuccessMessage("Product updated successfully!");
       } else {
-        const errorData = await response.json()
+        const errorData = await response.json();
         // Use enhanced error handling
-        handleApiError(errorData, response)
+        handleApiError(errorData, response);
       }
     } catch (error) {
-      console.error("Edit product error:", error)
-      showErrorMessage("An error occurred while updating the product. Please try again.")
+      console.error("Edit product error:", error);
+      showErrorMessage(
+        "An error occurred while updating the product. Please try again."
+      );
     }
-    setIsSubmitting(false)
-    setEditingProductId(null)
-  }
+    setIsSubmitting(false);
+    setEditingProductId(null);
+  };
 
   // Edit Product Modal
   const EditProductModal = () => {
     // Restore scroll position on mount
     React.useEffect(() => {
       if (window._productScrollY !== undefined) {
-        window.scrollTo({ top: window._productScrollY })
+        window.scrollTo({ top: window._productScrollY });
       }
-    }, [])
-    const [step, setStep] = React.useState(0)
-    const [search, setSearch] = React.useState("")
-    const [localForm, setLocalForm] = React.useState(editFormData)
-    const [error, setError] = React.useState("")
-    const [success, setSuccess] = React.useState(false)
-    const [imagePreview, setImagePreview] = React.useState(null)
+    }, []);
+    const [step, setStep] = React.useState(0);
+    const [search, setSearch] = React.useState("");
+    const [localForm, setLocalForm] = React.useState(editFormData);
+    const [error, setError] = React.useState("");
+    const [success, setSuccess] = React.useState(false);
+    const [imagePreview, setImagePreview] = React.useState(null);
 
     // Sync localForm to parent state on submit
     React.useEffect(() => {
       if (showEditProduct && selectedProduct) {
-        setStep(0)
-        setLocalForm(editFormData)
-        setError("")
-        setSuccess(false)
+        setStep(0);
+        setLocalForm(editFormData);
+        setError("");
+        setSuccess(false);
         if (selectedProduct.image) {
-          setImagePreview(`${selectedProduct.image}`)
+          setImagePreview(`${selectedProduct.image}`);
         } else {
-          setImagePreview(null)
+          setImagePreview(null);
         }
       }
       if (!showEditProduct) {
-        setStep(0)
-        setLocalForm(editFormData)
-        setError("")
-        setSuccess(false)
-        setImagePreview(null)
+        setStep(0);
+        setLocalForm(editFormData);
+        setError("");
+        setSuccess(false);
+        setImagePreview(null);
       }
-    }, [showEditProduct, selectedProduct, editFormData])
+    }, [showEditProduct, selectedProduct, editFormData]);
 
     const handleImageUpload = (e) => {
-      const file = e.target.files[0]
+      const file = e.target.files[0];
       if (file) {
         if (file.size > 5 * 1024 * 1024) {
           // 5MB limit
-          setError("Image size must be less than 5MB")
-          return
+          setError("Image size must be less than 5MB");
+          return;
         }
-        if (!["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type)) {
-          setError("Please select a valid image file (JPG, PNG, GIF, WEBP)")
-          return
+        if (
+          !["image/jpeg", "image/png", "image/gif", "image/webp"].includes(
+            file.type
+          )
+        ) {
+          setError("Please select a valid image file (JPG, PNG, GIF, WEBP)");
+          return;
         }
-        setLocalForm((f) => ({ ...f, image: file }))
-        const reader = new FileReader()
-        reader.onload = (e) => setImagePreview(e.target.result)
-        reader.readAsDataURL(file)
-        setError("")
+        setLocalForm((f) => ({ ...f, image: file }));
+        const reader = new FileReader();
+        reader.onload = (e) => setImagePreview(e.target.result);
+        reader.readAsDataURL(file);
+        setError("");
       }
-    }
+    };
 
     // Helper to update ingredient in localForm
     const updateIngredient = (ingredientId, changes) => {
       setLocalForm((prev) => {
         // Update ingredient
-        const updated = prev.ingredients.map((i) => (i.id === ingredientId ? { ...i, ...changes } : i))
+        const updated = prev.ingredients.map((i) =>
+          i.id === ingredientId ? { ...i, ...changes } : i
+        );
         // Deduplicate by id
-        const deduped = updated.filter((ing, idx, arr) => arr.findIndex((ii) => ii.id === ing.id) === idx)
+        const deduped = updated.filter(
+          (ing, idx, arr) => arr.findIndex((ii) => ii.id === ing.id) === idx
+        );
         return {
           ...prev,
           ingredients: deduped,
-        }
-      })
-    }
+        };
+      });
+    };
 
     // Helper to add/remove ingredient
     const toggleIngredient = (ingredient, checked) => {
       setLocalForm((prev) => {
         if (checked) {
-          if (prev.ingredients.some((i) => i.id === ingredient.id)) return prev
+          if (prev.ingredients.some((i) => i.id === ingredient.id)) return prev;
           return {
             ...prev,
             ingredients: [
@@ -1376,38 +1587,51 @@ export default function Products() {
                 ...ingredient,
                 selectedQuantity: 1,
                 is_optional: false,
-                selectedUnit: ingredient.unit === "L" ? "ml" : ingredient.unit === "kg" ? "g" : ingredient.unit,
+                selectedUnit:
+                  ingredient.unit === "L"
+                    ? "ml"
+                    : ingredient.unit === "kg"
+                    ? "g"
+                    : ingredient.unit,
               },
             ],
-          }
+          };
         } else {
           return {
             ...prev,
             ingredients: prev.ingredients.filter((i) => i.id !== ingredient.id),
-          }
+          };
         }
-      })
-    }
+      });
+    };
 
-    if (!showEditProduct || !selectedProduct) return null
+    if (!showEditProduct || !selectedProduct) return null;
 
     // Step 0: Details
     const detailsStep = (
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Product Name
+          </label>
           <input
             type="text"
             value={localForm.name}
-            onChange={(e) => setLocalForm((f) => ({ ...f, name: e.target.value }))}
+            onChange={(e) =>
+              setLocalForm((f) => ({ ...f, name: e.target.value }))
+            }
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Category
+          </label>
           <select
             value={localForm.category}
-            onChange={(e) => setLocalForm((f) => ({ ...f, category: e.target.value }))}
+            onChange={(e) =>
+              setLocalForm((f) => ({ ...f, category: e.target.value }))
+            }
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all bg-white"
           >
             <option value="">Select category</option>
@@ -1418,17 +1642,23 @@ export default function Products() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Sell Price ($)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Sell Price ($)
+          </label>
           <input
             type="number"
             step="0.01"
             value={localForm.sell_price}
-            onChange={(e) => setLocalForm((f) => ({ ...f, sell_price: e.target.value }))}
+            onChange={(e) =>
+              setLocalForm((f) => ({ ...f, sell_price: e.target.value }))
+            }
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Product Image
+          </label>
           <div className="space-y-3">
             {imagePreview && (
               <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-gray-200">
@@ -1440,8 +1670,8 @@ export default function Products() {
                 <button
                   type="button"
                   onClick={() => {
-                    setImagePreview(null)
-                    setLocalForm((f) => ({ ...f, image: null }))
+                    setImagePreview(null);
+                    setLocalForm((f) => ({ ...f, image: null }));
                   }}
                   className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                 >
@@ -1454,24 +1684,35 @@ export default function Products() {
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-8 h-8 mb-2 text-gray-400" />
                   <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">Click to upload</span> 
+                    <span className="font-semibold">Click to upload</span>
                   </p>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF, WEBP (MAX. 5MB)</p>
+                  <p className="text-xs text-gray-500">
+                    PNG, JPG, GIF, WEBP (MAX. 5MB)
+                  </p>
                 </div>
-                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                />
               </label>
             </div>
           </div>
         </div>
       </div>
-    )
+    );
 
     // Step 1: Ingredients (with search and stock info)
-    const filteredIngredients = allIngredients.filter((i) => i.name.toLowerCase().includes(search.toLowerCase()))
+    const filteredIngredients = allIngredients.filter((i) =>
+      i.name.toLowerCase().includes(search.toLowerCase())
+    );
     const ingredientsStep = (
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Search Ingredients</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Search Ingredients
+          </label>
           <input
             type="text"
             placeholder="Search by name..."
@@ -1481,26 +1722,43 @@ export default function Products() {
           />
         </div>
         <div className="max-h-48 overflow-y-auto border border-gray-100 rounded-xl p-2 bg-gray-50">
-          {filteredIngredients.length === 0 && <div className="text-gray-400 text-sm">No ingredients found.</div>}
+          {filteredIngredients.length === 0 && (
+            <div className="text-gray-400 text-sm">No ingredients found.</div>
+          )}
           {filteredIngredients.map((ingredient) => {
-            const checked = localForm.ingredients.some((i) => i.id === ingredient.id)
-            const selected = localForm.ingredients.find((i) => i.id === ingredient.id)
-            const availableStock = getAvailableStock(ingredient.id)
-            const stockUnit = getStockUnit(ingredient.id)
+            const checked = localForm.ingredients.some(
+              (i) => i.id === ingredient.id
+            );
+            const selected = localForm.ingredients.find(
+              (i) => i.id === ingredient.id
+            );
+            const availableStock = getAvailableStock(ingredient.id);
+            const stockUnit = getStockUnit(ingredient.id);
 
             return (
-              <div key={ingredient.id} className="flex items-center gap-2 mb-2 p-2 bg-white rounded-lg border">
+              <div
+                key={ingredient.id}
+                className="flex items-center gap-2 mb-2 p-2 bg-white rounded-lg border"
+              >
                 <input
                   type="checkbox"
                   checked={checked}
-                  onChange={(e) => toggleIngredient(ingredient, e.target.checked)}
+                  onChange={(e) =>
+                    toggleIngredient(ingredient, e.target.checked)
+                  }
                 />
                 <div className="flex-1">
-                  <span className="text-gray-800 text-sm font-medium">{ingredient.name}</span>
+                  <span className="text-gray-800 text-sm font-medium">
+                    {ingredient.name}
+                  </span>
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <span>${getIngredientPrice(ingredient).toFixed(4)}</span>
                     <span>•</span>
-                    <span className={`${availableStock > 0 ? "text-green-600" : "text-red-600"}`}>
+                    <span
+                      className={`${
+                        availableStock > 0 ? "text-green-600" : "text-red-600"
+                      }`}
+                    >
                       Stock: {availableStock} {stockUnit}
                     </span>
                   </div>
@@ -1512,40 +1770,59 @@ export default function Products() {
                         type="number"
                         min="1"
                         step="1"
-                        value={selected.selectedQuantity !== undefined ? selected.selectedQuantity : ""}
+                        value={
+                          selected.selectedQuantity !== undefined
+                            ? selected.selectedQuantity
+                            : ""
+                        }
                         onChange={(e) => {
-                          const val = Math.max(1, Number.parseInt(e.target.value) || 1)
-                          updateIngredient(ingredient.id, { selectedQuantity: val })
+                          const val = Math.max(
+                            1,
+                            Number.parseInt(e.target.value) || 1
+                          );
+                          updateIngredient(ingredient.id, {
+                            selectedQuantity: val,
+                          });
                         }}
                         className="w-16 px-2 py-1 border border-gray-200 rounded"
-                        placeholder={ingredient.unit === "kg" ? "g" : ingredient.unit === "L" ? "ml" : ingredient.unit}
+                        placeholder={
+                          ingredient.unit === "kg"
+                            ? "g"
+                            : ingredient.unit === "L"
+                            ? "ml"
+                            : ingredient.unit
+                        }
                       />
                       <span className="text-xs text-gray-500">
                         {ingredient.unit === "L"
                           ? "ml"
                           : ingredient.unit === "kg"
-                            ? "g"
-                            : ingredient.unit === "ml" || ingredient.unit === "g"
-                              ? ingredient.unit
-                              : "unit"}
+                          ? "g"
+                          : ingredient.unit === "ml" || ingredient.unit === "g"
+                          ? ingredient.unit
+                          : "unit"}
                       </span>
                     </div>
                     <label className="flex items-center gap-1 text-xs">
                       <input
                         type="checkbox"
                         checked={!!selected.is_optional}
-                        onChange={(e) => updateIngredient(ingredient.id, { is_optional: e.target.checked })}
+                        onChange={(e) =>
+                          updateIngredient(ingredient.id, {
+                            is_optional: e.target.checked,
+                          })
+                        }
                       />
                       Optional
                     </label>
                   </>
                 )}
               </div>
-            )
+            );
           })}
         </div>
       </div>
-    )
+    );
 
     // Step 2: Review & Save
     const reviewStep = (
@@ -1559,126 +1836,141 @@ export default function Products() {
             <span className="font-medium">Category:</span> {localForm.category}
           </div>
           <div className="mb-2">
-            <span className="font-medium">Sell Price:</span> ${localForm.sell_price}
+            <span className="font-medium">Sell Price:</span> $
+            {localForm.sell_price}
           </div>
           <div>
             <span className="font-medium">Ingredients:</span>
             <ul className="list-disc ml-6 mt-1">
               {localForm.ingredients.map((i) => {
-                const availableStock = getAvailableStock(i.id)
-                const stockUnit = getStockUnit(i.id)
+                const availableStock = getAvailableStock(i.id);
+                const stockUnit = getStockUnit(i.id);
                 const willExceedStock = checkStockExceeded(
                   i.selectedQuantity,
                   i.selectedUnit || i.unit,
                   availableStock,
-                  stockUnit,
-                )
+                  stockUnit
+                );
 
                 return (
-                  <li key={i.id} className={willExceedStock ? "text-red-600" : ""}>
+                  <li
+                    key={i.id}
+                    className={willExceedStock ? "text-red-600" : ""}
+                  >
                     {i.name} ({i.selectedQuantity} {i.selectedUnit || i.unit})
-                    {i.is_optional && <span className="text-xs text-gray-500">(Optional)</span>}
+                    {i.is_optional && (
+                      <span className="text-xs text-gray-500">(Optional)</span>
+                    )}
                     {willExceedStock && (
                       <span className="text-xs text-red-500 ml-2">
-                        ⚠️ Exceeds stock ({availableStock} {stockUnit} available)
+                        ⚠️ Exceeds stock ({availableStock} {stockUnit}{" "}
+                        available)
                       </span>
                     )}
                   </li>
-                )
+                );
               })}
             </ul>
           </div>
         </div>
         {error && <div className="text-red-500 text-sm">{error}</div>}
       </div>
-    )
+    );
 
     // Stepper UI
-    const steps = ["Details", "Ingredients", "Review"]
+    const steps = ["Details", "Ingredients", "Review"];
 
     const handleNext = () => {
       if (step === 0) {
         if (!localForm.name || !localForm.category || !localForm.sell_price) {
-          setError("Please fill all product details.")
-          return
+          setError("Please fill all product details.");
+          return;
         }
       }
       if (step === 1) {
         if (localForm.ingredients.length === 0) {
-          setError("Select at least one ingredient.")
-          return
+          setError("Select at least one ingredient.");
+          return;
         }
         // Validate ingredient quantities
         const invalidQty = localForm.ingredients.some(
-          (i) => isNaN(Number(i.selectedQuantity)) || Number(i.selectedQuantity) < 0.01,
-        )
+          (i) =>
+            isNaN(Number(i.selectedQuantity)) ||
+            Number(i.selectedQuantity) < 0.01
+        );
         if (invalidQty) {
-          setError("All ingredient quantities must be at least 0.01.")
-          return
+          setError("All ingredient quantities must be at least 0.01.");
+          return;
         }
       }
-      setError("")
-      setStep((s) => s + 1)
-    }
+      setError("");
+      setStep((s) => s + 1);
+    };
     const handleBack = () => {
-      setError("")
-      setStep((s) => s - 1)
-    }
+      setError("");
+      setStep((s) => s - 1);
+    };
 
     const handleSubmit = async () => {
-      setShowEditProduct(false) // Close modal immediately
-      setError("")
-      setIsSubmitting(true)
-      setEditingProductId(selectedProduct.id) // Track which product is being edited
-      const token = localStorage.getItem("accessToken")
+      setShowEditProduct(false); // Close modal immediately
+      setError("");
+      setIsSubmitting(true);
+      setEditingProductId(selectedProduct.id); // Track which product is being edited
+      const token = localStorage.getItem("accessToken");
       // Deduplicate and map ingredients to backend schema
-      const seen = new Set()
+      const seen = new Set();
       const selectedIngredients = localForm.ingredients
         .filter((ing) => {
-          if (!ing.id || seen.has(ing.id)) return false
-          seen.add(ing.id)
-          return true
+          if (!ing.id || seen.has(ing.id)) return false;
+          seen.add(ing.id);
+          return true;
         })
         .map((ing) => ({
           ingredientId: ing.id,
           quantity: Number(ing.selectedQuantity ?? ing.quantity ?? 1),
           unit: ing.selectedUnit || ing.unit,
           is_optional: !!ing.is_optional,
-        }))
+        }));
 
-      let requestBody
+      let requestBody;
       const headers = {
         Authorization: `Bearer ${token}`,
-      }
+      };
 
       if (localForm.image) {
         // Use FormData for multipart/form-data
-        const formDataObj = new FormData()
-        formDataObj.append("name", localForm.name)
-        formDataObj.append("category", localForm.category)
-        formDataObj.append("sell_price", Number.parseFloat(localForm.sell_price))
-        formDataObj.append("ingredients", JSON.stringify(selectedIngredients))
-        formDataObj.append("image", localForm.image)
-        requestBody = formDataObj
+        const formDataObj = new FormData();
+        formDataObj.append("name", localForm.name);
+        formDataObj.append("category", localForm.category);
+        formDataObj.append(
+          "sell_price",
+          Number.parseFloat(localForm.sell_price)
+        );
+        formDataObj.append("ingredients", JSON.stringify(selectedIngredients));
+        formDataObj.append("image", localForm.image);
+        requestBody = formDataObj;
       } else {
         // Use JSON for regular data
-        headers["Content-Type"] = "application/json"
+        headers["Content-Type"] = "application/json";
         requestBody = JSON.stringify({
           name: localForm.name,
           category: localForm.category,
           sell_price: Number.parseFloat(localForm.sell_price),
           ingredients: selectedIngredients,
-        })
+        });
       }
 
       try {
-        const response = await fetch(`https://busy-fool-backend.vercel.app/products/${selectedProduct.id}`, {
-          method: "PATCH",
-          headers: headers,
-          body: requestBody,
-        })
+        const response = await fetch(
+          `http://localhost:3000/products/${selectedProduct.id}`,
+          {
+            method: "PATCH",
+            headers: headers,
+            body: requestBody,
+          }
+        );
         if (response.ok) {
-          const updated = await response.json()
+          const updated = await response.json();
 
           // PRESERVE numberOfSales and quantity_sold when updating
           setProducts((prev) =>
@@ -1689,24 +1981,26 @@ export default function Products() {
                     numberOfSales: p.numberOfSales, // Preserve the numberOfSales
                     quantity_sold: p.quantity_sold, // Preserve the quantity_sold
                   }
-                : p,
-            ),
-          )
+                : p
+            )
+          );
 
-          setSelectedProduct(null)
-          showSuccessMessage("Product updated successfully!")
+          setSelectedProduct(null);
+          showSuccessMessage("Product updated successfully!");
         } else {
-          const errorData = await response.json()
+          const errorData = await response.json();
           // Use enhanced error handling
-          handleApiError(errorData, response)
+          handleApiError(errorData, response);
         }
       } catch (error) {
-        console.error("Edit product error:", error)
-        showErrorMessage("An error occurred while updating the product. Please try again.")
+        console.error("Edit product error:", error);
+        showErrorMessage(
+          "An error occurred while updating the product. Please try again."
+        );
       }
-      setIsSubmitting(false)
-      setEditingProductId(null)
-    }
+      setIsSubmitting(false);
+      setEditingProductId(null);
+    };
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -1721,12 +2015,12 @@ export default function Products() {
               <h2 className="text-2xl font-bold text-gray-900">Edit Product</h2>
               <button
                 onClick={() => {
-                  setShowEditProduct(false)
-                  setSelectedProduct(null)
-                  setStep(0)
-                  setLocalForm(editFormData)
-                  setError("")
-                  setSuccess(false)
+                  setShowEditProduct(false);
+                  setSelectedProduct(null);
+                  setStep(0);
+                  setLocalForm(editFormData);
+                  setError("");
+                  setSuccess(false);
                 }}
                 className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
               >
@@ -1739,12 +2033,18 @@ export default function Products() {
                 <div key={label} className="flex-1 flex flex-col items-center">
                   <div
                     className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-white transition-all ${
-                      step === idx ? "bg-[#175E3B] scale-110 shadow-lg" : "bg-gray-300"
+                      step === idx
+                        ? "bg-[#175E3B] scale-110 shadow-lg"
+                        : "bg-gray-300"
                     }`}
                   >
                     {idx + 1}
                   </div>
-                  <span className={`mt-2 text-xs font-medium ${step === idx ? "text-[#175E3B]" : "text-gray-400"}`}>
+                  <span
+                    className={`mt-2 text-xs font-medium ${
+                      step === idx ? "text-[#175E3B]" : "text-gray-400"
+                    }`}
+                  >
                     {label}
                   </span>
                 </div>
@@ -1760,7 +2060,9 @@ export default function Products() {
                   <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
                     <CheckCircle className="w-10 h-10 text-green-600" />
                   </div>
-                  <div className="text-green-700 font-bold text-lg">Product Updated!</div>
+                  <div className="text-green-700 font-bold text-lg">
+                    Product Updated!
+                  </div>
                 </div>
               )}
             </div>
@@ -1797,16 +2099,16 @@ export default function Products() {
           </div>
         </motion.div>
       </div>
-    )
-  }
+    );
+  };
 
   const handleAddProduct = async (formData) => {
-    setIsSubmitting(true)
-    const token = localStorage.getItem("accessToken")
+    setIsSubmitting(true);
+    const token = localStorage.getItem("accessToken");
 
     // Clear any previous errors
-    setErrorMessage("")
-    setShowErrorToast(false)
+    setErrorMessage("");
+    setShowErrorToast(false);
 
     // Map to backend schema: { ingredient: id, quantity, unit, is_optional }
     const selectedIngredients = formData.ingredients.map((ing) => ({
@@ -1814,50 +2116,53 @@ export default function Products() {
       quantity: Number(ing.selectedQuantity ?? 1),
       unit: ing.selectedUnit || ing.unit,
       is_optional: !!ing.is_optional,
-    }))
+    }));
 
-    let requestBody
+    let requestBody;
     const headers = {
       Authorization: `Bearer ${token}`,
-    }
+    };
 
     if (formData.image) {
       // Use FormData for multipart/form-data
-      const formDataObj = new FormData()
-      formDataObj.append("name", formData.name)
-      formDataObj.append("category", formData.category)
-      formDataObj.append("sell_price", Number.parseFloat(formData.sell_price))
-      formDataObj.append("ingredients", JSON.stringify(selectedIngredients))
-      formDataObj.append("image", formData.image)
-      requestBody = formDataObj
+      const formDataObj = new FormData();
+      formDataObj.append("name", formData.name);
+      formDataObj.append("category", formData.category);
+      formDataObj.append("sell_price", Number.parseFloat(formData.sell_price));
+      formDataObj.append("ingredients", JSON.stringify(selectedIngredients));
+      formDataObj.append("image", formData.image);
+      requestBody = formDataObj;
     } else {
       // Use JSON for regular data
-      headers["Content-Type"] = "application/json"
+      headers["Content-Type"] = "application/json";
       requestBody = JSON.stringify({
         name: formData.name,
         category: formData.category,
         sell_price: Number.parseFloat(formData.sell_price),
         ingredients: selectedIngredients,
-      })
+      });
     }
 
-    console.log("Adding product with payload:", formData.image ? "FormData with image" : "JSON data")
+    console.log(
+      "Adding product with payload:",
+      formData.image ? "FormData with image" : "JSON data"
+    );
 
     try {
-      const response = await fetch("https://busy-fool-backend.vercel.app/products", {
+      const response = await fetch("http://localhost:3000/products", {
         method: "POST",
         headers: headers,
         body: requestBody,
-      })
+      });
 
-      console.log("Add product response status:", response.status)
+      console.log("Add product response status:", response.status);
 
       if (response.ok) {
-        const newProduct = await response.json()
-        console.log("Successfully added product:", newProduct)
+        const newProduct = await response.json();
+        console.log("Successfully added product:", newProduct);
 
         // Add the new product to the list with numberOfSales = 0
-        setProducts((prev) => [...prev, { ...newProduct, numberOfSales: 0 }])
+        setProducts((prev) => [...prev, { ...newProduct, numberOfSales: 0 }]);
 
         // Reset form data
         setFormData({
@@ -1866,23 +2171,30 @@ export default function Products() {
           sell_price: "",
           ingredients: [],
           image: null,
-        })
+        });
 
-        setShowAddProduct(false)
-        showSuccessMessage("Product added successfully!")
+        setShowAddProduct(false);
+        showSuccessMessage("Product added successfully!");
       } else {
-        const errorData = await response.json()
-        console.log("Add product error response:", errorData, "Status:", response.status)
+        const errorData = await response.json();
+        console.log(
+          "Add product error response:",
+          errorData,
+          "Status:",
+          response.status
+        );
 
         // Use enhanced error handling
-        handleApiError(errorData, response)
+        handleApiError(errorData, response);
       }
     } catch (error) {
-      console.error("Add product error:", error)
-      showErrorMessage("Network error occurred. Please check your connection and try again.")
+      console.error("Add product error:", error);
+      showErrorMessage(
+        "Network error occurred. Please check your connection and try again."
+      );
     }
-    setIsSubmitting(false)
-  }
+    setIsSubmitting(false);
+  };
 
   // Memoized filtered products to prevent excessive re-renders
   const filteredProducts = useMemo(() => {
@@ -1891,77 +2203,94 @@ export default function Products() {
         (product) =>
           product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
           (filterCategory === "all" || product.category === filterCategory) &&
-          (filterStatus === "all" || product.status === filterStatus),
+          (filterStatus === "all" || product.status === filterStatus)
       )
       .sort((a, b) => {
         // Use quantity_sold from API instead of calculating from sales
-        const getNumberOfSales = (product) => Number(product.quantity_sold) || 0
+        const getNumberOfSales = (product) =>
+          Number(product.quantity_sold) || 0;
         switch (sortBy) {
           case "margin":
-            return (b.margin_percent || 0) - (a.margin_percent || 0)
+            return (b.margin_percent || 0) - (a.margin_percent || 0);
           case "sales": {
-            return getNumberOfSales(b) - getNumberOfSales(a)
+            return getNumberOfSales(b) - getNumberOfSales(a);
           }
           case "price":
-            return (b.sell_price || 0) - (a.sell_price || 0)
+            return (b.sell_price || 0) - (a.sell_price || 0);
           case "name":
-            return a.name.localeCompare(b.name)
+            return a.name.localeCompare(b.name);
           case "impact": {
             // Compute impact as marginAmount * numberOfSales
-            const aMarginAmount = typeof a.margin_amount === "number" ? a.margin_amount : Number(a.margin_amount) || 0
-            const bMarginAmount = typeof b.margin_amount === "number" ? b.margin_amount : Number(b.margin_amount) || 0
-            return Math.abs(bMarginAmount * getNumberOfSales(b)) - Math.abs(aMarginAmount * getNumberOfSales(a))
+            const aMarginAmount =
+              typeof a.margin_amount === "number"
+                ? a.margin_amount
+                : Number(a.margin_amount) || 0;
+            const bMarginAmount =
+              typeof b.margin_amount === "number"
+                ? b.margin_amount
+                : Number(b.margin_amount) || 0;
+            return (
+              Math.abs(bMarginAmount * getNumberOfSales(b)) -
+              Math.abs(aMarginAmount * getNumberOfSales(a))
+            );
           }
           default:
-            return 0
+            return 0;
         }
-      })
-  }, [products, searchTerm, filterCategory, filterStatus, sortBy])
+      });
+  }, [products, searchTerm, filterCategory, filterStatus, sortBy]);
 
-  const categories = ["all", "Coffee", "Food", "Iced Drinks", "Pastries"]
-  const statuses = ["all", "profitable", "breaking even", "losing money"]
+  const categories = ["all", "Coffee", "Food", "Iced Drinks", "Pastries"];
+  const statuses = ["all", "profitable", "breaking even", "losing money"];
 
   const getStatusColor = (status) => {
     switch (status) {
       case "profitable":
-        return "text-green-700 bg-green-100 border-green-200"
+        return "text-green-700 bg-green-100 border-green-200";
       case "breaking even":
-        return "text-yellow-700 bg-yellow-100 border-yellow-200"
+        return "text-yellow-700 bg-yellow-100 border-yellow-200";
       case "losing money":
-        return "text-red-700 bg-red-100 border-red-200"
+        return "text-red-700 bg-red-100 border-red-200";
       default:
-        return "text-gray-600 bg-gray-100 border-gray-200"
+        return "text-gray-600 bg-gray-100 border-gray-200";
     }
-  }
+  };
 
   const getMarginIcon = (marginPercent) => {
-    if (marginPercent > 50) return <TrendingUp className="w-5 h-5 text-green-600" />
-    if (marginPercent > 0) return <CheckCircle className="w-5 h-5 text-green-600" />
-    if (marginPercent < 0) return <AlertCircle className="w-5 h-5 text-red-600" />
-    return <AlertTriangle className="w-5 h-5 text-yellow-600" />
-  }
+    if (marginPercent > 50)
+      return <TrendingUp className="w-5 h-5 text-green-600" />;
+    if (marginPercent > 0)
+      return <CheckCircle className="w-5 h-5 text-green-600" />;
+    if (marginPercent < 0)
+      return <AlertCircle className="w-5 h-5 text-red-600" />;
+    return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
+  };
 
   const getTrendingIcon = (trending) => {
     switch (trending) {
       case "hot":
-        return <Flame className="w-4 h-4 text-orange-500" />
+        return <Flame className="w-4 h-4 text-orange-500" />;
       case "rising":
-        return <ArrowUpRight className="w-4 h-4 text-green-500" />
+        return <ArrowUpRight className="w-4 h-4 text-green-500" />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
-  const losingMoneyProducts = products.filter((p) => p.status === "losing money")
+  const losingMoneyProducts = products.filter(
+    (p) => p.status === "losing money"
+  );
   // Use numberOfSales for loss calculation
   // Use margin_amount (API property) instead of marginAmount
   const totalDailyLoss = losingMoneyProducts.reduce(
-    (acc, p) => acc + Math.abs(Number(p.margin_amount) || 0) * (Number(p.numberOfSales) || 0),
-    0,
-  )
+    (acc, p) =>
+      acc +
+      Math.abs(Number(p.margin_amount) || 0) * (Number(p.numberOfSales) || 0),
+    0
+  );
 
   const QuickWinsAlert = () => {
-    if (!showQuickWins || losingMoneyProducts.length === 0) return null
+    if (!showQuickWins || losingMoneyProducts.length === 0) return null;
 
     return (
       <motion.div
@@ -1982,20 +2311,28 @@ export default function Products() {
             <AlertCircle className="w-5 h-5 text-red-600" />
           </div>
           <div className="flex-1">
-            <h3 className="font-bold text-red-800 mb-1">⚠️ Urgent: Products Losing Money</h3>
+            <h3 className="font-bold text-red-800 mb-1">
+              ⚠️ Urgent: Products Losing Money
+            </h3>
             <p className="text-red-700 text-sm mb-3">
-              You're losing <span className="font-bold">${totalDailyLoss.toFixed(2)}</span> daily from{" "}
-              {losingMoneyProducts.length} products
+              You're losing{" "}
+              <span className="font-bold">${totalDailyLoss.toFixed(2)}</span>{" "}
+              daily from {losingMoneyProducts.length} products
             </p>
             <div className="flex flex-wrap gap-2">
               {losingMoneyProducts.slice(0, 2).map((product) => {
                 // Use margin_amount (API property) instead of marginAmount
-                const marginAmount = Number(product.margin_amount) || 0
-                const numberOfSales = Number(product.numberOfSales) || 0
+                const marginAmount = Number(product.margin_amount) || 0;
+                const numberOfSales = Number(product.numberOfSales) || 0;
                 return (
-                  <div key={product.id} className="bg-white rounded-lg p-3 border border-red-200 shadow-sm">
+                  <div
+                    key={product.id}
+                    className="bg-white rounded-lg p-3 border border-red-200 shadow-sm"
+                  >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-sm text-gray-800">{product.name}</span>
+                      <span className="font-medium text-sm text-gray-800">
+                        {product.name}
+                      </span>
                       <span className="text-red-600 font-bold text-sm">
                         -${(Math.abs(marginAmount) * numberOfSales).toFixed(2)}
                       </span>
@@ -2003,122 +2340,145 @@ export default function Products() {
                     <div className="text-xs text-gray-500 mb-1">
                       {numberOfSales} sale{numberOfSales === 1 ? "" : "s"}
                     </div>
-                    {product.quickWin && <p className="text-xs text-gray-600 mb-2">{product.quickWin}</p>}
+                    {product.quickWin && (
+                      <p className="text-xs text-gray-600 mb-2">
+                        {product.quickWin}
+                      </p>
+                    )}
                     <button
                       className="bg-red-600 text-white text-xs px-3 py-1 rounded-full hover:bg-red-700 transition-colors"
                       onClick={() => {
-                        setWhatIfProduct(product)
-                        setShowWhatIfModal(true)
+                        setWhatIfProduct(product);
+                        setShowWhatIfModal(true);
                       }}
                     >
                       Fix Now
                     </button>
                   </div>
-                )
+                );
               })}
             </div>
           </div>
         </div>
       </motion.div>
-    )
-  }
+    );
+  };
 
   // --- AddProductModal Handlers (memoized to prevent unnecessary re-renders) ---
   const handleIngredientCheck = useCallback((ingredient, checked) => {
     setFormData((prev) => {
       if (checked) {
-        if (prev.ingredients.some((i) => i.id === ingredient.id)) return prev
+        if (prev.ingredients.some((i) => i.id === ingredient.id)) return prev;
         return {
           ...prev,
-          ingredients: [...prev.ingredients, { ...ingredient, selectedQuantity: 1, is_optional: false }],
-        }
+          ingredients: [
+            ...prev.ingredients,
+            { ...ingredient, selectedQuantity: 1, is_optional: false },
+          ],
+        };
       } else {
         return {
           ...prev,
           ingredients: prev.ingredients.filter((i) => i.id !== ingredient.id),
-        }
+        };
       }
-    })
-  }, [])
+    });
+  }, []);
 
   const handleIngredientQuantity = useCallback((ingredientId, value) => {
     setFormData((prev) => {
-      if (!prev.ingredients.some((i) => i.id === ingredientId)) return prev
+      if (!prev.ingredients.some((i) => i.id === ingredientId)) return prev;
       return {
         ...prev,
-        ingredients: prev.ingredients.map((i) => (i.id === ingredientId ? { ...i, selectedQuantity: value } : i)),
-      }
-    })
-  }, [])
+        ingredients: prev.ingredients.map((i) =>
+          i.id === ingredientId ? { ...i, selectedQuantity: value } : i
+        ),
+      };
+    });
+  }, []);
 
   const handleOptionalCheck = useCallback((ingredientId, checked) => {
     setFormData((prev) => {
-      if (!prev.ingredients.some((i) => i.id === ingredientId)) return prev
+      if (!prev.ingredients.some((i) => i.id === ingredientId)) return prev;
       return {
         ...prev,
-        ingredients: prev.ingredients.map((i) => (i.id === ingredientId ? { ...i, is_optional: checked } : i)),
-      }
-    })
-  }, [])
+        ingredients: prev.ingredients.map((i) =>
+          i.id === ingredientId ? { ...i, is_optional: checked } : i
+        ),
+      };
+    });
+  }, []);
 
   const AddProductModal = () => {
-    const [step, setStep] = useState(0)
-    const [search, setSearch] = useState("")
-    const [localForm, setLocalForm] = useState(formData)
-    const [error, setError] = useState("")
-    const [success, setSuccess] = useState(false)
-    const [imagePreview, setImagePreview] = useState(null)
+    const [step, setStep] = useState(0);
+    const [search, setSearch] = useState("");
+    const [localForm, setLocalForm] = useState(formData);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState(false);
+    const [imagePreview, setImagePreview] = useState(null);
 
     React.useEffect(() => {
       if (showAddProduct) {
-        setStep(0)
-        setLocalForm(formData)
-        setError("")
-        setSuccess(false)
-        setImagePreview(null)
+        setStep(0);
+        setLocalForm(formData);
+        setError("");
+        setSuccess(false);
+        setImagePreview(null);
       }
-    }, [showAddProduct, formData])
+    }, [showAddProduct, formData]);
 
     const handleImageUpload = (e) => {
-      const file = e.target.files[0]
+      const file = e.target.files[0];
       if (file) {
         if (file.size > 5 * 1024 * 1024) {
           // 5MB limit
-          setError("Image size must be less than 5MB")
-          return
+          setError("Image size must be less than 5MB");
+          return;
         }
-        if (!["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type)) {
-          setError("Please select a valid image file (JPG, PNG, GIF, WEBP)")
-          return
+        if (
+          !["image/jpeg", "image/png", "image/gif", "image/webp"].includes(
+            file.type
+          )
+        ) {
+          setError("Please select a valid image file (JPG, PNG, GIF, WEBP)");
+          return;
         }
-        setLocalForm((f) => ({ ...f, image: file }))
-        const reader = new FileReader()
-        reader.onload = (e) => setImagePreview(e.target.result)
-        reader.readAsDataURL(file)
-        setError("")
+        setLocalForm((f) => ({ ...f, image: file }));
+        const reader = new FileReader();
+        reader.onload = (e) => setImagePreview(e.target.result);
+        reader.readAsDataURL(file);
+        setError("");
       }
-    }
+    };
 
-    if (!showAddProduct) return null
+    if (!showAddProduct) return null;
 
     // Step 0: Details
     const detailsStep = (
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Product Name
+          </label>
           <input
             type="text"
             placeholder="Enter product name"
             value={localForm.name}
-            onChange={(e) => setLocalForm((f) => ({ ...f, name: e.target.value }))}
+            onChange={(e) =>
+              setLocalForm((f) => ({ ...f, name: e.target.value }))
+            }
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Category
+          </label>
           <select
             value={localForm.category}
-            onChange={(e) => setLocalForm((f) => ({ ...f, category: e.target.value }))}
+            onChange={(e) =>
+              setLocalForm((f) => ({ ...f, category: e.target.value }))
+            }
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all bg-white"
           >
             <option value="">Select category</option>
@@ -2129,18 +2489,24 @@ export default function Products() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Sell Price ($)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Sell Price ($)
+          </label>
           <input
             type="number"
             step="0.01"
             placeholder="0.00"
             value={localForm.sell_price}
-            onChange={(e) => setLocalForm((f) => ({ ...f, sell_price: e.target.value }))}
+            onChange={(e) =>
+              setLocalForm((f) => ({ ...f, sell_price: e.target.value }))
+            }
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#175E3B] focus:border-transparent transition-all"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Product Image
+          </label>
           <div className="space-y-3">
             {imagePreview && (
               <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-gray-200">
@@ -2152,8 +2518,8 @@ export default function Products() {
                 <button
                   type="button"
                   onClick={() => {
-                    setImagePreview(null)
-                    setLocalForm((f) => ({ ...f, image: null }))
+                    setImagePreview(null);
+                    setLocalForm((f) => ({ ...f, image: null }));
                   }}
                   className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                 >
@@ -2166,24 +2532,35 @@ export default function Products() {
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-8 h-8 mb-2 text-gray-400" />
                   <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">Click to upload</span> 
+                    <span className="font-semibold">Click to upload</span>
                   </p>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF, WEBP (MAX. 5MB)</p>
+                  <p className="text-xs text-gray-500">
+                    PNG, JPG, GIF, WEBP (MAX. 5MB)
+                  </p>
                 </div>
-                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                />
               </label>
             </div>
           </div>
         </div>
       </div>
-    )
+    );
 
     // Step 1: Ingredients (with search and stock validation)
-    const filteredIngredients = allIngredients.filter((i) => i.name.toLowerCase().includes(search.toLowerCase()))
+    const filteredIngredients = allIngredients.filter((i) =>
+      i.name.toLowerCase().includes(search.toLowerCase())
+    );
     const ingredientsStep = (
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Search Ingredients</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Search Ingredients
+          </label>
           <input
             type="text"
             placeholder="Search by name..."
@@ -2193,22 +2570,32 @@ export default function Products() {
           />
         </div>
         <div className="max-h-48 overflow-y-auto border border-gray-100 rounded-xl p-2 bg-gray-50">
-          {filteredIngredients.length === 0 && <div className="text-gray-400 text-sm">No ingredients found.</div>}
+          {filteredIngredients.length === 0 && (
+            <div className="text-gray-400 text-sm">No ingredients found.</div>
+          )}
           {filteredIngredients.map((ingredient) => {
-            const checked = localForm.ingredients.some((i) => i.id === ingredient.id)
-            const selected = localForm.ingredients.find((i) => i.id === ingredient.id)
-            const availableStock = getAvailableStock(ingredient.id)
-            const stockUnit = getStockUnit(ingredient.id)
+            const checked = localForm.ingredients.some(
+              (i) => i.id === ingredient.id
+            );
+            const selected = localForm.ingredients.find(
+              (i) => i.id === ingredient.id
+            );
+            const availableStock = getAvailableStock(ingredient.id);
+            const stockUnit = getStockUnit(ingredient.id);
 
             return (
-              <div key={ingredient.id} className="flex items-center gap-2 mb-2 p-2 bg-white rounded-lg border">
+              <div
+                key={ingredient.id}
+                className="flex items-center gap-2 mb-2 p-2 bg-white rounded-lg border"
+              >
                 <input
                   type="checkbox"
                   checked={checked}
                   onChange={(e) => {
                     setLocalForm((f) => {
                       if (e.target.checked) {
-                        if (f.ingredients.some((i) => i.id === ingredient.id)) return f
+                        if (f.ingredients.some((i) => i.id === ingredient.id))
+                          return f;
                         // Default to subunit if available
                         return {
                           ...f,
@@ -2219,25 +2606,37 @@ export default function Products() {
                               selectedQuantity: 1,
                               is_optional: false,
                               selectedUnit:
-                                ingredient.unit === "L" ? "ml" : ingredient.unit === "kg" ? "g" : ingredient.unit,
+                                ingredient.unit === "L"
+                                  ? "ml"
+                                  : ingredient.unit === "kg"
+                                  ? "g"
+                                  : ingredient.unit,
                             },
                           ],
-                        }
+                        };
                       } else {
                         return {
                           ...f,
-                          ingredients: f.ingredients.filter((i) => i.id !== ingredient.id),
-                        }
+                          ingredients: f.ingredients.filter(
+                            (i) => i.id !== ingredient.id
+                          ),
+                        };
                       }
-                    })
+                    });
                   }}
                 />
                 <div className="flex-1">
-                  <span className="text-gray-800 text-sm font-medium">{ingredient.name}</span>
+                  <span className="text-gray-800 text-sm font-medium">
+                    {ingredient.name}
+                  </span>
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <span>${getIngredientPrice(ingredient).toFixed(4)}</span>
                     <span>•</span>
-                    <span className={`${availableStock > 0 ? "text-green-600" : "text-red-600"}`}>
+                    <span
+                      className={`${
+                        availableStock > 0 ? "text-green-600" : "text-red-600"
+                      }`}
+                    >
                       Stock: {availableStock} {stockUnit}
                     </span>
                   </div>
@@ -2251,19 +2650,28 @@ export default function Products() {
                         step="1"
                         value={selected.selectedQuantity || 1}
                         onChange={(e) => {
-                          const val = Math.max(1, Number.parseInt(e.target.value) || 1)
+                          const val = Math.max(
+                            1,
+                            Number.parseInt(e.target.value) || 1
+                          );
                           setLocalForm((f) => ({
                             ...f,
                             ingredients: f.ingredients.map((i) =>
-                              i.id === ingredient.id ? { ...i, selectedQuantity: val } : i,
+                              i.id === ingredient.id
+                                ? { ...i, selectedQuantity: val }
+                                : i
                             ),
-                          }))
+                          }));
                         }}
                         className="w-16 px-2 py-1 border border-gray-200 rounded"
                         placeholder="Qty"
                       />
                       <span className="text-xs text-gray-500">
-                        {ingredient.unit === "L" ? "ml" : ingredient.unit === "kg" ? "g" : ingredient.unit || "unit"}
+                        {ingredient.unit === "L"
+                          ? "ml"
+                          : ingredient.unit === "kg"
+                          ? "g"
+                          : ingredient.unit || "unit"}
                       </span>
                     </div>
                     <label className="flex items-center gap-1 text-xs">
@@ -2274,7 +2682,9 @@ export default function Products() {
                           setLocalForm((f) => ({
                             ...f,
                             ingredients: f.ingredients.map((i) =>
-                              i.id === ingredient.id ? { ...i, is_optional: e.target.checked } : i,
+                              i.id === ingredient.id
+                                ? { ...i, is_optional: e.target.checked }
+                                : i
                             ),
                           }))
                         }
@@ -2284,11 +2694,11 @@ export default function Products() {
                   </>
                 )}
               </div>
-            )
+            );
           })}
         </div>
       </div>
-    )
+    );
 
     // Step 2: Review & Add with FIXED stock validation
     const reviewStep = (
@@ -2302,71 +2712,78 @@ export default function Products() {
             <span className="font-medium">Category:</span> {localForm.category}
           </div>
           <div className="mb-2">
-            <span className="font-medium">Sell Price:</span> ${localForm.sell_price}
+            <span className="font-medium">Sell Price:</span> $
+            {localForm.sell_price}
           </div>
           <div>
             <span className="font-medium">Ingredients:</span>
             <ul className="list-disc ml-6 mt-1">
               {localForm.ingredients.map((i) => {
-                const availableStock = getAvailableStock(i.id)
-                const stockUnit = getStockUnit(i.id)
+                const availableStock = getAvailableStock(i.id);
+                const stockUnit = getStockUnit(i.id);
                 const willExceedStock = checkStockExceeded(
                   i.selectedQuantity,
                   i.selectedUnit || i.unit,
                   availableStock,
-                  stockUnit,
-                )
+                  stockUnit
+                );
 
                 return (
-                  <li key={i.id} className={willExceedStock ? "text-red-600" : ""}>
+                  <li
+                    key={i.id}
+                    className={willExceedStock ? "text-red-600" : ""}
+                  >
                     {i.name} ({i.selectedQuantity} {i.selectedUnit || i.unit})
-                    {i.is_optional && <span className="text-xs text-gray-500">(Optional)</span>}
+                    {i.is_optional && (
+                      <span className="text-xs text-gray-500">(Optional)</span>
+                    )}
                     {willExceedStock && (
                       <span className="text-xs text-red-500 ml-2">
-                        ⚠️ Exceeds stock ({availableStock} {stockUnit} available)
+                        ⚠️ Exceeds stock ({availableStock} {stockUnit}{" "}
+                        available)
                       </span>
                     )}
                   </li>
-                )
+                );
               })}
             </ul>
           </div>
         </div>
         {error && <div className="text-red-500 text-sm">{error}</div>}
       </div>
-    )
+    );
 
     // Stepper UI
-    const steps = ["Details", "Ingredients", "Review"]
+    const steps = ["Details", "Ingredients", "Review"];
 
     const handleNext = () => {
       if (step === 0) {
         if (!localForm.name || !localForm.category || !localForm.sell_price) {
-          setError("Please fill all product details.")
-          return
+          setError("Please fill all product details.");
+          return;
         }
       }
       if (step === 1) {
         if (localForm.ingredients.length === 0) {
-          setError("Select at least one ingredient.")
-          return
+          setError("Select at least one ingredient.");
+          return;
         }
       }
-      setError("")
-      setStep((s) => s + 1)
-    }
+      setError("");
+      setStep((s) => s + 1);
+    };
     const handleBack = () => {
-      setError("")
-      setStep((s) => s - 1)
-    }
+      setError("");
+      setStep((s) => s - 1);
+    };
 
     const handleSubmit = async () => {
-      setShowAddProduct(false) // Close modal immediately
-      setError("")
+      setShowAddProduct(false); // Close modal immediately
+      setError("");
 
       // Call the main handleAddProduct function with the local form data
-      await handleAddProduct(localForm)
-    }
+      await handleAddProduct(localForm);
+    };
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -2378,7 +2795,9 @@ export default function Products() {
         >
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Add New Product</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Add New Product
+              </h2>
               <button
                 onClick={() => setShowAddProduct(false)}
                 className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
@@ -2392,12 +2811,18 @@ export default function Products() {
                 <div key={label} className="flex-1 flex flex-col items-center">
                   <div
                     className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-white transition-all ${
-                      step === idx ? "bg-[#175E3B] scale-110 shadow-lg" : "bg-gray-300"
+                      step === idx
+                        ? "bg-[#175E3B] scale-110 shadow-lg"
+                        : "bg-gray-300"
                     }`}
                   >
                     {idx + 1}
                   </div>
-                  <span className={`mt-2 text-xs font-medium ${step === idx ? "text-[#175E3B]" : "text-gray-400"}`}>
+                  <span
+                    className={`mt-2 text-xs font-medium ${
+                      step === idx ? "text-[#175E3B]" : "text-gray-400"
+                    }`}
+                  >
                     {label}
                   </span>
                 </div>
@@ -2413,7 +2838,9 @@ export default function Products() {
                   <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
                     <CheckCircle className="w-10 h-10 text-green-600" />
                   </div>
-                  <div className="text-green-700 font-bold text-lg">Product Added!</div>
+                  <div className="text-green-700 font-bold text-lg">
+                    Product Added!
+                  </div>
                 </div>
               )}
             </div>
@@ -2450,17 +2877,19 @@ export default function Products() {
           </div>
         </motion.div>
       </div>
-    )
-  }
+    );
+  };
 
   // Enhanced Product Card with loading state - MEMOIZED to prevent re-renders and FIXED animations
   const EnhancedProductCard = React.memo(({ product }) => {
     // Show/hide ingredients dropdown
-    const [showIngredients, setShowIngredients] = useState(false)
-    const isBeingEdited = editingProductId === product.id
+    const [showIngredients, setShowIngredients] = useState(false);
+    const isBeingEdited = editingProductId === product.id;
 
     // Always map product.ingredients to correct display shape and deduplicate by id
-    const safeIngredientsRaw = Array.isArray(product.ingredients) ? product.ingredients : []
+    const safeIngredientsRaw = Array.isArray(product.ingredients)
+      ? product.ingredients
+      : [];
     // Map API shape to UI shape for display, always use latest info
     const mappedIngredients = safeIngredientsRaw.map((i) => {
       return {
@@ -2471,20 +2900,22 @@ export default function Products() {
         selectedUnit: i.selectedUnit,
         is_optional: i.is_optional || false,
         line_cost: i.line_cost,
-      }
-    })
+      };
+    });
     // Deduplicate by id
-    const safeIngredients = mappedIngredients.filter((ing, idx, arr) => arr.findIndex((i) => i.id === ing.id) === idx)
+    const safeIngredients = mappedIngredients.filter(
+      (ing, idx, arr) => arr.findIndex((i) => i.id === ing.id) === idx
+    );
 
-    const toggleIngredients = () => setShowIngredients((v) => !v)
+    const toggleIngredients = () => setShowIngredients((v) => !v);
 
     // Use correct API property names and always coerce to number
-    const sellPrice = Number(product.sell_price) || 0
-    const totalCost = Number(product.total_cost) || 0
-    const marginAmount = Number(product.margin_amount) || 0
-    const marginPercent = Number(product.margin_percent) || 0
+    const sellPrice = Number(product.sell_price) || 0;
+    const totalCost = Number(product.total_cost) || 0;
+    const marginAmount = Number(product.margin_amount) || 0;
+    const marginPercent = Number(product.margin_percent) || 0;
     // Use injected numberOfSales (from merged sales data)
-    const numberOfSales = Number(product.numberOfSales) || 0
+    const numberOfSales = Number(product.numberOfSales) || 0;
 
     return (
       <div
@@ -2518,12 +2949,20 @@ export default function Products() {
                 <div className="relative">
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "linear",
+                    }}
                     className="w-10 h-10 border-3 border-blue-200 border-t-blue-600 rounded-full"
                   />
                   <motion.div
                     animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                    transition={{
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "easeInOut",
+                    }}
                     className="absolute inset-0 w-10 h-10 border-2 border-blue-300/30 rounded-full"
                   />
                 </div>
@@ -2552,7 +2991,11 @@ export default function Products() {
                 <div className="w-32 h-1 bg-blue-100 rounded-full overflow-hidden">
                   <motion.div
                     animate={{ x: ["-100%", "100%"] }}
-                    transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "easeInOut",
+                    }}
                     className="h-full w-1/3 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"
                   />
                 </div>
@@ -2562,15 +3005,17 @@ export default function Products() {
         </AnimatePresence>
 
         <div
-          className={`relative transition-all duration-300 ${isBeingEdited ? "filter blur-[1px] brightness-95" : ""}`}
+          className={`relative transition-all duration-300 ${
+            isBeingEdited ? "filter blur-[1px] brightness-95" : ""
+          }`}
         >
           <div
             className={`h-2 ${
               product.status === "profitable"
                 ? "bg-green-400"
                 : product.status === "losing money"
-                  ? "bg-red-400"
-                  : "bg-yellow-400"
+                ? "bg-red-400"
+                : "bg-yellow-400"
             }`}
           ></div>
           <div className="p-6 pb-4">
@@ -2582,7 +3027,7 @@ export default function Products() {
                     alt={product.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.target.style.display = "none"
+                      e.target.style.display = "none";
                     }}
                   />
                 </div>
@@ -2597,11 +3042,15 @@ export default function Products() {
                   {getTrendingIcon(product.trending)}
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{product.category}</span>
+                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                    {product.category}
+                  </span>
                   {product.avgRating && (
                     <div className="flex items-center gap-1">
                       <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                      <span className="text-xs text-gray-600">{product.avgRating}</span>
+                      <span className="text-xs text-gray-600">
+                        {product.avgRating}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -2611,8 +3060,8 @@ export default function Products() {
                   type="button"
                   className="p-2 rounded-xl opacity-0 group-hover:opacity-100 bg-[#175E3B] hover:bg-[#175E3B]/90"
                   onClick={(e) => {
-                    e.preventDefault()
-                    handleEditProduct(product)
+                    e.preventDefault();
+                    handleEditProduct(product);
                   }}
                   disabled={isBeingEdited}
                 >
@@ -2633,44 +3082,63 @@ export default function Products() {
             <div className="mb-4">
               <span
                 className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
-                  product.status,
+                  product.status
                 )}`}
               >
                 {getMarginIcon(marginPercent)}
-                {product.status ? product.status.charAt(0).toUpperCase() + product.status.slice(1) : "Unknown"}
+                {product.status
+                  ? product.status.charAt(0).toUpperCase() +
+                    product.status.slice(1)
+                  : "Unknown"}
               </span>
             </div>
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-3 border border-blue-200">
                 <div className="absolute top-0 right-0 w-12 h-12 bg-blue-200 rounded-full -mr-6 -mt-6 opacity-30"></div>
                 <DollarSign className="w-4 h-4 text-blue-600 mb-1" />
-                <p className="text-xs font-medium text-blue-800 mb-1">Sell Price</p>
-                <p className="text-lg font-bold text-blue-900">${sellPrice.toFixed(2)}</p>
+                <p className="text-xs font-medium text-blue-800 mb-1">
+                  Sell Price
+                </p>
+                <p className="text-lg font-bold text-blue-900">
+                  ${sellPrice.toFixed(2)}
+                </p>
               </div>
               <div className="relative overflow-hidden bg-gradient-to-br from-orange-50 to-red-100 rounded-xl p-3 border border-orange-200">
                 <div className="absolute top-0 right-0 w-12 h-12 bg-orange-200 rounded-full -mr-6 -mt-6 opacity-30"></div>
                 <Package className="w-4 h-4 text-orange-600 mb-1" />
-                <p className="text-xs font-medium text-orange-800 mb-1">Total Cost</p>
-                <p className="text-lg font-bold text-orange-900">${totalCost.toFixed(2)}</p>
+                <p className="text-xs font-medium text-orange-800 mb-1">
+                  Total Cost
+                </p>
+                <p className="text-lg font-bold text-orange-900">
+                  ${totalCost.toFixed(2)}
+                </p>
               </div>
             </div>
             <div className="relative bg-gradient-to-r from-gray-50 via-white to-gray-50 rounded-xl p-3 mb-4 border border-gray-200">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   {getMarginIcon(marginPercent)}
-                  <span className="font-bold text-sm text-gray-800">Profit Margin</span>
+                  <span className="font-bold text-sm text-gray-800">
+                    Profit Margin
+                  </span>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-gray-500">Number of Sales</p>
                   <div className="flex items-center gap-1">
                     <BarChart3 className="w-3 h-3 text-gray-400" />
-                    <span className="font-bold text-sm text-gray-700">{numberOfSales}</span>
+                    <span className="font-bold text-sm text-gray-700">
+                      {numberOfSales}
+                    </span>
                   </div>
                 </div>
               </div>
               <div className="flex items-end justify-between">
                 <div>
-                  <p className={`text-2xl font-bold ${marginPercent >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  <p
+                    className={`text-2xl font-bold ${
+                      marginPercent >= 0 ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
                     {marginPercent > 0 ? "+" : ""}
                     {marginPercent.toFixed(1)}%
                   </p>
@@ -2683,10 +3151,15 @@ export default function Products() {
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{
-                      width: `${Math.max(0, Math.min(100, (marginPercent + 20) * 1.25))}%`,
+                      width: `${Math.max(
+                        0,
+                        Math.min(100, (marginPercent + 20) * 1.25)
+                      )}%`,
                     }}
                     transition={{ duration: 1, delay: 0.2 }}
-                    className={`h-full rounded-full ${marginPercent >= 0 ? "bg-green-400" : "bg-red-400"}`}
+                    className={`h-full rounded-full ${
+                      marginPercent >= 0 ? "bg-green-400" : "bg-red-400"
+                    }`}
                   />
                 </div>
               </div>
@@ -2701,8 +3174,12 @@ export default function Products() {
                 <div className="flex items-start gap-2">
                   <Sparkles className="w-4 h-4 text-yellow-600 mt-0.5" />
                   <div>
-                    <p className="text-xs font-medium text-yellow-800 mb-1">Quick Win</p>
-                    <p className="text-sm text-yellow-700">{product.quickWin}</p>
+                    <p className="text-xs font-medium text-yellow-800 mb-1">
+                      Quick Win
+                    </p>
+                    <p className="text-sm text-yellow-700">
+                      {product.quickWin}
+                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -2715,7 +3192,9 @@ export default function Products() {
           >
             <div className="flex items-center gap-2">
               <Package className="w-4 h-4 text-gray-600" />
-              <span className="font-medium text-gray-700">Ingredients ({safeIngredients.length})</span>
+              <span className="font-medium text-gray-700">
+                Ingredients ({safeIngredients.length})
+              </span>
             </div>
             <div
               style={{
@@ -2744,14 +3223,20 @@ export default function Products() {
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-[#175E3B] rounded-full"></div>
                         <div>
-                          <span className="font-medium text-sm text-gray-800">{ingredient.name ?? "Unknown"}</span>
+                          <span className="font-medium text-sm text-gray-800">
+                            {ingredient.name ?? "Unknown"}
+                          </span>
                           <p className="text-xs text-gray-500">
-                            {`${ingredient.quantity ?? 0}${ingredient.selectedUnit ?? ingredient.unit ?? ""}`}
+                            {`${ingredient.quantity ?? 0}${
+                              ingredient.selectedUnit ?? ingredient.unit ?? ""
+                            }`}
                           </p>
                         </div>
                       </div>
                       <span className="font-bold text-sm text-[#175E3B] bg-[#175E3B]/5 px-2 py-1 rounded">
-                        {ingredient.line_cost !== undefined ? `$${Number(ingredient.line_cost).toFixed(2)}` : "$0.00"}
+                        {ingredient.line_cost !== undefined
+                          ? `$${Number(ingredient.line_cost).toFixed(2)}`
+                          : "$0.00"}
                       </span>
                     </div>
                   ))}
@@ -2766,8 +3251,8 @@ export default function Products() {
                 whileTap={{ scale: 0.98 }}
                 className="bg-[#175E3B] text-white py-2 px-4 rounded-xl text-sm font-semibold hover:bg-[#175E3B]/90 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
                 onClick={() => {
-                  setWhatIfProduct(product)
-                  setShowWhatIfModal(true)
+                  setWhatIfProduct(product);
+                  setShowWhatIfModal(true);
                 }}
                 disabled={isBeingEdited}
               >
@@ -2779,8 +3264,8 @@ export default function Products() {
                 whileTap={{ scale: 0.98 }}
                 className="bg-[#175E3B] text-white py-2 px-4 rounded-xl text-sm font-semibold hover:bg-[#175E3B]/90 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
                 onClick={() => {
-                  setMilkSwapProduct(product)
-                  setShowMilkSwapModal(true)
+                  setMilkSwapProduct(product);
+                  setShowMilkSwapModal(true);
                 }}
                 disabled={isBeingEdited}
               >
@@ -2791,8 +3276,8 @@ export default function Products() {
           </div>
         </div>
       </div>
-    )
-  })
+    );
+  });
 
   const TableView = ({ products }) => (
     <motion.div
@@ -2804,37 +3289,69 @@ export default function Products() {
         <table className="w-full">
           <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
             <tr>
-              <th className="text-left p-4 font-semibold text-gray-700">Name</th>
-              <th className="text-left p-4 font-semibold text-gray-700">Category</th>
-              <th className="text-right p-4 font-semibold text-gray-700">Sell Price ($)</th>
-              <th className="text-right p-4 font-semibold text-gray-700">Total Cost ($)</th>
-              <th className="text-right p-4 font-semibold text-gray-700">Margin ($)</th>
-              <th className="text-right p-4 font-semibold text-gray-700">Margin (%)</th>
-              <th className="text-center p-4 font-semibold text-gray-700">Status</th>
-              <th className="text-center p-4 font-semibold text-gray-700">Created At</th>
-              <th className="text-center p-4 font-semibold text-gray-700">Sales</th>
-              <th className="text-center p-4 font-semibold text-gray-700">Ingredients</th>
-              <th className="text-center p-4 font-semibold text-gray-700">Actions</th>
+              <th className="text-left p-4 font-semibold text-gray-700">
+                Name
+              </th>
+              <th className="text-left p-4 font-semibold text-gray-700">
+                Category
+              </th>
+              <th className="text-right p-4 font-semibold text-gray-700">
+                Sell Price ($)
+              </th>
+              <th className="text-right p-4 font-semibold text-gray-700">
+                Total Cost ($)
+              </th>
+              <th className="text-right p-4 font-semibold text-gray-700">
+                Margin ($)
+              </th>
+              <th className="text-right p-4 font-semibold text-gray-700">
+                Margin (%)
+              </th>
+              <th className="text-center p-4 font-semibold text-gray-700">
+                Status
+              </th>
+              <th className="text-center p-4 font-semibold text-gray-700">
+                Created At
+              </th>
+              <th className="text-center p-4 font-semibold text-gray-700">
+                Sales
+              </th>
+              <th className="text-center p-4 font-semibold text-gray-700">
+                Ingredients
+              </th>
+              <th className="text-center p-4 font-semibold text-gray-700">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
             {filteredProducts.map((product, index) => {
               const sellPrice =
-                typeof product.sell_price === "number" ? product.sell_price : Number(product.sell_price) || 0
+                typeof product.sell_price === "number"
+                  ? product.sell_price
+                  : Number(product.sell_price) || 0;
               const totalCost =
-                typeof product.total_cost === "number" ? product.total_cost : Number(product.total_cost) || 0
+                typeof product.total_cost === "number"
+                  ? product.total_cost
+                  : Number(product.total_cost) || 0;
               const marginAmount =
-                typeof product.margin_amount === "number" ? product.margin_amount : Number(product.margin_amount) || 0
+                typeof product.margin_amount === "number"
+                  ? product.margin_amount
+                  : Number(product.margin_amount) || 0;
               const marginPercent =
                 typeof product.margin_percent === "number"
                   ? product.margin_percent
-                  : Number(product.margin_percent) || 0
-              const status = product.status || ""
-              const createdAt = product.created_at ? new Date(product.created_at).toLocaleString() : ""
+                  : Number(product.margin_percent) || 0;
+              const status = product.status || "";
+              const createdAt = product.created_at
+                ? new Date(product.created_at).toLocaleString()
+                : "";
               // Use injected numberOfSales (from merged sales data)
-              const numberOfSales = Number(product.numberOfSales) || 0
-              const ingredientsCount = Array.isArray(product.ingredients) ? product.ingredients.length : 0
-              const isBeingEdited = editingProductId === product.id
+              const numberOfSales = Number(product.numberOfSales) || 0;
+              const ingredientsCount = Array.isArray(product.ingredients)
+                ? product.ingredients.length
+                : 0;
+              const isBeingEdited = editingProductId === product.id;
 
               return (
                 <motion.tr
@@ -2855,31 +3372,44 @@ export default function Products() {
                     )}
                   </td>
                   <td className="p-4">
-                    <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm">{product.category}</span>
+                    <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm">
+                      {product.category}
+                    </span>
                   </td>
                   <td className="p-4 text-right">${sellPrice.toFixed(2)}</td>
-                  <td className="p-4 text-right text-orange-600">${totalCost.toFixed(2)}</td>
+                  <td className="p-4 text-right text-orange-600">
+                    ${totalCost.toFixed(2)}
+                  </td>
                   <td className="p-4 text-right">${marginAmount.toFixed(2)}</td>
-                  <td className="p-4 text-right">{marginPercent.toFixed(2)}%</td>
+                  <td className="p-4 text-right">
+                    {marginPercent.toFixed(2)}%
+                  </td>
                   <td className="p-4 text-center">
                     <span
                       className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
-                        status,
+                        status
                       )}`}
                     >
                       {getMarginIcon(marginPercent)}
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </span>
                   </td>
-                  <td className="p-4 text-center text-xs text-gray-500">{createdAt}</td>
+                  <td className="p-4 text-center text-xs text-gray-500">
+                    {createdAt}
+                  </td>
                   <td className="p-4 text-center">{numberOfSales}</td>
                   <td className="p-4 text-center">
                     {ingredientsCount > 0 ? (
                       <span
                         className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold cursor-pointer"
-                        title={product.ingredients.map((i) => i.name || (i.ingredient && i.ingredient.name)).join(", ")}
+                        title={product.ingredients
+                          .map(
+                            (i) => i.name || (i.ingredient && i.ingredient.name)
+                          )
+                          .join(", ")}
                       >
-                        {ingredientsCount} {ingredientsCount === 1 ? "item" : "items"}
+                        {ingredientsCount}{" "}
+                        {ingredientsCount === 1 ? "item" : "items"}
                       </span>
                     ) : (
                       <span className="text-gray-400">0</span>
@@ -2890,8 +3420,8 @@ export default function Products() {
                       <button
                         className="p-1 hover:bg-gray-100 rounded disabled:opacity-50"
                         onClick={() => {
-                          setWhatIfProduct(product)
-                          setShowWhatIfModal(true)
+                          setWhatIfProduct(product);
+                          setShowWhatIfModal(true);
                         }}
                         title="What-If Analysis"
                         disabled={isBeingEdited}
@@ -2901,8 +3431,8 @@ export default function Products() {
                       <button
                         className="p-1 hover:bg-gray-100 rounded disabled:opacity-50"
                         onClick={() => {
-                          setMilkSwapProduct(product)
-                          setShowMilkSwapModal(true)
+                          setMilkSwapProduct(product);
+                          setShowMilkSwapModal(true);
                         }}
                         title="Ingredient Swap"
                         disabled={isBeingEdited}
@@ -2926,67 +3456,72 @@ export default function Products() {
                     </div>
                   </td>
                 </motion.tr>
-              )
+              );
             })}
           </tbody>
         </table>
       </div>
     </motion.div>
-  )
+  );
 
   // INGREDIENTS TABLE COMPONENT
   const handleDeleteIngredient = async (id) => {
-    const token = localStorage.getItem("accessToken")
-    if (!window.confirm("Are you sure you want to delete this ingredient?")) return
+    const token = localStorage.getItem("accessToken");
+    if (!window.confirm("Are you sure you want to delete this ingredient?"))
+      return;
     try {
-      const response = await fetch(`https://busy-fool-backend.vercel.app/ingredients/${id}`, {
+      const response = await fetch(`http://localhost:3000/ingredients/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
-      })
+      });
       if (response.ok) {
-        setIngredients((prev) => prev.filter((ing) => ing.id !== id))
-        setAllIngredients((prev) => prev.filter((ing) => ing.id !== id))
+        setIngredients((prev) => prev.filter((ing) => ing.id !== id));
+        setAllIngredients((prev) => prev.filter((ing) => ing.id !== id));
       } else {
-        alert("Failed to delete ingredient")
+        alert("Failed to delete ingredient");
       }
     } catch (e) {
-      alert("Error deleting ingredient")
+      alert("Error deleting ingredient");
     }
-  }
+  };
 
   const handleEditIngredient = (ingredient) => {
-    setEditingIngredient(ingredient.id)
+    setEditingIngredient(ingredient.id);
     setIngredientEditData({
       name: ingredient.name,
       unit: ingredient.unit,
       cost_per_unit: ingredient.cost_per_unit,
       cost_per_ml: ingredient.cost_per_ml,
-    })
-  }
+    });
+  };
 
   const handleSaveIngredient = async (id) => {
-    const token = localStorage.getItem("accessToken")
+    const token = localStorage.getItem("accessToken");
     try {
-      const response = await fetch(`https://busy-fool-backend.vercel.app/ingredients/${id}`, {
+      const response = await fetch(`http://localhost:3000/ingredients/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(ingredientEditData),
-      })
+      });
       if (response.ok) {
-        const updated = await response.json()
-        setIngredients((prev) => prev.map((ing) => (ing.id === id ? updated : ing)))
-        setAllIngredients((prev) => prev.map((ing) => (ing.id === id ? updated : ing)))
-        setEditingIngredient(null)
+        const updated = await response.json();
+        setIngredients((prev) =>
+          prev.map((ing) => (ing.id === id ? updated : ing))
+        );
+        setAllIngredients((prev) =>
+          prev.map((ing) => (ing.id === id ? updated : ing))
+        );
+        setEditingIngredient(null);
       } else {
-        alert("Failed to update ingredient")
+        alert("Failed to update ingredient");
       }
     } catch (e) {
-      alert("Error updating ingredient")
+      alert("Error updating ingredient");
     }
-  }
+  };
 
   // --- Main Render ---
   return (
@@ -3005,8 +3540,12 @@ export default function Products() {
               className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
             >
               <div>
-                <h1 className="text-4xl font-bold text-[#175E3B] bg-clip-text ">Products</h1>
-                <p className="text-gray-600 text-sm mt-1">Smart margin tracking for your coffee shop</p>
+                <h1 className="text-4xl font-bold text-[#175E3B] bg-clip-text ">
+                  Products
+                </h1>
+                <p className="text-gray-600 text-sm mt-1">
+                  Smart margin tracking for your coffee shop
+                </p>
               </div>
               <div className="flex gap-3">
                 <motion.button
@@ -3016,7 +3555,11 @@ export default function Products() {
                   className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2 rounded-xl flex items-center gap-2 hover:shadow-lg transition-all shadow-sm"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  {isSubmitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Plus className="w-4 h-4" />
+                  )}
                   Add Product
                 </motion.button>
               </div>
@@ -3039,14 +3582,16 @@ export default function Products() {
                 {
                   icon: TrendingUp,
                   label: "Profitable",
-                  value: products.filter((p) => p.status === "profitable").length,
+                  value: products.filter((p) => p.status === "profitable")
+                    .length,
                   color: "from-green-600 to-green-700",
                   bgColor: "from-green-50 to-emerald-50",
                 },
                 {
                   icon: AlertCircle,
                   label: "Losing Money",
-                  value: products.filter((p) => p.status === "losing money").length,
+                  value: products.filter((p) => p.status === "losing money")
+                    .length,
                   color: "from-red-600 to-red-700",
                   bgColor: "from-red-50 to-pink-50",
                   change: "Fix these!",
@@ -3061,13 +3606,21 @@ export default function Products() {
                   className={`bg-gradient-to-br ${stat.bgColor} p-5 rounded-2xl shadow-sm border border-white/50 hover:shadow-md transition-all`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <div className={`p-2 rounded-xl bg-gradient-to-br ${stat.color}`}>
+                    <div
+                      className={`p-2 rounded-xl bg-gradient-to-br ${stat.color}`}
+                    >
                       <stat.icon className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-xs text-gray-500 bg-white/50 px-2 py-1 rounded-full">{stat.change}</span>
+                    <span className="text-xs text-gray-500 bg-white/50 px-2 py-1 rounded-full">
+                      {stat.change}
+                    </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">{stat.label}</p>
-                  <p className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <p className="text-sm font-medium text-gray-600 mb-1">
+                    {stat.label}
+                  </p>
+                  <p
+                    className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
                     {stat.value}
                   </p>
                 </motion.div>
@@ -3109,7 +3662,9 @@ export default function Products() {
                   >
                     {statuses.map((status) => (
                       <option key={status} value={status}>
-                        {status === "all" ? "All Statuses" : status.charAt(0).toUpperCase() + status.slice(1)}
+                        {status === "all"
+                          ? "All Statuses"
+                          : status.charAt(0).toUpperCase() + status.slice(1)}
                       </option>
                     ))}
                   </select>
@@ -3128,7 +3683,9 @@ export default function Products() {
                     <button
                       onClick={() => setViewMode("cards")}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                        viewMode === "cards" ? "bg-white text-[#175E3B] shadow-sm" : "text-gray-600 hover:text-gray-800"
+                        viewMode === "cards"
+                          ? "bg-white text-[#175E3B] shadow-sm"
+                          : "text-gray-600 hover:text-gray-800"
                       }`}
                     >
                       Cards
@@ -3136,7 +3693,9 @@ export default function Products() {
                     <button
                       onClick={() => setViewMode("table")}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                        viewMode === "table" ? "bg-white text-[#175E3B] shadow-sm" : "text-gray-600 hover:text-gray-800"
+                        viewMode === "table"
+                          ? "bg-white text-[#175E3B] shadow-sm"
+                          : "text-gray-600 hover:text-gray-800"
                       }`}
                     >
                       Table
@@ -3204,19 +3763,25 @@ export default function Products() {
                 <div className="bg-gradient-to-br from-gray-100 to-gray-200 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Coffee className="w-10 h-10 text-gray-400" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-700 mb-2">No products found</h3>
+                <h3 className="text-xl font-bold text-gray-700 mb-2">
+                  No products found
+                </h3>
                 <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                  {searchTerm || filterCategory !== "all" || filterStatus !== "all"
+                  {searchTerm ||
+                  filterCategory !== "all" ||
+                  filterStatus !== "all"
                     ? "Try adjusting your search terms or filters to find what you're looking for."
                     : "Start by adding your first product to track margins and optimize profitability."}
                 </p>
                 <div className="flex gap-3 justify-center">
-                  {(searchTerm || filterCategory !== "all" || filterStatus !== "all") && (
+                  {(searchTerm ||
+                    filterCategory !== "all" ||
+                    filterStatus !== "all") && (
                     <button
                       onClick={() => {
-                        setSearchTerm("")
-                        setFilterCategory("all")
-                        setFilterStatus("all")
+                        setSearchTerm("");
+                        setFilterCategory("all");
+                        setFilterStatus("all");
                       }}
                       className="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-200 transition-colors font-medium"
                     >
@@ -3243,5 +3808,5 @@ export default function Products() {
         {showMilkSwapModal && <MilkSwapModal />}
       </AnimatePresence>
     </>
-  )
+  );
 }

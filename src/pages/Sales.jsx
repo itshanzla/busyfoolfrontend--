@@ -1,15 +1,32 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useRef, useState, useCallback } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
-import { Button } from "../components/ui/button"
-import { Input } from "../components/ui/input"
-import { Label } from "../components/ui/label"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../components/ui/dialog"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../components/ui/select"
-import { Sidebar } from "../components/Sidebar"
-import { Navbar } from "../components/Navbar"
-import { Info } from "lucide-react"
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../components/ui/dialog";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "../components/ui/select";
+import { Sidebar } from "../components/Sidebar";
+import { Navbar } from "../components/Navbar";
+import { Info } from "lucide-react";
 import {
   Plus,
   Package,
@@ -27,87 +44,95 @@ import {
   ChevronRight,
   Percent,
   Download,
-} from "lucide-react"
+} from "lucide-react";
 
-const API_BASE = "https://busy-fool-backend.vercel.app"
+const API_BASE = "http://localhost:3000";
 
-const IDEMP_STORE_KEY = "bf:idempotency:imports"
-const IDEMP_TTL_MS = 30 * 60 * 1000 // 30 minutes
-const getSalesStatsKey = (userId) => `bf:sales:last-stats:${userId || "anonymous"}`
+const IDEMP_STORE_KEY = "bf:idempotency:imports";
+const IDEMP_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const getSalesStatsKey = (userId) =>
+  `bf:sales:last-stats:${userId || "anonymous"}`;
 
 function toHex(buffer) {
-  const bytes = new Uint8Array(buffer)
-  let hex = ""
+  const bytes = new Uint8Array(buffer);
+  let hex = "";
   for (let i = 0; i < bytes.length; i++) {
-    const h = bytes[i].toString(16).padStart(2, "0")
-    hex += h
+    const h = bytes[i].toString(16).padStart(2, "0");
+    hex += h;
   }
-  return hex
+  return hex;
 }
 function formatCurrency(n) {
-  const num = Number(n ?? 0)
-  if (Number.isNaN(num)) return "$0.00"
-  return num.toLocaleString(undefined, { style: "currency", currency: "USD" })
+  const num = Number(n ?? 0);
+  if (Number.isNaN(num)) return "$0.00";
+  return num.toLocaleString(undefined, { style: "currency", currency: "USD" });
 }
 function formatPercent2(n) {
-  const num = Number(n ?? 0)
-  if (Number.isNaN(num)) return "0.00%"
-  return `${num.toFixed(2)}%`
+  const num = Number(n ?? 0);
+  if (Number.isNaN(num)) return "0.00%";
+  return `${num.toFixed(2)}%`;
 }
 
 function readImportMap() {
   try {
-    const raw = localStorage.getItem(IDEMP_STORE_KEY)
-    const map = raw ? JSON.parse(raw) : {}
-    const now = Date.now()
+    const raw = localStorage.getItem(IDEMP_STORE_KEY);
+    const map = raw ? JSON.parse(raw) : {};
+    const now = Date.now();
     for (const [k, v] of Object.entries(map)) {
       if (!v || typeof v !== "object" || typeof v.ts !== "number") {
-        delete map[k]
-        continue
+        delete map[k];
+        continue;
       }
       if (now - v.ts > IDEMP_TTL_MS) {
-        delete map[k]
+        delete map[k];
       }
     }
-    if (raw) localStorage.setItem(IDEMP_STORE_KEY, JSON.stringify(map))
-    return map
+    if (raw) localStorage.setItem(IDEMP_STORE_KEY, JSON.stringify(map));
+    return map;
   } catch {
-    return {}
+    return {};
   }
 }
 function writeImportMap(map) {
   try {
-    localStorage.setItem(IDEMP_STORE_KEY, JSON.stringify(map))
+    localStorage.setItem(IDEMP_STORE_KEY, JSON.stringify(map));
   } catch {}
 }
 async function computeIdempotencyKey(file, mappings, userId) {
   try {
-    const buf = await file.arrayBuffer()
-    const fileHash = await crypto.subtle.digest("SHA-256", buf)
+    const buf = await file.arrayBuffer();
+    const fileHash = await crypto.subtle.digest("SHA-256", buf);
     const mappingSorted = Object.keys(mappings || {})
       .sort()
       .reduce((acc, k) => {
-        acc[k] = mappings[k] ?? null
-        return acc
-      }, {})
-    const meta = `${userId}|${file.name}|${file.size}|${file.type}|${JSON.stringify(mappingSorted)}`
-    const metaHash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(meta))
-    return `v1-${toHex(fileHash)}-${toHex(metaHash)}`
+        acc[k] = mappings[k] ?? null;
+        return acc;
+      }, {});
+    const meta = `${userId}|${file.name}|${file.size}|${
+      file.type
+    }|${JSON.stringify(mappingSorted)}`;
+    const metaHash = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(meta)
+    );
+    return `v1-${toHex(fileHash)}-${toHex(metaHash)}`;
   } catch {
-    return `fallback-${userId || "nouser"}-${file.name}-${file.size}-${Date.now()}`
+    return `fallback-${userId || "nouser"}-${file.name}-${
+      file.size
+    }-${Date.now()}`;
   }
 }
 function dedupeSalesArray(arr) {
-  if (!Array.isArray(arr)) return []
-  const out = []
-  const seenId = new Set()
-  const seenSig = new Set()
+  if (!Array.isArray(arr)) return [];
+  const out = [];
+  const seenId = new Set();
+  const seenSig = new Set();
   for (const s of arr) {
-    const id = s?.id
+    const id = s?.id;
     if (id && !seenId.has(id)) {
-      seenId.add(id)
-      out.push(s)
-      continue
+      seenId.add(id);
+      out.push(s);
+      continue;
     }
     const sig = JSON.stringify([
       s?.product?.id ?? null,
@@ -116,532 +141,605 @@ function dedupeSalesArray(arr) {
       s?.user?.id ?? null,
       s?.user?.name ?? "",
       s?.created_at ?? s?.sale_date ?? s?.date ?? "",
-    ])
+    ]);
     if (!seenSig.has(sig)) {
-      seenSig.add(sig)
-      out.push(s)
+      seenSig.add(sig);
+      out.push(s);
     }
   }
-  return out
+  return out;
 }
 
 export default function Sales() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [showGuidelinesModal, setShowGuidelinesModal] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
 
   // Data lists
-  const [sales, setSales] = useState([])
-  const [products, setProducts] = useState([])
+  const [sales, setSales] = useState([]);
+  const [products, setProducts] = useState([]);
 
   // Loading flags
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isProcessingCsv, setIsProcessingCsv] = useState(false)
-  const [isImporting, setIsImporting] = useState(false)
-  const [currentImportKey, setCurrentImportKey] = useState(null)
-  const importingRef = useRef(false)
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isProcessingCsv, setIsProcessingCsv] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [currentImportKey, setCurrentImportKey] = useState(null);
+  const importingRef = useRef(false);
 
   // Notifications
-  const [message, setMessage] = useState("")
-  const [messageType, setMessageType] = useState("")
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
 
   // Modals
-  const [showModal, setShowModal] = useState(false)
-  const [showCsvModal, setShowCsvModal] = useState(false)
-  const [showMappingModal, setShowMappingModal] = useState(false)
-  const [showPreviewModal, setShowPreviewModal] = useState(false)
+  const [showModal, setShowModal] = useState(false);
+  const [showCsvModal, setShowCsvModal] = useState(false);
+  const [showMappingModal, setShowMappingModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   // Manual add sale form
-  const [formData, setFormData] = useState({ productId: "", quantity: "" })
-  const [formErrors, setFormErrors] = useState({})
+  const [formData, setFormData] = useState({ productId: "", quantity: "" });
+  const [formErrors, setFormErrors] = useState({});
 
   // CSV state
-  const [csvFile, setCsvFile] = useState(null)
-  const [csvHeaders, setCsvHeaders] = useState([])
-  const [headerSignature, setHeaderSignature] = useState(null)
+  const [csvFile, setCsvFile] = useState(null);
+  const [csvHeaders, setCsvHeaders] = useState([]);
+  const [headerSignature, setHeaderSignature] = useState(null);
 
   // Mapping state (Sales fields)
   const busyfoolFields = useMemo(
     () => [
-      { key: "product_name", label: "Product Name", required: true, description: "Name of the product being sold" },
-      { key: "quantity_sold", label: "Quantity Sold", required: true, description: "Number of items sold" },
-      { key: "sale_price", label: "Amount", required: false, description: "Total sales amount " },
-      { key: "sale_date", label: "Sale Date", required: false, description: "Date of sale (optional)" },
+      {
+        key: "product_name",
+        label: "Product Name",
+        required: true,
+        description: "Name of the product being sold",
+      },
+      {
+        key: "quantity_sold",
+        label: "Quantity Sold",
+        required: true,
+        description: "Number of items sold",
+      },
+      {
+        key: "sale_price",
+        label: "Amount",
+        required: false,
+        description: "Total sales amount ",
+      },
+      {
+        key: "sale_date",
+        label: "Sale Date",
+        required: false,
+        description: "Date of sale (optional)",
+      },
     ],
-    [],
-  )
+    []
+  );
   const [mappings, setMappings] = useState({
     product_name: null,
     quantity_sold: null,
     sale_price: null,
     sale_date: null,
-  })
-  const [draggedHeader, setDraggedHeader] = useState(null)
-  const [dragOverField, setDragOverField] = useState(null)
+  });
+  const [draggedHeader, setDraggedHeader] = useState(null);
+  const [dragOverField, setDragOverField] = useState(null);
 
   // Preview result (now compatible with import-daily-sales JSON)
-  const [previewData, setPreviewData] = useState(null)
+  const [previewData, setPreviewData] = useState(null);
 
   // Sales page summary stats (persisted from last preview)
-  const [salesStats, setSalesStats] = useState(null)
+  const [salesStats, setSalesStats] = useState(null);
 
   // Preview pagination
-  const [previewPage, setPreviewPage] = useState(1)
-  const [previewPageSize, setPreviewPageSize] = useState(20)
-  const previewRows = previewData?.sales || []
-  const previewTotalPages = Math.max(1, Math.ceil(previewRows.length / previewPageSize))
-  const previewStart = (previewPage - 1) * previewPageSize
-  const previewEnd = Math.min(previewStart + previewPageSize, previewRows.length)
+  const [previewPage, setPreviewPage] = useState(1);
+  const [previewPageSize, setPreviewPageSize] = useState(20);
+  const previewRows = previewData?.sales || [];
+  const previewTotalPages = Math.max(
+    1,
+    Math.ceil(previewRows.length / previewPageSize)
+  );
+  const previewStart = (previewPage - 1) * previewPageSize;
+  const previewEnd = Math.min(
+    previewStart + previewPageSize,
+    previewRows.length
+  );
   const paginatedPreviewRows = useMemo(
     () => previewRows.slice(previewStart, previewEnd),
-    [previewRows, previewStart, previewEnd],
-  )
-  useEffect(() => setPreviewPage(1), [previewRows.length, previewPageSize])
+    [previewRows, previewStart, previewEnd]
+  );
+  useEffect(() => setPreviewPage(1), [previewRows.length, previewPageSize]);
 
   // User
-  const [currentUserId, setCurrentUserId] = useState(null)
-  const [currentUserName, setCurrentUserName] = useState("")
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [currentUserName, setCurrentUserName] = useState("");
 
   // Sales History pagination
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const totalPages = Math.max(1, Math.ceil((sales?.length || 0) / pageSize))
-  const startIdx = (page - 1) * pageSize
-  const endIdx = Math.min(startIdx + pageSize, sales?.length || 0)
-  const paginatedSales = useMemo(() => sales.slice(startIdx, endIdx), [sales, startIdx, endIdx])
-  useEffect(() => setPage(1), [sales, pageSize])
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const totalPages = Math.max(1, Math.ceil((sales?.length || 0) / pageSize));
+  const startIdx = (page - 1) * pageSize;
+  const endIdx = Math.min(startIdx + pageSize, sales?.length || 0);
+  const paginatedSales = useMemo(
+    () => sales.slice(startIdx, endIdx),
+    [sales, startIdx, endIdx]
+  );
+  useEffect(() => setPage(1), [sales, pageSize]);
 
   const authHeaders = useCallback(() => {
-    const token = localStorage.getItem("accessToken")
-    return token ? { Authorization: `Bearer ${token}` } : {}
-  }, [])
+    const token = localStorage.getItem("accessToken");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }, []);
 
   const loadUserId = useCallback(async () => {
     try {
-      const token = localStorage.getItem("accessToken")
+      const token = localStorage.getItem("accessToken");
       if (token) {
-        const res = await fetch(`${API_BASE}/auth/profile`, { headers: { Authorization: `Bearer ${token}` } })
+        const res = await fetch(`${API_BASE}/auth/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (res.ok) {
-          const data = await res.json()
-          const uid = data?.id || data?.user?.id
+          const data = await res.json();
+          const uid = data?.id || data?.user?.id;
           if (uid) {
-            localStorage.setItem("userId", uid)
-            setCurrentUserId(uid)
-            const name = data?.name || data?.user?.name || data?.username
+            localStorage.setItem("userId", uid);
+            setCurrentUserId(uid);
+            const name = data?.name || data?.user?.name || data?.username;
             if (name) {
-              localStorage.setItem("userName", name)
-              setCurrentUserName(name)
+              localStorage.setItem("userName", name);
+              setCurrentUserName(name);
             }
-            return uid
+            return uid;
           }
         }
       }
     } catch {}
     try {
-      const userStr = localStorage.getItem("user")
+      const userStr = localStorage.getItem("user");
       if (userStr) {
-        const user = JSON.parse(userStr)
-        const uid = user?.id || user?.user?.id
+        const user = JSON.parse(userStr);
+        const uid = user?.id || user?.user?.id;
         if (uid) {
-          localStorage.setItem("userId", uid)
-          setCurrentUserId(uid)
-          const name = user?.name || user?.user?.name || user?.username
+          localStorage.setItem("userId", uid);
+          setCurrentUserId(uid);
+          const name = user?.name || user?.user?.name || user?.username;
           if (name) {
-            localStorage.setItem("userName", name)
-            setCurrentUserName(name)
+            localStorage.setItem("userName", name);
+            setCurrentUserName(name);
           }
-          return uid
+          return uid;
         }
       }
     } catch {}
-    const existing = localStorage.getItem("userId")
+    const existing = localStorage.getItem("userId");
     if (existing) {
-      setCurrentUserId(existing)
-      return existing
+      setCurrentUserId(existing);
+      return existing;
     }
-    setCurrentUserId(null)
-    return null
-  }, [])
+    setCurrentUserId(null);
+    return null;
+  }, []);
 
-  const LOCAL_KEY_PREFIX = "bf:mappings"
+  const LOCAL_KEY_PREFIX = "bf:mappings";
   const getHeaderSignature = useCallback((headers) => {
-    if (!headers || !headers.length) return null
+    if (!headers || !headers.length) return null;
     return headers
       .map((h) => String(h).trim().toLowerCase())
       .sort()
-      .join("|")
-  }, [])
+      .join("|");
+  }, []);
   const hasRequiredMappings = useCallback(
     (currentHeaders, mappingObject) => {
-      if (!mappingObject) return false
-      const headerSet = new Set(currentHeaders.map((h) => String(h).trim()))
-      const requiredFields = busyfoolFields.filter((f) => f.required).map((f) => f.key)
+      if (!mappingObject) return false;
+      const headerSet = new Set(currentHeaders.map((h) => String(h).trim()));
+      const requiredFields = busyfoolFields
+        .filter((f) => f.required)
+        .map((f) => f.key);
       return requiredFields.every((key) => {
-        const mapped = mappingObject[key]
-        return typeof mapped === "string" && mapped.length > 0 && headerSet.has(mapped)
-      })
+        const mapped = mappingObject[key];
+        return (
+          typeof mapped === "string" &&
+          mapped.length > 0 &&
+          headerSet.has(mapped)
+        );
+      });
     },
-    [busyfoolFields],
-  )
-  const saveMappingLocal = useCallback((userId, headerSig, mappingObject, headers) => {
-    if (!userId || !headerSig || !mappingObject) return
-    const key = `${LOCAL_KEY_PREFIX}:${userId}:${headerSig}`
-    const value = { savedAt: new Date().toISOString(), headers, mappings: mappingObject }
-    localStorage.setItem(key, JSON.stringify(value))
-  }, [])
+    [busyfoolFields]
+  );
+  const saveMappingLocal = useCallback(
+    (userId, headerSig, mappingObject, headers) => {
+      if (!userId || !headerSig || !mappingObject) return;
+      const key = `${LOCAL_KEY_PREFIX}:${userId}:${headerSig}`;
+      const value = {
+        savedAt: new Date().toISOString(),
+        headers,
+        mappings: mappingObject,
+      };
+      localStorage.setItem(key, JSON.stringify(value));
+    },
+    []
+  );
   const loadMappingLocal = useCallback((userId, headerSig) => {
-    if (!userId || !headerSig) return null
+    if (!userId || !headerSig) return null;
     try {
-      const raw = localStorage.getItem(`${LOCAL_KEY_PREFIX}:${userId}:${headerSig}`)
-      return raw ? JSON.parse(raw) : null
+      const raw = localStorage.getItem(
+        `${LOCAL_KEY_PREFIX}:${userId}:${headerSig}`
+      );
+      return raw ? JSON.parse(raw) : null;
     } catch {
-      return null
+      return null;
     }
-  }, [])
+  }, []);
   const saveMappingSilent = useCallback(
     async (uid, mappingObject) => {
       const mappingArray = Object.entries(mappingObject)
         .filter(([, value]) => value !== null)
-        .map(([busyfoolColumn, posColumnName]) => ({ busyfoolColumn, posColumnName }))
+        .map(([busyfoolColumn, posColumnName]) => ({
+          busyfoolColumn,
+          posColumnName,
+        }));
       const res = await fetch(`${API_BASE}/csv-mappings/save-mapping`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({ userId: uid, mappings: mappingArray }),
-      })
-      return res.ok
+      });
+      return res.ok;
     },
-    [authHeaders],
-  )
+    [authHeaders]
+  );
 
   useEffect(() => {
-    ;(async () => {
-      await loadUserId()
-      await fetchProducts()
-      await fetchSales()
-    })()
-  }, [loadUserId])
+    (async () => {
+      await loadUserId();
+      await fetchProducts();
+      await fetchSales();
+    })();
+  }, [loadUserId]);
 
   useEffect(() => {
     if (currentUserId) {
       try {
-        const raw = localStorage.getItem(getSalesStatsKey(currentUserId))
-        setSalesStats(raw ? JSON.parse(raw) : null)
+        const raw = localStorage.getItem(getSalesStatsKey(currentUserId));
+        setSalesStats(raw ? JSON.parse(raw) : null);
       } catch {
-        setSalesStats(null)
+        setSalesStats(null);
       }
     } else {
-      setSalesStats(null)
+      setSalesStats(null);
     }
-  }, [currentUserId])
+  }, [currentUserId]);
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch(`${API_BASE}/products`, { headers: { ...authHeaders() } })
+      const res = await fetch(`${API_BASE}/products`, {
+        headers: { ...authHeaders() },
+      });
       if (res.ok) {
-        const data = await res.json()
-        setProducts(Array.isArray(data) ? data : [])
+        const data = await res.json();
+        setProducts(Array.isArray(data) ? data : []);
       } else {
-        setProducts([])
+        setProducts([]);
       }
     } catch {
-      setProducts([])
+      setProducts([]);
     }
-  }
+  };
   const fetchSales = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/sales`, { headers: { ...authHeaders() } })
+      const res = await fetch(`${API_BASE}/sales`, {
+        headers: { ...authHeaders() },
+      });
       if (res.ok) {
-        const data = await res.json()
-        const arr = Array.isArray(data) ? data : []
-        const deduped = dedupeSalesArray(arr)
-        setSales(deduped)
+        const data = await res.json();
+        const arr = Array.isArray(data) ? data : [];
+        const deduped = dedupeSalesArray(arr);
+        setSales(deduped);
       } else {
-        setSales([])
+        setSales([]);
       }
     } catch {
-      setSales([])
+      setSales([]);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   // Manual add sale
   const handleSubmit = async () => {
-    setIsSubmitting(true)
-    setMessage("")
-    const errors = {}
-    if (!formData.productId) errors.productId = "Required"
-    if (!formData.quantity) errors.quantity = "Required"
-    setFormErrors(errors)
+    setIsSubmitting(true);
+    setMessage("");
+    const errors = {};
+    if (!formData.productId) errors.productId = "Required";
+    if (!formData.quantity) errors.quantity = "Required";
+    setFormErrors(errors);
     if (Object.keys(errors).length) {
-      setIsSubmitting(false)
-      return
+      setIsSubmitting(false);
+      return;
     }
     try {
-      const selectedProduct = products.find((p) => p.id === formData.productId)
+      const selectedProduct = products.find((p) => p.id === formData.productId);
       const payload = {
         productId: formData.productId,
         product_name: selectedProduct?.name || "",
         quantity: Number(formData.quantity),
-      }
+      };
       const res = await fetch(`${API_BASE}/sales`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify(payload),
-      })
+      });
       if (res.ok) {
-        setMessage("Sale added successfully.")
-        setMessageType("success")
-        setShowModal(false)
-        setFormData({ productId: "", quantity: "" })
-        fetchSales()
+        setMessage("Sale added successfully.");
+        setMessageType("success");
+        setShowModal(false);
+        setFormData({ productId: "", quantity: "" });
+        fetchSales();
       } else {
-        let errorMsg = "Failed to add sale."
+        let errorMsg = "Failed to add sale.";
         try {
-          const contentType = res.headers.get("content-type") || ""
+          const contentType = res.headers.get("content-type") || "";
           if (contentType.includes("application/json")) {
-            const json = await res.json()
+            const json = await res.json();
             if (json?.message) {
-              errorMsg = formatStockError(json.message) // Apply formatting here
+              errorMsg = formatStockError(json.message); // Apply formatting here
             }
           } else {
-            const text = await res.text()
+            const text = await res.text();
             if (text) {
-              errorMsg = formatStockError(text) // Apply formatting here too
+              errorMsg = formatStockError(text); // Apply formatting here too
             }
           }
         } catch {}
-        setMessage(errorMsg)
-        setMessageType("error")
+        setMessage(errorMsg);
+        setMessageType("error");
       }
     } catch {
-      setMessage("Error adding sale.")
-      setMessageType("error")
+      setMessage("Error adding sale.");
+      setMessageType("error");
     }
-    setIsSubmitting(false)
-  }
+    setIsSubmitting(false);
+  };
 
   // CSV upload -> headers
   const handleCsvUpload = async (file) => {
-    if (!file) return
-    setIsProcessingCsv(true)
-    setMessage("")
+    if (!file) return;
+    setIsProcessingCsv(true);
+    setMessage("");
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-      const uid = currentUserId || (await loadUserId())
-      if (uid) formData.append("userId", uid)
+      const formData = new FormData();
+      formData.append("file", file);
+      const uid = currentUserId || (await loadUserId());
+      if (uid) formData.append("userId", uid);
       const res = await fetch(`${API_BASE}/csv-mappings/upload-temp`, {
         method: "POST",
         headers: { ...authHeaders() },
         body: formData,
-      })
+      });
       if (!res.ok) {
-        const t = await res.text()
-        throw new Error(t || "Failed to upload CSV.")
+        const t = await res.text();
+        throw new Error(t || "Failed to upload CSV.");
       }
-      const data = await res.json()
-      let headers = []
-      if (Array.isArray(data)) headers = data
-      else if (Array.isArray(data?.headers)) headers = data.headers
-      else if (Array.isArray(data?.data?.headers)) headers = data.data.headers
-      else if (Array.isArray(data?.csvHeaders)) headers = data.csvHeaders
+      const data = await res.json();
+      let headers = [];
+      if (Array.isArray(data)) headers = data;
+      else if (Array.isArray(data?.headers)) headers = data.headers;
+      else if (Array.isArray(data?.data?.headers)) headers = data.data.headers;
+      else if (Array.isArray(data?.csvHeaders)) headers = data.csvHeaders;
 
       // Filter out empty, null, undefined headers and whitespace-only headers
       const filteredHeaders = headers.filter((h) => {
-        const header = String(h || "").trim()
-        return header.length > 0
-      })
+        const header = String(h || "").trim();
+        return header.length > 0;
+      });
 
       if (!filteredHeaders.length) {
-        setMessage("No valid headers found in CSV. Ensure the first row contains header names.")
-        setMessageType("error")
-        setIsProcessingCsv(false)
-        return
+        setMessage(
+          "No valid headers found in CSV. Ensure the first row contains header names."
+        );
+        setMessageType("error");
+        setIsProcessingCsv(false);
+        return;
       }
 
-      setCsvHeaders(filteredHeaders) // Use filtered headers
-      setCsvFile(file)
-      const sig = getHeaderSignature(filteredHeaders) // Use filtered headers
-      setHeaderSignature(sig)
+      setCsvHeaders(filteredHeaders); // Use filtered headers
+      setCsvFile(file);
+      const sig = getHeaderSignature(filteredHeaders); // Use filtered headers
+      setHeaderSignature(sig);
 
-      const uid2 = currentUserId || (await loadUserId())
-      const previous = loadMappingLocal(uid2, sig)
+      const uid2 = currentUserId || (await loadUserId());
+      const previous = loadMappingLocal(uid2, sig);
       if (previous && hasRequiredMappings(filteredHeaders, previous.mappings)) {
-        setMappings(previous.mappings)
-        const ok = await saveMappingSilent(uid2, previous.mappings)
+        setMappings(previous.mappings);
+        const ok = await saveMappingSilent(uid2, previous.mappings);
         if (ok) {
-          setShowCsvModal(false)
-          setShowMappingModal(false)
-          setMessage("Found previous mapping. Auto-applied and generating preview...")
-          setMessageType("success")
-          await previewImport(file)
-          setIsProcessingCsv(false)
-          return
+          setShowCsvModal(false);
+          setShowMappingModal(false);
+          setMessage(
+            "Found previous mapping. Auto-applied and generating preview..."
+          );
+          setMessageType("success");
+          await previewImport(file);
+          setIsProcessingCsv(false);
+          return;
         } else {
-          setMessage("Found previous mapping but server sync failed. Please review and save again.")
-          setMessageType("warning")
-          setShowCsvModal(false)
-          setShowMappingModal(true)
-          setIsProcessingCsv(false)
-          return
+          setMessage(
+            "Found previous mapping but server sync failed. Please review and save again."
+          );
+          setMessageType("warning");
+          setShowCsvModal(false);
+          setShowMappingModal(true);
+          setIsProcessingCsv(false);
+          return;
         }
       }
 
-      if (previous?.mappings) setMappings(previous.mappings)
-      setShowCsvModal(false)
-      setShowMappingModal(true)
-      setMessage("CSV uploaded. Please map the columns.")
-      setMessageType("success")
+      if (previous?.mappings) setMappings(previous.mappings);
+      setShowCsvModal(false);
+      setShowMappingModal(true);
+      setMessage("CSV uploaded. Please map the columns.");
+      setMessageType("success");
     } catch (e) {
-      setMessage(e?.message || "Network error uploading CSV.")
-      setMessageType("error")
+      setMessage(e?.message || "Network error uploading CSV.");
+      setMessageType("error");
     }
-    setIsProcessingCsv(false)
-  }
+    setIsProcessingCsv(false);
+  };
 
   // Drag and drop mapping handlers
   const handleDragStart = (e, header) => {
-    setDraggedHeader(header)
-    e.dataTransfer.effectAllowed = "move"
-  }
+    setDraggedHeader(header);
+    e.dataTransfer.effectAllowed = "move";
+  };
   const handleDragOver = (e, fieldKey) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = "move"
-    setDragOverField(fieldKey)
-  }
-  const handleDragLeave = () => setDragOverField(null)
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverField(fieldKey);
+  };
+  const handleDragLeave = () => setDragOverField(null);
   const handleDrop = (e, fieldKey) => {
-    e.preventDefault()
-    if (draggedHeader) setMappings((prev) => ({ ...prev, [fieldKey]: draggedHeader }))
-    setDraggedHeader(null)
-    setDragOverField(null)
-  }
-  const removeMappingForField = (fieldKey) => setMappings((prev) => ({ ...prev, [fieldKey]: null }))
+    e.preventDefault();
+    if (draggedHeader)
+      setMappings((prev) => ({ ...prev, [fieldKey]: draggedHeader }));
+    setDraggedHeader(null);
+    setDragOverField(null);
+  };
+  const removeMappingForField = (fieldKey) =>
+    setMappings((prev) => ({ ...prev, [fieldKey]: null }));
   const getAvailableHeaders = () => {
-    const mapped = Object.values(mappings).filter(Boolean)
+    const mapped = Object.values(mappings).filter(Boolean);
     return csvHeaders.filter((h) => {
       // Filter out empty, null, undefined headers and whitespace-only headers
-      const header = String(h || "").trim()
-      return header.length > 0 && !mapped.includes(h)
-    })
-  }
+      const header = String(h || "").trim();
+      return header.length > 0 && !mapped.includes(h);
+    });
+  };
   const resetCsvState = () => {
-    setCsvFile(null)
-    setCsvHeaders([])
-    setHeaderSignature(null)
-    setMappings({ product_name: null, quantity_sold: null, sale_price: null, sale_date: null })
-    setPreviewData(null)
-    setDraggedHeader(null)
-    setDragOverField(null)
-    setPreviewPage(1)
-    importingRef.current = false
-    setIsImporting(false)
-    setCurrentImportKey(null)
-  }
+    setCsvFile(null);
+    setCsvHeaders([]);
+    setHeaderSignature(null);
+    setMappings({
+      product_name: null,
+      quantity_sold: null,
+      sale_price: null,
+      sale_date: null,
+    });
+    setPreviewData(null);
+    setDraggedHeader(null);
+    setDragOverField(null);
+    setPreviewPage(1);
+    importingRef.current = false;
+    setIsImporting(false);
+    setCurrentImportKey(null);
+  };
 
   // Save mappings then preview
   const saveMappings = async () => {
-    const required = busyfoolFields.filter((f) => f.required)
-    const missing = required.filter((f) => !mappings[f.key])
+    const required = busyfoolFields.filter((f) => f.required);
+    const missing = required.filter((f) => !mappings[f.key]);
     if (missing.length) {
-      setMessage(`Please map required fields: ${missing.map((f) => f.label).join(", ")}`)
-      setMessageType("error")
-      return
+      setMessage(
+        `Please map required fields: ${missing.map((f) => f.label).join(", ")}`
+      );
+      setMessageType("error");
+      return;
     }
     const mappingArray = Object.entries(mappings)
       .filter(([, value]) => value !== null)
-      .map(([busyfoolColumn, posColumnName]) => ({ busyfoolColumn, posColumnName }))
+      .map(([busyfoolColumn, posColumnName]) => ({
+        busyfoolColumn,
+        posColumnName,
+      }));
     if (!mappingArray.length) {
-      setMessage("Please map at least one field.")
-      setMessageType("error")
-      return
+      setMessage("Please map at least one field.");
+      setMessageType("error");
+      return;
     }
-    const uid = currentUserId || (await loadUserId())
+    const uid = currentUserId || (await loadUserId());
     if (!uid) {
-      setMessageType("error")
-      return
+      setMessageType("error");
+      return;
     }
-    const sig = headerSignature || getHeaderSignature(csvHeaders)
-    setIsProcessingCsv(true)
+    const sig = headerSignature || getHeaderSignature(csvHeaders);
+    setIsProcessingCsv(true);
     try {
       const res = await fetch(`${API_BASE}/csv-mappings/save-mapping`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({ userId: uid, mappings: mappingArray }),
-      })
+      });
       if (res.ok) {
-        saveMappingLocal(uid, sig, mappings, csvHeaders)
-        setShowMappingModal(false)
-        setMessage("Mappings saved. Generating preview...")
-        setMessageType("success")
-        setTimeout(() => previewImport(csvFile), 80)
+        saveMappingLocal(uid, sig, mappings, csvHeaders);
+        setShowMappingModal(false);
+        setMessage("Mappings saved. Generating preview...");
+        setMessageType("success");
+        setTimeout(() => previewImport(csvFile), 80);
       } else {
-        const t = await res.text()
-        setMessage(t || "Failed to save mappings.")
-        setMessageType("error")
+        const t = await res.text();
+        setMessage(t || "Failed to save mappings.");
+        setMessageType("error");
       }
     } catch {
-      setMessage("Network error saving mappings.")
-      setMessageType("error")
+      setMessage("Network error saving mappings.");
+      setMessageType("error");
     }
-    setIsProcessingCsv(false)
-  }
+    setIsProcessingCsv(false);
+  };
 
   // PREVIEW: Use /csv-mappings/import-sales per your response shape
   const previewImport = async (fileOverride = null) => {
-    const fileToUse = fileOverride || csvFile
+    const fileToUse = fileOverride || csvFile;
     if (!fileToUse) {
-      setMessage("No CSV file selected. Please upload again.")
-      setMessageType("error")
-      return
+      setMessage("No CSV file selected. Please upload again.");
+      setMessageType("error");
+      return;
     }
-    const uid = currentUserId || (await loadUserId())
+    const uid = currentUserId || (await loadUserId());
     if (!uid) {
-      setMessage("Could not determine user ID. Please log in again.")
-      setMessageType("error")
-      return
+      setMessage("Could not determine user ID. Please log in again.");
+      setMessageType("error");
+      return;
     }
-    setIsProcessingCsv(true)
+    setIsProcessingCsv(true);
     try {
-      const formData = new FormData()
-      formData.append("file", fileToUse)
-      formData.append("confirm", "false")
-      formData.append("userId", uid)
+      const formData = new FormData();
+      formData.append("file", fileToUse);
+      formData.append("confirm", "false");
+      formData.append("userId", uid);
 
       const res = await fetch(`${API_BASE}/csv-mappings/import-sales`, {
         method: "POST",
         headers: { ...authHeaders() },
         body: formData,
-      })
+      });
       if (!res.ok) {
-        const t = await res.text()
-        throw new Error(t || "Failed to preview import.")
+        const t = await res.text();
+        throw new Error(t || "Failed to preview import.");
       }
-      const data = await res.json()
+      const data = await res.json();
 
       const normalized = {
         totalSales: Number(data.totalSales) || 0,
         totalProfit: Number(data.totalProfit) || 0,
-        avgProfitMargin: Number(data.avgProfitMargin ?? data.averageProfitMargin) || 0,
+        avgProfitMargin:
+          Number(data.avgProfitMargin ?? data.averageProfitMargin) || 0,
         sales: Array.isArray(data.rows)
           ? data.rows.map((r) => ({
               ...r,
               amount:
                 r.amount ??
-                (r.quantitySold != null && (r.salePrice != null || r.unitPrice != null)
+                (r.quantitySold != null &&
+                (r.salePrice != null || r.unitPrice != null)
                   ? Number(r.quantitySold) * Number(r.salePrice ?? r.unitPrice)
                   : r.amount),
             }))
           : [],
-      }
+      };
 
-      setPreviewData(normalized)
-      setPreviewPage(1)
-      setShowPreviewModal(true)
-      setMessage("Preview generated successfully.")
-      setMessageType("success")
+      setPreviewData(normalized);
+      setPreviewPage(1);
+      setShowPreviewModal(true);
+      setMessage("Preview generated successfully.");
+      setMessageType("success");
 
       // Persist stats to show above Sales History
       try {
@@ -651,146 +749,153 @@ export default function Sales() {
             totalSales: normalized.totalSales,
             totalProfit: normalized.totalProfit,
             avgProfitMargin: normalized.avgProfitMargin,
-          }),
-        )
+          })
+        );
         setSalesStats({
           totalSales: normalized.totalSales,
           totalProfit: normalized.totalProfit,
           avgProfitMargin: normalized.avgProfitMargin,
-        })
+        });
       } catch {}
     } catch (e) {
-      setMessage(e?.message || "Network error generating preview.")
-      setMessageType("error")
+      setMessage(e?.message || "Network error generating preview.");
+      setMessageType("error");
     }
-    setIsProcessingCsv(false)
-  }
+    setIsProcessingCsv(false);
+  };
 
   // CONFIRM: keep using /csv-mappings/import-sales to actually insert Sales history
-  const [currentImportKeyState, setCurrentImportKeyState] = useState(null)
+  const [currentImportKeyState, setCurrentImportKeyState] = useState(null);
   const confirmImport = async () => {
-    if (!csvFile) return
-    if (importingRef.current) return
-    importingRef.current = true
-    setIsImporting(true)
-    setIsProcessingCsv(true)
+    if (!csvFile) return;
+    if (importingRef.current) return;
+    importingRef.current = true;
+    setIsImporting(true);
+    setIsProcessingCsv(true);
 
     try {
-      const uid = currentUserId || (await loadUserId())
+      const uid = currentUserId || (await loadUserId());
       if (!uid) {
-        setMessage("Could not determine user ID. Please log in again.")
-        setMessageType("error")
-        return
+        setMessage("Could not determine user ID. Please log in again.");
+        setMessageType("error");
+        return;
       }
 
-      const idKey = await computeIdempotencyKey(csvFile, mappings, uid)
-      setCurrentImportKeyState(idKey)
+      const idKey = await computeIdempotencyKey(csvFile, mappings, uid);
+      setCurrentImportKeyState(idKey);
 
-      const map = readImportMap()
-      const existing = map[idKey]
+      const map = readImportMap();
+      const existing = map[idKey];
       if (existing && existing.status === "pending") {
-        setMessage("This CSV import is already in progress. Please wait...")
-        setMessageType("warning")
-        return
+        setMessage("This CSV import is already in progress. Please wait...");
+        setMessageType("warning");
+        return;
       }
-      map[idKey] = { status: "pending", ts: Date.now() }
-      writeImportMap(map)
+      map[idKey] = { status: "pending", ts: Date.now() };
+      writeImportMap(map);
 
-      const formData = new FormData()
-      formData.append("file", csvFile)
-      formData.append("confirm", "true")
-      formData.append("userId", uid)
-      formData.append("idempotencyKey", idKey)
+      const formData = new FormData();
+      formData.append("file", csvFile);
+      formData.append("confirm", "true");
+      formData.append("userId", uid);
+      formData.append("idempotencyKey", idKey);
 
       const res = await fetch(`${API_BASE}/csv-mappings/import-sales`, {
         method: "POST",
         headers: { ...authHeaders() },
         body: formData,
-      })
+      });
       if (res.ok) {
-        const data = await res.json()
-        const importedCount = data.importedCount || data.rows?.length || data.sales?.length || 0
-        const mapDone = readImportMap()
-        mapDone[idKey] = { status: "done", ts: Date.now() }
-        writeImportMap(mapDone)
-        setShowPreviewModal(false)
-        setMessage(`Successfully imported ${importedCount} sales`)
-        setMessageType("success")
-        resetCsvState()
-        fetchSales()
+        const data = await res.json();
+        const importedCount =
+          data.importedCount || data.rows?.length || data.sales?.length || 0;
+        const mapDone = readImportMap();
+        mapDone[idKey] = { status: "done", ts: Date.now() };
+        writeImportMap(mapDone);
+        setShowPreviewModal(false);
+        setMessage(`Successfully imported ${importedCount} sales`);
+        setMessageType("success");
+        resetCsvState();
+        fetchSales();
       } else {
-        const text = await res.text()
-        const mapFail = readImportMap()
-        delete mapFail[idKey]
-        writeImportMap(mapFail)
-        setMessage(formatStockError(text) || "Failed to import sales.") // Apply formatting here
-        setMessageType("error")
+        const text = await res.text();
+        const mapFail = readImportMap();
+        delete mapFail[idKey];
+        writeImportMap(mapFail);
+        setMessage(formatStockError(text) || "Failed to import sales."); // Apply formatting here
+        setMessageType("error");
       }
     } catch (e) {
       try {
         if (currentImportKey) {
-          const mapErr = readImportMap()
-          delete mapErr[currentImportKey]
-          writeImportMap(mapErr)
+          const mapErr = readImportMap();
+          delete mapErr[currentImportKey];
+          writeImportMap(mapErr);
         }
       } catch {}
-      setMessage("Network error importing CSV.")
-      setMessageType("error")
+      setMessage("Network error importing CSV.");
+      setMessageType("error");
     } finally {
-      setIsProcessingCsv(false)
-      setIsImporting(false)
-      importingRef.current = false
+      setIsProcessingCsv(false);
+      setIsImporting(false);
+      importingRef.current = false;
     }
-  }
+  };
 
   // Export sales to CSV (now includes amount if present)
   const exportSalesToCSV = () => {
-    if (!sales || sales.length === 0) return
-    const headers = ["Product", "Quantity", "User"]
+    if (!sales || sales.length === 0) return;
+    const headers = ["Product", "Quantity", "User"];
     const csvRows = [
       headers.join(","),
       ...sales.map((sale) => {
-        const product = sale.product?.name ?? sale.product_name ?? ""
-        const qty = sale.quantity ?? sale.quantitySold ?? ""
-        const user = sale.user?.name ?? ""
+        const product = sale.product?.name ?? sale.product_name ?? "";
+        const qty = sale.quantity ?? sale.quantitySold ?? "";
+        const user = sale.user?.name ?? "";
         return [product, qty, user]
           .map((val) => {
-            const s = String(val ?? "")
-            if (s.includes(",") || s.includes('"') || s.includes("\n")) return `"${s.replace(/"/g, '""')}"`
-            return s
+            const s = String(val ?? "");
+            if (s.includes(",") || s.includes('"') || s.includes("\n"))
+              return `"${s.replace(/"/g, '""')}"`;
+            return s;
           })
-          .join(",")
+          .join(",");
       }),
-    ]
-    const csvContent = csvRows.join("\n")
-    const blob = new Blob([csvContent], { type: "text/csv" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = "busy-fool-sales.csv"
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
+    ];
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "busy-fool-sales.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
   function formatStockError(errorMessage) {
-    if (!errorMessage || typeof errorMessage !== "string") return errorMessage
+    if (!errorMessage || typeof errorMessage !== "string") return errorMessage;
 
     // Check if it's a stock-related error
-    if (errorMessage.includes("Insufficient stock") || errorMessage.includes("Maximum sellable quantity")) {
+    if (
+      errorMessage.includes("Insufficient stock") ||
+      errorMessage.includes("Maximum sellable quantity")
+    ) {
       // Extract the maximum quantity if available
-      const maxQuantityMatch = errorMessage.match(/Maximum sellable quantity is (\d+)/)
-      const maxQuantity = maxQuantityMatch ? maxQuantityMatch[1] : null
+      const maxQuantityMatch = errorMessage.match(
+        /Maximum sellable quantity is (\d+)/
+      );
+      const maxQuantity = maxQuantityMatch ? maxQuantityMatch[1] : null;
 
       if (maxQuantity) {
-        return `Insufficient stock. Maximum available quantity: ${maxQuantity}`
+        return `Insufficient stock. Maximum available quantity: ${maxQuantity}`;
       } else {
-        return "Insufficient stock. Please check product availability."
+        return "Insufficient stock. Please check product availability.";
       }
     }
 
     // Return original message if not a stock error
-    return errorMessage
+    return errorMessage;
   }
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -799,391 +904,459 @@ export default function Sales() {
         <Navbar onToggleSidebar={() => setSidebarOpen(true)} />
         <main className="flex-1 p-4 sm:p-6 space-y-6">
           <div className="max-w-7xl mx-auto">
-  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-  <div>
-    <h1 className="text-4xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent tracking-tight">
-      Sales
-    </h1>
-    <p className="text-green-600 mt-2 text-base font-medium">Track and import your product sales</p>
-    {currentUserName ? (
-      <p className="text-xs text-gray-600 mt-2 flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full inline-flex">
-        <User className="w-3 h-3" />
-        User: {currentUserName}
-      </p>
-    ) : currentUserId ? (
-      <p className="text-xs text-gray-600 mt-2 flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full inline-flex">
-        <User className="w-3 h-3" />
-        User ID: {currentUserId}
-      </p>
-    ) : (
-      <p className="text-xs text-red-600 mt-2 flex items-center gap-2 bg-red-50 px-3 py-1 rounded-full inline-flex">
-        <AlertCircle className="w-3 h-3" />
-        loading.
-      </p>
-    )}
-  </div>
-  <div className="flex gap-3 flex-wrap">
-    <Button
-      onClick={() => setShowGuidelinesModal(true)}
-      variant="outline"
-      className="bg-white/95 hover:bg-green-50 text-green-700 border-green-200 hover:border-green-300 px-5 py-2.5 rounded-xl flex items-center gap-2 hover:shadow-lg transition-all duration-300 font-semibold shadow-sm backdrop-blur-sm"
-      type="button"
-    >
-      <Info className="w-4 h-4" />
-      CSV Guidelines
-    </Button>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent tracking-tight">
+                  Sales
+                </h1>
+                <p className="text-green-600 mt-2 text-base font-medium">
+                  Track and import your product sales
+                </p>
+                {currentUserName ? (
+                  <p className="text-xs text-gray-600 mt-2 flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full inline-flex">
+                    <User className="w-3 h-3" />
+                    User: {currentUserName}
+                  </p>
+                ) : currentUserId ? (
+                  <p className="text-xs text-gray-600 mt-2 flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full inline-flex">
+                    <User className="w-3 h-3" />
+                    User ID: {currentUserId}
+                  </p>
+                ) : (
+                  <p className="text-xs text-red-600 mt-2 flex items-center gap-2 bg-red-50 px-3 py-1 rounded-full inline-flex">
+                    <AlertCircle className="w-3 h-3" />
+                    loading.
+                  </p>
+                )}
+              </div>
+              <div className="flex gap-3 flex-wrap">
+                <Button
+                  onClick={() => setShowGuidelinesModal(true)}
+                  variant="outline"
+                  className="bg-white/95 hover:bg-green-50 text-green-700 border-green-200 hover:border-green-300 px-5 py-2.5 rounded-xl flex items-center gap-2 hover:shadow-lg transition-all duration-300 font-semibold shadow-sm backdrop-blur-sm"
+                  type="button"
+                >
+                  <Info className="w-4 h-4" />
+                  CSV Guidelines
+                </Button>
 
-    <Button
-      onClick={exportSalesToCSV}
-      className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all duration-300 shadow-lg font-semibold"
-      type="button"
-    >
-      <Download className="w-4 h-4" />
-      Export CSV
-    </Button>
+                <Button
+                  onClick={exportSalesToCSV}
+                  className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all duration-300 shadow-lg font-semibold"
+                  type="button"
+                >
+                  <Download className="w-4 h-4" />
+                  Export CSV
+                </Button>
 
-    <Button
-      onClick={() => setShowCsvModal(true)}
-      className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all duration-300 shadow-lg font-semibold"
-      disabled={isProcessingCsv}
-      type="button"
-    >
-      <Upload className="w-4 h-4" />
-      Import CSV
-    </Button>
+                <Button
+                  onClick={() => setShowCsvModal(true)}
+                  className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all duration-300 shadow-lg font-semibold"
+                  disabled={isProcessingCsv}
+                  type="button"
+                >
+                  <Upload className="w-4 h-4" />
+                  Import CSV
+                </Button>
 
-    <Button
-      onClick={() => setShowModal(true)}
-      className="bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all duration-300 shadow-lg font-semibold"
-      disabled={isSubmitting}
-      type="button"
-    >
-      <Plus className="w-4 h-4" />
-      Add Sale
-    </Button>
-  </div>
-</div>
+                <Button
+                  onClick={() => setShowModal(true)}
+                  className="bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all duration-300 shadow-lg font-semibold"
+                  disabled={isSubmitting}
+                  type="button"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Sale
+                </Button>
+              </div>
+            </div>
 
-{message && (
-  <div
-    className={`mb-8 px-6 py-4 rounded-xl border-l-4 flex items-center gap-4 shadow-lg backdrop-blur-sm ${
-      messageType === "success"
-        ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-800 border-green-400 shadow-green-100/50"
-        : messageType === "warning"
-          ? "bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-800 border-amber-400 shadow-amber-100/50"
-          : "bg-gradient-to-r from-red-50 to-rose-50 text-red-800 border-red-400 shadow-red-100/50"
-    }`}
-  >
-    <div className={`p-2 rounded-lg ${
-      messageType === "success"
-        ? "bg-green-100"
-        : messageType === "warning"
-          ? "bg-amber-100"
-          : "bg-red-100"
-    }`}>
-      {messageType === "success" ? (
-        <CheckCircle className="w-5 h-5 text-green-600" />
-      ) : messageType === "warning" ? (
-        <AlertCircle className="w-5 h-5 text-amber-600" />
-      ) : (
-        <AlertCircle className="w-5 h-5 text-red-600" />
-      )}
-    </div>
-    <span className="font-semibold text-lg">{message}</span>
-  </div>
-)}
-
-{/* Enhanced Stats Cards */}
-{salesStats ? (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-    {/* Total Sales Card - Blue Theme */}
-    <Card className="group relative bg-white/95 backdrop-blur-lg border border-blue-200/60 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-105">
-      <CardContent className="p-8">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-bold text-gray-600 mb-2 uppercase tracking-wider">Total Sales</p>
-            <p className="text-xs text-blue-600 mb-4 font-semibold bg-blue-50 px-2 py-1 rounded-full inline-block">last preview</p>
-            <p className="text-3xl font-black text-gray-900 group-hover:text-blue-700 transition-colors">
-              {formatCurrency(salesStats.totalSales)}
-            </p>
-          </div>
-          <div className="p-4 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl border-2 border-blue-200 shadow-lg group-hover:shadow-xl transition-all">
-            <DollarSign className="w-6 h-6 text-blue-600" />
-          </div>
-        </div>
-        <div className="mt-6 h-2 bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 rounded-full shadow-inner"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 to-transparent rounded-xl pointer-events-none"></div>
-      </CardContent>
-    </Card>
-
-    {/* Total Profit Card - Dynamic Green/Red */}
-    <Card
-      className={`group relative bg-white/95 backdrop-blur-lg border-2 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 ${
-        salesStats.totalProfit >= 0
-          ? "border-emerald-200/60 shadow-xl shadow-emerald-100/30"
-          : "border-red-200/60 shadow-xl shadow-red-100/30"
-      }`}
-    >
-      <CardContent className="p-8">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-bold text-gray-600 mb-2 uppercase tracking-wider">Total Profit</p>
-            <p className={`text-xs mb-4 font-semibold px-2 py-1 rounded-full inline-block ${
-              salesStats.totalProfit >= 0 
-                ? "text-emerald-600 bg-emerald-50" 
-                : "text-red-600 bg-red-50"
-            }`}>
-              last preview
-            </p>
-            <p className={`text-3xl font-black group-hover:scale-110 transition-transform ${
-              salesStats.totalProfit >= 0 ? "text-emerald-700" : "text-red-700"
-            }`}>
-              {formatCurrency(salesStats.totalProfit)}
-            </p>
-          </div>
-          <div className={`p-4 rounded-xl border-2 shadow-lg group-hover:shadow-xl transition-all ${
-            salesStats.totalProfit >= 0 
-              ? "bg-gradient-to-br from-emerald-100 to-green-200 border-emerald-200" 
-              : "bg-gradient-to-br from-red-100 to-rose-200 border-red-200"
-          }`}>
-            <DollarSign className={`w-6 h-6 ${
-              salesStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-600"
-            }`} />
-          </div>
-        </div>
-        <div className={`mt-6 h-2 rounded-full shadow-inner ${
-          salesStats.totalProfit >= 0
-            ? "bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-400"
-            : "bg-gradient-to-r from-red-500 via-rose-400 to-red-400"
-        }`}></div>
-        <div className={`absolute inset-0 rounded-xl pointer-events-none ${
-          salesStats.totalProfit >= 0
-            ? "bg-gradient-to-br from-emerald-50/20 to-transparent"
-            : "bg-gradient-to-br from-red-50/20 to-transparent"
-        }`}></div>
-      </CardContent>
-    </Card>
-
-    {/* Profit Margin Card - Dynamic Green/Red */}
-    <Card
-      className={`group relative bg-white/95 backdrop-blur-lg border-2 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 ${
-        salesStats.avgProfitMargin >= 0
-          ? "border-emerald-200/60 shadow-xl shadow-emerald-100/30"
-          : "border-red-200/60 shadow-xl shadow-red-100/30"
-      }`}
-    >
-      <CardContent className="p-8">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-bold text-gray-600 mb-2 uppercase tracking-wider">Avg Profit Margin</p>
-            <p className={`text-xs mb-4 font-semibold px-2 py-1 rounded-full inline-block ${
-              salesStats.avgProfitMargin >= 0 
-                ? "text-emerald-600 bg-emerald-50" 
-                : "text-red-600 bg-red-50"
-            }`}>
-              last preview
-            </p>
-            <p className={`text-3xl font-black group-hover:scale-110 transition-transform ${
-              salesStats.avgProfitMargin >= 0 ? "text-emerald-700" : "text-red-700"
-            }`}>
-              {formatPercent2(salesStats.avgProfitMargin)}
-            </p>
-          </div>
-          <div className={`p-4 rounded-xl border-2 shadow-lg group-hover:shadow-xl transition-all ${
-            salesStats.avgProfitMargin >= 0
-              ? "bg-gradient-to-br from-emerald-100 to-green-200 border-emerald-200"
-              : "bg-gradient-to-br from-red-100 to-rose-200 border-red-200"
-          }`}>
-            <Percent className={`w-6 h-6 ${
-              salesStats.avgProfitMargin >= 0 ? "text-emerald-600" : "text-red-600"
-            }`} />
-          </div>
-        </div>
-        <div className={`mt-6 h-2 rounded-full shadow-inner ${
-          salesStats.avgProfitMargin >= 0
-            ? "bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-400"
-            : "bg-gradient-to-r from-red-500 via-rose-400 to-red-400"
-        }`}></div>
-        <div className={`absolute inset-0 rounded-xl pointer-events-none ${
-          salesStats.avgProfitMargin >= 0
-            ? "bg-gradient-to-br from-emerald-50/20 to-transparent"
-            : "bg-gradient-to-br from-red-50/20 to-transparent"
-        }`}></div>
-      </CardContent>
-    </Card>
-  </div>
-) : null}
-
-{/* Enhanced Sales History Table */}
-<Card className="bg-white/95 backdrop-blur-lg border border-gray-200 shadow-xl hover:shadow-2xl transition-all duration-300">
-  <CardHeader className="bg-gradient-to-r from-green-50/90 to-emerald-50/90 border-b-2 border-green-200/50 backdrop-blur-sm">
-    <div className="flex items-center justify-between">
-      <CardTitle className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-        <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl shadow-lg">
-          <DollarSign className="w-6 h-6 text-white" />
-        </div>
-        <span className="bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent">
-          Sales History
-        </span>
-      </CardTitle>
-
-      {/* Enhanced Pagination Controls */}
-      <div className="flex items-center gap-4">
-        <div className="hidden sm:flex items-center text-sm text-gray-700 font-medium">
-          <span className="mr-3">Rows per page:</span>
-          <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-            <SelectTrigger className="h-9 w-[90px] bg-white border-green-200 hover:border-green-300 transition-colors shadow-sm">
-              <SelectValue placeholder="10" />
-            </SelectTrigger>
-            <SelectContent>
-              {[5, 10, 20, 50, 100].map((n) => (
-                <SelectItem key={n} value={String(n)}>
-                  {n}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="text-sm text-gray-700 font-semibold bg-gray-50 px-3 py-1.5 rounded-lg">
-          {sales.length === 0 ? "0 of 0" : `${startIdx + 1}-${endIdx} of ${sales.length}`}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page <= 1}
-            className="h-9 w-9 p-0 bg-white hover:bg-green-50 border-green-200 hover:border-green-300 disabled:opacity-50 transition-all shadow-sm"
-            aria-label="Previous page"
-            type="button"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages}
-            className="h-9 w-9 p-0 bg-white hover:bg-green-50 border-green-200 hover:border-green-300 disabled:opacity-50 transition-all shadow-sm"
-            aria-label="Next page"
-            type="button"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-    </div>
-  </CardHeader>
-  <CardContent className="p-0">
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead className="bg-gradient-to-r from-gray-50/90 to-green-50/40 border-b-2 border-green-200/30 sticky top-0 z-10">
-          <tr>
-            <th className="px-8 py-5 text-left text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
-              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
-                Product
-              </span>
-            </th>
-            <th className="px-8 py-5 text-right text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
-              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
-                Quantity
-              </span>
-            </th>
-            <th className="px-8 py-5 text-center text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
-              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
-                Date
-              </span>
-            </th>
-            <th className="px-8 py-5 text-center text-xs font-bold text-gray-800 uppercase tracking-wider">
-              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
-                User
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100/50">
-          {isLoading ? (
-            <tr>
-              <td colSpan={4} className="px-8 py-16 text-center">
-                <div className="flex items-center justify-center gap-4">
-                  <div className="animate-spin h-8 w-8 border-3 border-emerald-500 border-t-transparent rounded-full"></div>
-                  <span className="text-gray-600 font-semibold text-lg">Loading sales...</span>
-                </div>
-              </td>
-            </tr>
-          ) : sales.length === 0 ? (
-            <tr>
-              <td colSpan={4} className="px-8 py-16 text-center align-middle min-h-[300px]">
-                <div className="flex flex-col items-center justify-center gap-4 min-h-[220px] h-full w-full">
-                  <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-emerald-200 rounded-full flex items-center justify-center mb-3 shadow-lg">
-                    <DollarSign className="w-10 h-10 text-green-600" strokeWidth={1.5} />
-                  </div>
-                  <div className="flex flex-col items-center gap-2">
-                    <p className="text-gray-800 font-bold text-xl">No sales found</p>
-                    <p className="text-green-600 text-base font-medium">Add your first sale to get started</p>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          ) : (
-            paginatedSales.map((sale, index) => {
-              const product = sale.product?.name || sale.product_name || "-"
-              const qty = sale.quantity ?? sale.quantitySold ?? ""
-              const date = sale.saleDate || sale.sale_date || sale.date
-              let formattedDate
-              if (date) {
-                formattedDate = new Date(date).toLocaleDateString()
-              } else {
-                const today = new Date()
-                formattedDate = today.toLocaleDateString()
-              }
-              return (
-                <tr 
-                  key={sale.id} 
-                  className={`group hover:bg-gradient-to-r hover:from-green-50/50 hover:to-emerald-50/30 transition-all duration-300 border-b border-gray-100/50 hover:border-green-200/60 ${
-                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
+            {message && (
+              <div
+                className={`mb-8 px-6 py-4 rounded-xl border-l-4 flex items-center gap-4 shadow-lg backdrop-blur-sm ${
+                  messageType === "success"
+                    ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-800 border-green-400 shadow-green-100/50"
+                    : messageType === "warning"
+                    ? "bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-800 border-amber-400 shadow-amber-100/50"
+                    : "bg-gradient-to-r from-red-50 to-rose-50 text-red-800 border-red-400 shadow-red-100/50"
+                }`}
+              >
+                <div
+                  className={`p-2 rounded-lg ${
+                    messageType === "success"
+                      ? "bg-green-100"
+                      : messageType === "warning"
+                      ? "bg-amber-100"
+                      : "bg-red-100"
                   }`}
                 >
-                  <td className="px-8 py-6 border-r border-gray-100/40">
-                    <div className="flex items-center gap-4">
-                      <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-sm"></div>
-                      <span className="font-bold text-gray-900 text-base group-hover:text-green-800 transition-colors">
-                        {product}
-                      </span>
+                  {messageType === "success" ? (
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                  ) : messageType === "warning" ? (
+                    <AlertCircle className="w-5 h-5 text-amber-600" />
+                  ) : (
+                    <AlertCircle className="w-5 h-5 text-red-600" />
+                  )}
+                </div>
+                <span className="font-semibold text-lg">{message}</span>
+              </div>
+            )}
+
+            {/* Enhanced Stats Cards */}
+            {salesStats ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+                {/* Total Sales Card - Blue Theme */}
+                <Card className="group relative bg-white/95 backdrop-blur-lg border border-blue-200/60 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-105">
+                  <CardContent className="p-8">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-gray-600 mb-2 uppercase tracking-wider">
+                          Total Sales
+                        </p>
+                        <p className="text-xs text-blue-600 mb-4 font-semibold bg-blue-50 px-2 py-1 rounded-full inline-block">
+                          last preview
+                        </p>
+                        <p className="text-3xl font-black text-gray-900 group-hover:text-blue-700 transition-colors">
+                          {formatCurrency(salesStats.totalSales)}
+                        </p>
+                      </div>
+                      <div className="p-4 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl border-2 border-blue-200 shadow-lg group-hover:shadow-xl transition-all">
+                        <DollarSign className="w-6 h-6 text-blue-600" />
+                      </div>
                     </div>
-                  </td>
-                  <td className="px-8 py-6 text-right font-bold text-gray-900 text-lg border-r border-gray-100/40">
-                    <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-bold group-hover:bg-blue-100 transition-colors">
-                      {qty}
+                    <div className="mt-6 h-2 bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 rounded-full shadow-inner"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 to-transparent rounded-xl pointer-events-none"></div>
+                  </CardContent>
+                </Card>
+
+                {/* Total Profit Card - Dynamic Green/Red */}
+                <Card
+                  className={`group relative bg-white/95 backdrop-blur-lg border-2 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 ${
+                    salesStats.totalProfit >= 0
+                      ? "border-emerald-200/60 shadow-xl shadow-emerald-100/30"
+                      : "border-red-200/60 shadow-xl shadow-red-100/30"
+                  }`}
+                >
+                  <CardContent className="p-8">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-gray-600 mb-2 uppercase tracking-wider">
+                          Total Profit
+                        </p>
+                        <p
+                          className={`text-xs mb-4 font-semibold px-2 py-1 rounded-full inline-block ${
+                            salesStats.totalProfit >= 0
+                              ? "text-emerald-600 bg-emerald-50"
+                              : "text-red-600 bg-red-50"
+                          }`}
+                        >
+                          last preview
+                        </p>
+                        <p
+                          className={`text-3xl font-black group-hover:scale-110 transition-transform ${
+                            salesStats.totalProfit >= 0
+                              ? "text-emerald-700"
+                              : "text-red-700"
+                          }`}
+                        >
+                          {formatCurrency(salesStats.totalProfit)}
+                        </p>
+                      </div>
+                      <div
+                        className={`p-4 rounded-xl border-2 shadow-lg group-hover:shadow-xl transition-all ${
+                          salesStats.totalProfit >= 0
+                            ? "bg-gradient-to-br from-emerald-100 to-green-200 border-emerald-200"
+                            : "bg-gradient-to-br from-red-100 to-rose-200 border-red-200"
+                        }`}
+                      >
+                        <DollarSign
+                          className={`w-6 h-6 ${
+                            salesStats.totalProfit >= 0
+                              ? "text-emerald-600"
+                              : "text-red-600"
+                          }`}
+                        />
+                      </div>
+                    </div>
+                    <div
+                      className={`mt-6 h-2 rounded-full shadow-inner ${
+                        salesStats.totalProfit >= 0
+                          ? "bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-400"
+                          : "bg-gradient-to-r from-red-500 via-rose-400 to-red-400"
+                      }`}
+                    ></div>
+                    <div
+                      className={`absolute inset-0 rounded-xl pointer-events-none ${
+                        salesStats.totalProfit >= 0
+                          ? "bg-gradient-to-br from-emerald-50/20 to-transparent"
+                          : "bg-gradient-to-br from-red-50/20 to-transparent"
+                      }`}
+                    ></div>
+                  </CardContent>
+                </Card>
+
+                {/* Profit Margin Card - Dynamic Green/Red */}
+                <Card
+                  className={`group relative bg-white/95 backdrop-blur-lg border-2 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 ${
+                    salesStats.avgProfitMargin >= 0
+                      ? "border-emerald-200/60 shadow-xl shadow-emerald-100/30"
+                      : "border-red-200/60 shadow-xl shadow-red-100/30"
+                  }`}
+                >
+                  <CardContent className="p-8">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-gray-600 mb-2 uppercase tracking-wider">
+                          Avg Profit Margin
+                        </p>
+                        <p
+                          className={`text-xs mb-4 font-semibold px-2 py-1 rounded-full inline-block ${
+                            salesStats.avgProfitMargin >= 0
+                              ? "text-emerald-600 bg-emerald-50"
+                              : "text-red-600 bg-red-50"
+                          }`}
+                        >
+                          last preview
+                        </p>
+                        <p
+                          className={`text-3xl font-black group-hover:scale-110 transition-transform ${
+                            salesStats.avgProfitMargin >= 0
+                              ? "text-emerald-700"
+                              : "text-red-700"
+                          }`}
+                        >
+                          {formatPercent2(salesStats.avgProfitMargin)}
+                        </p>
+                      </div>
+                      <div
+                        className={`p-4 rounded-xl border-2 shadow-lg group-hover:shadow-xl transition-all ${
+                          salesStats.avgProfitMargin >= 0
+                            ? "bg-gradient-to-br from-emerald-100 to-green-200 border-emerald-200"
+                            : "bg-gradient-to-br from-red-100 to-rose-200 border-red-200"
+                        }`}
+                      >
+                        <Percent
+                          className={`w-6 h-6 ${
+                            salesStats.avgProfitMargin >= 0
+                              ? "text-emerald-600"
+                              : "text-red-600"
+                          }`}
+                        />
+                      </div>
+                    </div>
+                    <div
+                      className={`mt-6 h-2 rounded-full shadow-inner ${
+                        salesStats.avgProfitMargin >= 0
+                          ? "bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-400"
+                          : "bg-gradient-to-r from-red-500 via-rose-400 to-red-400"
+                      }`}
+                    ></div>
+                    <div
+                      className={`absolute inset-0 rounded-xl pointer-events-none ${
+                        salesStats.avgProfitMargin >= 0
+                          ? "bg-gradient-to-br from-emerald-50/20 to-transparent"
+                          : "bg-gradient-to-br from-red-50/20 to-transparent"
+                      }`}
+                    ></div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null}
+
+            {/* Enhanced Sales History Table */}
+            <Card className="bg-white/95 backdrop-blur-lg border border-gray-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-green-50/90 to-emerald-50/90 border-b-2 border-green-200/50 backdrop-blur-sm">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl shadow-lg">
+                      <DollarSign className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent">
+                      Sales History
                     </span>
-                  </td>
-                  <td className="px-8 py-6 text-center border-r border-gray-100/40">
-                    <div className="bg-gray-50 rounded-lg px-3 py-2 inline-block group-hover:bg-green-50 transition-colors">
-                      <span className="text-sm text-gray-700 font-semibold group-hover:text-green-700">
-                        {formattedDate}
-                      </span>
+                  </CardTitle>
+
+                  {/* Enhanced Pagination Controls */}
+                  <div className="flex items-center gap-4">
+                    <div className="hidden sm:flex items-center text-sm text-gray-700 font-medium">
+                      <span className="mr-3">Rows per page:</span>
+                      <Select
+                        value={String(pageSize)}
+                        onValueChange={(v) => setPageSize(Number(v))}
+                      >
+                        <SelectTrigger className="h-9 w-[90px] bg-white border-green-200 hover:border-green-300 transition-colors shadow-sm">
+                          <SelectValue placeholder="10" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[5, 10, 20, 50, 100].map((n) => (
+                            <SelectItem key={n} value={String(n)}>
+                              {n}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </td>
-                  <td className="px-8 py-6 text-center">
-                    <div className="bg-gray-50 rounded-lg px-3 py-2 inline-block group-hover:bg-green-50 transition-colors">
-                      <span className="text-sm text-gray-700 font-semibold group-hover:text-green-700">
-                        {sale.user?.name || "-"}
-                      </span>
+
+                    <div className="text-sm text-gray-700 font-semibold bg-gray-50 px-3 py-1.5 rounded-lg">
+                      {sales.length === 0
+                        ? "0 of 0"
+                        : `${startIdx + 1}-${endIdx} of ${sales.length}`}
                     </div>
-                  </td>
-                </tr>
-              )
-            })
-          )}
-        </tbody>
-      </table>
-    </div>
-  </CardContent>
-</Card>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={page <= 1}
+                        className="h-9 w-9 p-0 bg-white hover:bg-green-50 border-green-200 hover:border-green-300 disabled:opacity-50 transition-all shadow-sm"
+                        aria-label="Previous page"
+                        type="button"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }
+                        disabled={page >= totalPages}
+                        className="h-9 w-9 p-0 bg-white hover:bg-green-50 border-green-200 hover:border-green-300 disabled:opacity-50 transition-all shadow-sm"
+                        aria-label="Next page"
+                        type="button"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gradient-to-r from-gray-50/90 to-green-50/40 border-b-2 border-green-200/30 sticky top-0 z-10">
+                      <tr>
+                        <th className="px-8 py-5 text-left text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+                          <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                            Product
+                          </span>
+                        </th>
+                        <th className="px-8 py-5 text-right text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+                          <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                            Quantity
+                          </span>
+                        </th>
+                        <th className="px-8 py-5 text-center text-xs font-bold text-gray-800 uppercase tracking-wider border-r border-gray-200/30">
+                          <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                            Date
+                          </span>
+                        </th>
+                        <th className="px-8 py-5 text-center text-xs font-bold text-gray-800 uppercase tracking-wider">
+                          <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
+                            User
+                          </span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100/50">
+                      {isLoading ? (
+                        <tr>
+                          <td colSpan={4} className="px-8 py-16 text-center">
+                            <div className="flex items-center justify-center gap-4">
+                              <div className="animate-spin h-8 w-8 border-3 border-emerald-500 border-t-transparent rounded-full"></div>
+                              <span className="text-gray-600 font-semibold text-lg">
+                                Loading sales...
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : sales.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan={4}
+                            className="px-8 py-16 text-center align-middle min-h-[300px]"
+                          >
+                            <div className="flex flex-col items-center justify-center gap-4 min-h-[220px] h-full w-full">
+                              <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-emerald-200 rounded-full flex items-center justify-center mb-3 shadow-lg">
+                                <DollarSign
+                                  className="w-10 h-10 text-green-600"
+                                  strokeWidth={1.5}
+                                />
+                              </div>
+                              <div className="flex flex-col items-center gap-2">
+                                <p className="text-gray-800 font-bold text-xl">
+                                  No sales found
+                                </p>
+                                <p className="text-green-600 text-base font-medium">
+                                  Add your first sale to get started
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        paginatedSales.map((sale, index) => {
+                          const product =
+                            sale.product?.name || sale.product_name || "-";
+                          const qty = sale.quantity ?? sale.quantitySold ?? "";
+                          const date =
+                            sale.saleDate || sale.sale_date || sale.date;
+                          let formattedDate;
+                          if (date) {
+                            formattedDate = new Date(date).toLocaleDateString();
+                          } else {
+                            const today = new Date();
+                            formattedDate = today.toLocaleDateString();
+                          }
+                          return (
+                            <tr
+                              key={sale.id}
+                              className={`group hover:bg-gradient-to-r hover:from-green-50/50 hover:to-emerald-50/30 transition-all duration-300 border-b border-gray-100/50 hover:border-green-200/60 ${
+                                index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                              }`}
+                            >
+                              <td className="px-8 py-6 border-r border-gray-100/40">
+                                <div className="flex items-center gap-4">
+                                  <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-sm"></div>
+                                  <span className="font-bold text-gray-900 text-base group-hover:text-green-800 transition-colors">
+                                    {product}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-8 py-6 text-right font-bold text-gray-900 text-lg border-r border-gray-100/40">
+                                <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-bold group-hover:bg-blue-100 transition-colors">
+                                  {qty}
+                                </span>
+                              </td>
+                              <td className="px-8 py-6 text-center border-r border-gray-100/40">
+                                <div className="bg-gray-50 rounded-lg px-3 py-2 inline-block group-hover:bg-green-50 transition-colors">
+                                  <span className="text-sm text-gray-700 font-semibold group-hover:text-green-700">
+                                    {formattedDate}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-8 py-6 text-center">
+                                <div className="bg-gray-50 rounded-lg px-3 py-2 inline-block group-hover:bg-green-50 transition-colors">
+                                  <span className="text-sm text-gray-700 font-semibold group-hover:text-green-700">
+                                    {sale.user?.name || "-"}
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
             {/* Manual Add Sale Modal */}
-            <Dialog open={showModal} onOpenChange={(open) => !open && setShowModal(false)}>
+            <Dialog
+              open={showModal}
+              onOpenChange={(open) => !open && setShowModal(false)}
+            >
               <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
                 <DialogHeader className="pb-6">
                   <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
@@ -1203,22 +1376,35 @@ export default function Sales() {
 
                 <div className="space-y-6 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="productId" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Label
+                      htmlFor="productId"
+                      className="text-sm font-semibold text-gray-700 flex items-center gap-2"
+                    >
                       <Package className="w-4 h-4" />
                       Product *
                     </Label>
                     <Select
                       value={formData.productId}
-                      onValueChange={(value) => setFormData((prev) => ({ ...prev, productId: value }))}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, productId: value }))
+                      }
                     >
                       <SelectTrigger
-                        className={`h-12 ${formErrors.productId ? "border-red-300 focus:ring-red-500" : "border-[#175e3b]"}`}
+                        className={`h-12 ${
+                          formErrors.productId
+                            ? "border-red-300 focus:ring-red-500"
+                            : "border-[#175e3b]"
+                        }`}
                       >
                         <SelectValue placeholder="Choose a product..." />
                       </SelectTrigger>
                       <SelectContent>
                         {products.map((product) => (
-                          <SelectItem key={product.id} value={product.id} className="py-3">
+                          <SelectItem
+                            key={product.id}
+                            value={product.id}
+                            className="py-3"
+                          >
                             {product.name}
                           </SelectItem>
                         ))}
@@ -1233,7 +1419,10 @@ export default function Sales() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="quantity" className="text-sm font-semibold text-gray-700">
+                    <Label
+                      htmlFor="quantity"
+                      className="text-sm font-semibold text-gray-700"
+                    >
                       Quantity *
                     </Label>
                     <Input
@@ -1241,9 +1430,18 @@ export default function Sales() {
                       type="number"
                       step="1"
                       value={formData.quantity}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, quantity: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          quantity: e.target.value,
+                        }))
+                      }
                       placeholder="Enter quantity..."
-                      className={`h-12 ${formErrors.quantity ? "border-red-300 focus:ring-red-500" : "border-[#175e3b]"}`}
+                      className={`h-12 ${
+                        formErrors.quantity
+                          ? "border-red-300 focus:ring-red-500"
+                          : "border-[#175e3b]"
+                      }`}
                     />
                     {formErrors.quantity && (
                       <p className="text-red-500 text-sm flex items-center gap-1">
@@ -1280,7 +1478,10 @@ export default function Sales() {
             </Dialog>
 
             {/* CSV Upload Modal */}
-            <Dialog open={showCsvModal} onOpenChange={(open) => !open && setShowCsvModal(false)}>
+            <Dialog
+              open={showCsvModal}
+              onOpenChange={(open) => !open && setShowCsvModal(false)}
+            >
               <DialogContent className="sm:max-w-lg bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
                 <DialogHeader className="pb-6">
                   <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
@@ -1294,13 +1495,15 @@ export default function Sales() {
                 <div className="space-y-4 py-4">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-green-400 transition-colors">
                     <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-4">Select a CSV file to upload</p>
+                    <p className="text-gray-600 mb-4">
+                      Select a CSV file to upload
+                    </p>
                     <Input
                       type="file"
                       accept=".csv"
                       onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        if (file) handleCsvUpload(file)
+                        const file = e.target.files?.[0];
+                        if (file) handleCsvUpload(file);
                       }}
                       className="max-w-xs mx-auto"
                       disabled={isProcessingCsv}
@@ -1308,13 +1511,17 @@ export default function Sales() {
                     {isProcessingCsv && (
                       <div className="mt-4 flex items-center justify-center gap-2">
                         <div className="animate-spin h-4 w-4 border-2 border-green-500 border-t-transparent rounded-full"></div>
-                        <span className="text-sm text-gray-600">Processing CSV...</span>
+                        <span className="text-sm text-gray-600">
+                          Processing CSV...
+                        </span>
                       </div>
                     )}
                   </div>
 
                   <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-blue-900 mb-2">Expected CSV Format:</h4>
+                    <h4 className="font-semibold text-blue-900 mb-2">
+                      Expected CSV Format:
+                    </h4>
                     <div className="text-sm text-blue-800 space-y-1">
                       <p>• Product - Name of the product (required)</p>
                       <p>• Quantity - Number sold (required)</p>
@@ -1338,7 +1545,10 @@ export default function Sales() {
             </Dialog>
 
             {/* CSV Import Guidelines Modal */}
-            <Dialog open={showGuidelinesModal} onOpenChange={(open) => !open && setShowGuidelinesModal(false)}>
+            <Dialog
+              open={showGuidelinesModal}
+              onOpenChange={(open) => !open && setShowGuidelinesModal(false)}
+            >
               <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/50 backdrop-blur-sm border-0 shadow-2xl">
                 <DialogHeader className="pb-6">
                   <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent flex items-center gap-3">
@@ -1359,10 +1569,13 @@ export default function Sales() {
                             <CheckCircle className="w-5 h-5 text-emerald-600" />
                           </div>
                           <div>
-                            <h3 className="font-bold text-emerald-900 text-lg mb-2">Match Product Names</h3>
+                            <h3 className="font-bold text-emerald-900 text-lg mb-2">
+                              Match Product Names
+                            </h3>
                             <p className="text-emerald-800 text-sm leading-relaxed">
-                              Use <strong>exact product names</strong> from your existing BusyFool products to ensure
-                              accurate reporting and profit calculations.
+                              Use <strong>exact product names</strong> from your
+                              existing BusyFool products to ensure accurate
+                              reporting and profit calculations.
                             </p>
                           </div>
                         </div>
@@ -1376,16 +1589,27 @@ export default function Sales() {
                             <AlertCircle className="w-5 h-5 text-blue-600" />
                           </div>
                           <div>
-                            <h3 className="font-bold text-blue-900 text-lg mb-2">Required Columns</h3>
+                            <h3 className="font-bold text-blue-900 text-lg mb-2">
+                              Required Columns
+                            </h3>
                             <div className="text-blue-800 text-sm space-y-1">
                               <p>
-                                <code className="bg-blue-200 px-2 py-1 rounded">Item name</code> - Product identifier
+                                <code className="bg-blue-200 px-2 py-1 rounded">
+                                  Item name
+                                </code>{" "}
+                                - Product identifier
                               </p>
                               <p>
-                                <code className="bg-blue-200 px-2 py-1 rounded">Quantity</code> - Number of items sold
+                                <code className="bg-blue-200 px-2 py-1 rounded">
+                                  Quantity
+                                </code>{" "}
+                                - Number of items sold
                               </p>
                               <p>
-                                <code className="bg-blue-200 px-2 py-1 rounded">Amount</code> - Total sale value
+                                <code className="bg-blue-200 px-2 py-1 rounded">
+                                  Amount
+                                </code>{" "}
+                                - Total sale value
                               </p>
                             </div>
                           </div>
@@ -1400,9 +1624,12 @@ export default function Sales() {
                             <DollarSign className="w-5 h-5 text-amber-600" />
                           </div>
                           <div>
-                            <h3 className="font-bold text-amber-900 text-lg mb-2">Amount Guidelines</h3>
+                            <h3 className="font-bold text-amber-900 text-lg mb-2">
+                              Amount Guidelines
+                            </h3>
                             <p className="text-amber-800 text-sm leading-relaxed">
-                              Enter the <strong>total sale amount</strong> for the quantity, not the unit price.
+                              Enter the <strong>total sale amount</strong> for
+                              the quantity, not the unit price.
                               <br />
                               Example: 10 items × $3.50 = $35.00
                             </p>
@@ -1418,10 +1645,14 @@ export default function Sales() {
                             <Package className="w-5 h-5 text-purple-600" />
                           </div>
                           <div>
-                            <h3 className="font-bold text-purple-900 text-lg mb-2">Avoid New Products</h3>
+                            <h3 className="font-bold text-purple-900 text-lg mb-2">
+                              Avoid New Products
+                            </h3>
                             <p className="text-purple-800 text-sm leading-relaxed">
-                              Unknown products default to <strong>zero cost</strong>, which affects profit calculations.
-                              Ensure all items exist in your inventory first.
+                              Unknown products default to{" "}
+                              <strong>zero cost</strong>, which affects profit
+                              calculations. Ensure all items exist in your
+                              inventory first.
                             </p>
                           </div>
                         </div>
@@ -1437,10 +1668,15 @@ export default function Sales() {
                           <FileText className="w-5 h-5 text-gray-600" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-gray-900 text-lg mb-2">Optional Column</h3>
+                          <h3 className="font-bold text-gray-900 text-lg mb-2">
+                            Optional Column
+                          </h3>
                           <p className="text-gray-700 text-sm">
-                            <code className="bg-gray-200 px-2 py-1 rounded mr-2">Date</code>
-                            If missing, the system will use the filename date for daily sales tracking.
+                            <code className="bg-gray-200 px-2 py-1 rounded mr-2">
+                              Date
+                            </code>
+                            If missing, the system will use the filename date
+                            for daily sales tracking.
                           </p>
                         </div>
                       </div>
@@ -1454,7 +1690,9 @@ export default function Sales() {
                         <div className="p-2 bg-teal-100 rounded-lg">
                           <Upload className="w-5 h-5 text-teal-600" />
                         </div>
-                        <h3 className="font-bold text-teal-900 text-lg">Supported Formats</h3>
+                        <h3 className="font-bold text-teal-900 text-lg">
+                          Supported Formats
+                        </h3>
                       </div>
                       <div className="flex gap-3">
                         <span className="px-3 py-2 bg-teal-100 text-teal-800 rounded-lg text-sm font-semibold">
@@ -1471,7 +1709,9 @@ export default function Sales() {
                         <div className="p-3 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl shadow-sm">
                           <Eye className="w-6 h-6 text-indigo-600" />
                         </div>
-                        <h3 className="font-bold text-gray-900 text-xl">Example CSV Format</h3>
+                        <h3 className="font-bold text-gray-900 text-xl">
+                          Example CSV Format
+                        </h3>
                       </div>
 
                       <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-indigo-200 overflow-hidden shadow-inner">
@@ -1479,30 +1719,62 @@ export default function Sales() {
                           <table className="w-full">
                             <thead className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
                               <tr>
-                                <th className="px-4 py-3 text-left text-sm font-semibold">Item name</th>
-                                <th className="px-4 py-3 text-center text-sm font-semibold">Quantity</th>
-                                <th className="px-4 py-3 text-right text-sm font-semibold">Amount</th>
-                                <th className="px-4 py-3 text-center text-sm font-semibold">Date</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                  Item name
+                                </th>
+                                <th className="px-4 py-3 text-center text-sm font-semibold">
+                                  Quantity
+                                </th>
+                                <th className="px-4 py-3 text-right text-sm font-semibold">
+                                  Amount
+                                </th>
+                                <th className="px-4 py-3 text-center text-sm font-semibold">
+                                  Date
+                                </th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-indigo-100">
                               <tr className="hover:bg-indigo-50/50 transition-colors">
-                                <td className="px-4 py-3 text-gray-900 font-medium">Latte</td>
-                                <td className="px-4 py-3 text-center text-gray-700">10</td>
-                                <td className="px-4 py-3 text-right text-gray-700 font-semibold">35.00</td>
-                                <td className="px-4 py-3 text-center text-gray-600 text-sm">2025-08-06</td>
+                                <td className="px-4 py-3 text-gray-900 font-medium">
+                                  Latte
+                                </td>
+                                <td className="px-4 py-3 text-center text-gray-700">
+                                  10
+                                </td>
+                                <td className="px-4 py-3 text-right text-gray-700 font-semibold">
+                                  35.00
+                                </td>
+                                <td className="px-4 py-3 text-center text-gray-600 text-sm">
+                                  2025-08-06
+                                </td>
                               </tr>
                               <tr className="hover:bg-indigo-50/50 transition-colors">
-                                <td className="px-4 py-3 text-gray-900 font-medium">Cappuccino</td>
-                                <td className="px-4 py-3 text-center text-gray-700">5</td>
-                                <td className="px-4 py-3 text-right text-gray-700 font-semibold">22.50</td>
-                                <td className="px-4 py-3 text-center text-gray-600 text-sm">2025-08-06</td>
+                                <td className="px-4 py-3 text-gray-900 font-medium">
+                                  Cappuccino
+                                </td>
+                                <td className="px-4 py-3 text-center text-gray-700">
+                                  5
+                                </td>
+                                <td className="px-4 py-3 text-right text-gray-700 font-semibold">
+                                  22.50
+                                </td>
+                                <td className="px-4 py-3 text-center text-gray-600 text-sm">
+                                  2025-08-06
+                                </td>
                               </tr>
                               <tr className="hover:bg-indigo-50/50 transition-colors">
-                                <td className="px-4 py-3 text-gray-900 font-medium">Croissant</td>
-                                <td className="px-4 py-3 text-center text-gray-700">15</td>
-                                <td className="px-4 py-3 text-right text-gray-700 font-semibold">67.50</td>
-                                <td className="px-4 py-3 text-center text-gray-600 text-sm">2025-08-06</td>
+                                <td className="px-4 py-3 text-gray-900 font-medium">
+                                  Croissant
+                                </td>
+                                <td className="px-4 py-3 text-center text-gray-700">
+                                  15
+                                </td>
+                                <td className="px-4 py-3 text-right text-gray-700 font-semibold">
+                                  67.50
+                                </td>
+                                <td className="px-4 py-3 text-center text-gray-600 text-sm">
+                                  2025-08-06
+                                </td>
                               </tr>
                             </tbody>
                           </table>
@@ -1524,7 +1796,10 @@ export default function Sales() {
               </DialogContent>
             </Dialog>
             {/* Drag & Drop Column Mapping Modal */}
-            <Dialog open={showMappingModal} onOpenChange={(open) => !open && setShowMappingModal(false)}>
+            <Dialog
+              open={showMappingModal}
+              onOpenChange={(open) => !open && setShowMappingModal(false)}
+            >
               <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
                 <DialogHeader className="pb-6">
                   <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
@@ -1537,10 +1812,13 @@ export default function Sales() {
 
                 <div className="space-y-6 py-4">
                   <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-                    <p className="text-amber-800 font-medium mb-2">Instructions:</p>
+                    <p className="text-amber-800 font-medium mb-2">
+                      Instructions:
+                    </p>
                     <p className="text-amber-700 text-sm">
-                      Drag CSV headers from the left and drop them onto the BusyFool fields on the right. Required
-                      fields must be mapped to proceed.
+                      Drag CSV headers from the left and drop them onto the
+                      BusyFool fields on the right. Required fields must be
+                      mapped to proceed.
                     </p>
                   </div>
 
@@ -1569,16 +1847,21 @@ export default function Sales() {
                               }`}
                             >
                               <GripVertical className="w-4 h-4 text-blue-600" />
-                              <span className="font-medium text-blue-900">{header}</span>
+                              <span className="font-medium text-blue-900">
+                                {header}
+                              </span>
                             </div>
                           ))}
 
-                          {getAvailableHeaders().length === 0 && csvHeaders.length > 0 && (
-                            <div className="text-center py-4 text-gray-500">
-                              <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                              <p className="text-sm">All columns have been mapped!</p>
-                            </div>
-                          )}
+                          {getAvailableHeaders().length === 0 &&
+                            csvHeaders.length > 0 && (
+                              <div className="text-center py-4 text-gray-500">
+                                <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                                <p className="text-sm">
+                                  All columns have been mapped!
+                                </p>
+                              </div>
+                            )}
                         </div>
                       )}
                     </div>
@@ -1601,26 +1884,36 @@ export default function Sales() {
                               dragOverField === field.key
                                 ? "border-green-400 bg-green-50"
                                 : mappings[field.key]
-                                  ? "border-green-300 bg-green-50"
-                                  : field.required
-                                    ? "border-red-300 bg-red-50"
-                                    : "border-gray-300 bg-gray-50"
+                                ? "border-green-300 bg-green-50"
+                                : field.required
+                                ? "border-red-300 bg-red-50"
+                                : "border-gray-300 bg-gray-50"
                             }`}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-semibold text-gray-900">{field.label}</span>
-                                  {field.required && <span className="text-red-500 text-sm">*</span>}
+                                  <span className="font-semibold text-gray-900">
+                                    {field.label}
+                                  </span>
+                                  {field.required && (
+                                    <span className="text-red-500 text-sm">
+                                      *
+                                    </span>
+                                  )}
                                 </div>
-                                <p className="text-xs text-gray-600">{field.description}</p>
+                                <p className="text-xs text-gray-600">
+                                  {field.description}
+                                </p>
                               </div>
 
                               {mappings[field.key] && (
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => removeMappingForField(field.key)}
+                                  onClick={() =>
+                                    removeMappingForField(field.key)
+                                  }
                                   className="text-red-600 hover:text-red-700 hover:bg-red-100"
                                   type="button"
                                 >
@@ -1632,11 +1925,15 @@ export default function Sales() {
                             {mappings[field.key] ? (
                               <div className="mt-2 p-2 bg-white border border-green-200 rounded flex items-center gap-2">
                                 <CheckCircle className="w-4 h-4 text-green-600" />
-                                <span className="font-medium text-green-900">{mappings[field.key]}</span>
+                                <span className="font-medium text-green-900">
+                                  {mappings[field.key]}
+                                </span>
                               </div>
                             ) : (
                               <div className="mt-2 text-center text-gray-500 text-sm">
-                                {dragOverField === field.key ? "Drop here" : "Drag a CSV column here"}
+                                {dragOverField === field.key
+                                  ? "Drop here"
+                                  : "Drag a CSV column here"}
                               </div>
                             )}
                           </div>
@@ -1650,8 +1947,8 @@ export default function Sales() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setShowMappingModal(false)
-                      resetCsvState()
+                      setShowMappingModal(false);
+                      resetCsvState();
                     }}
                     disabled={isProcessingCsv}
                     type="button"
@@ -1667,14 +1964,19 @@ export default function Sales() {
                     {isProcessingCsv && (
                       <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
                     )}
-                    {isProcessingCsv ? "Processing..." : "Save Mappings & Preview"}
+                    {isProcessingCsv
+                      ? "Processing..."
+                      : "Save Mappings & Preview"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
 
             {/* Preview Modal (using daily JSON) */}
-            <Dialog open={showPreviewModal} onOpenChange={(open) => !open && setShowPreviewModal(false)}>
+            <Dialog
+              open={showPreviewModal}
+              onOpenChange={(open) => !open && setShowPreviewModal(false)}
+            >
               <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
                 <DialogHeader className="pb-6">
                   <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
@@ -1694,7 +1996,9 @@ export default function Sales() {
                           <div className="flex items-center gap-3">
                             <DollarSign className="w-8 h-8 text-green-600" />
                             <div>
-                              <p className="text-sm text-green-700">Total Sales</p>
+                              <p className="text-sm text-green-700">
+                                Total Sales
+                              </p>
                               <p className="text-2xl font-bold text-green-900">
                                 {formatCurrency(previewData.totalSales || 0)}
                               </p>
@@ -1708,7 +2012,9 @@ export default function Sales() {
                           <div className="flex items-center gap-3">
                             <DollarSign className="w-8 h-8 text-blue-600" />
                             <div>
-                              <p className="text-sm text-blue-700">Total Profit</p>
+                              <p className="text-sm text-blue-700">
+                                Total Profit
+                              </p>
                               <p className="text-2xl font-bold text-blue-900">
                                 {formatCurrency(previewData.totalProfit || 0)}
                               </p>
@@ -1722,9 +2028,13 @@ export default function Sales() {
                           <div className="flex items-center gap-3">
                             <Percent className="w-8 h-8 text-purple-600" />
                             <div>
-                              <p className="text-sm text-purple-700">Avg Profit Margin</p>
+                              <p className="text-sm text-purple-700">
+                                Avg Profit Margin
+                              </p>
                               <p className="text-2xl font-bold text-purple-900">
-                                {formatPercent2(previewData.avgProfitMargin || 0)}
+                                {formatPercent2(
+                                  previewData.avgProfitMargin || 0
+                                )}
                               </p>
                             </div>
                           </div>
@@ -1737,12 +2047,17 @@ export default function Sales() {
                       <div className="text-sm text-gray-600">
                         {previewRows.length === 0
                           ? "0 of 0"
-                          : `${previewStart + 1}-${previewEnd} of ${previewRows.length}`}
+                          : `${previewStart + 1}-${previewEnd} of ${
+                              previewRows.length
+                            }`}
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="hidden sm:flex items-center text-sm text-gray-600">
                           <span className="mr-2">Rows per page:</span>
-                          <Select value={String(previewPageSize)} onValueChange={(v) => setPreviewPageSize(Number(v))}>
+                          <Select
+                            value={String(previewPageSize)}
+                            onValueChange={(v) => setPreviewPageSize(Number(v))}
+                          >
                             <SelectTrigger className="h-8 w-[82px]">
                               <SelectValue placeholder="20" />
                             </SelectTrigger>
@@ -1759,7 +2074,9 @@ export default function Sales() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setPreviewPage((p) => Math.max(1, p - 1))}
+                            onClick={() =>
+                              setPreviewPage((p) => Math.max(1, p - 1))
+                            }
                             disabled={previewPage <= 1}
                             className="h-8"
                             aria-label="Previous preview page"
@@ -1770,7 +2087,11 @@ export default function Sales() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setPreviewPage((p) => Math.min(previewTotalPages, p + 1))}
+                            onClick={() =>
+                              setPreviewPage((p) =>
+                                Math.min(previewTotalPages, p + 1)
+                              )
+                            }
                             disabled={previewPage >= previewTotalPages}
                             className="h-8"
                             aria-label="Next preview page"
@@ -1785,35 +2106,60 @@ export default function Sales() {
                     {/* Preview Table (with Unit Price and Amount now visible) */}
                     <Card>
                       <CardHeader>
-                        <CardTitle>Sales Preview ({previewRows.length} rows)</CardTitle>
+                        <CardTitle>
+                          Sales Preview ({previewRows.length} rows)
+                        </CardTitle>
                       </CardHeader>
                       <CardContent className="p-0">
                         <div className="overflow-x-auto max-h-[60vh]">
                           <table className="w-full">
                             <thead className="bg-gray-50 sticky top-0">
                               <tr>
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Product</th>
-                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">Quantity</th>
-                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">Unit Price</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                                  Product
+                                </th>
+                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
+                                  Quantity
+                                </th>
+                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
+                                  Unit Price
+                                </th>
 
-                                <th className="px-4 py-3 text-right textsm font-semibold text-gray-700">Amount</th>
+                                <th className="px-4 py-3 text-right textsm font-semibold text-gray-700">
+                                  Amount
+                                </th>
 
-                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">Profit</th>
+                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
+                                  Profit
+                                </th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                               {paginatedPreviewRows.map((sale, index) => (
-                                <tr key={`${previewStart}-${index}`} className="hover:bg-gray-50">
-                                  <td className="px-4 py-3 text-sm text-gray-900">{sale.productName}</td>
-                                  <td className="px-4 py-3 text-sm text-gray-900 text-right">{sale.quantitySold}</td>
-                                  <td className="px-4 py-3 text-sm text-right">{formatCurrency(sale.unitPrice)}</td>
+                                <tr
+                                  key={`${previewStart}-${index}`}
+                                  className="hover:bg-gray-50"
+                                >
+                                  <td className="px-4 py-3 text-sm text-gray-900">
+                                    {sale.productName}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                                    {sale.quantitySold}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-right">
+                                    {formatCurrency(sale.unitPrice)}
+                                  </td>
 
-                                  <td className="px-4 py-3 text-sm text-right">{formatCurrency(sale.amount)}</td>
+                                  <td className="px-4 py-3 text-sm text-right">
+                                    {formatCurrency(sale.amount)}
+                                  </td>
 
                                   <td className="px-4 py-3 text-sm text-right">
                                     <span
                                       className={`font-medium ${
-                                        Number(sale.profit || 0) >= 0 ? "text-green-600" : "text-red-600"
+                                        Number(sale.profit || 0) >= 0
+                                          ? "text-green-600"
+                                          : "text-red-600"
                                       }`}
                                     >
                                       {formatCurrency(sale.profit)}
@@ -1833,8 +2179,8 @@ export default function Sales() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setShowPreviewModal(false)
-                      setShowMappingModal(true)
+                      setShowPreviewModal(false);
+                      setShowMappingModal(true);
                     }}
                     disabled={isProcessingCsv || isImporting}
                     className="flex items-center gap-2"
@@ -1846,8 +2192,8 @@ export default function Sales() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setShowPreviewModal(false)
-                      resetCsvState()
+                      setShowPreviewModal(false);
+                      resetCsvState();
                     }}
                     disabled={isProcessingCsv || isImporting}
                     type="button"
@@ -1872,5 +2218,5 @@ export default function Sales() {
         </main>
       </div>
     </div>
-  )
+  );
 }

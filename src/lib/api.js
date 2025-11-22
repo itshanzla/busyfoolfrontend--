@@ -1,21 +1,22 @@
 class ApiClient {
   constructor() {
-    this.baseURL = "https://busy-fool-backend.vercel.app"
-    this.isRefreshing = false
-    this.failedQueue = []
+    // this.baseURL = "https://busy-fool-backend.vercel.app"
+    this.baseURL = "http://localhost:3000";
+    this.isRefreshing = false;
+    this.failedQueue = [];
   }
 
   // Process failed requests queue after token refresh
   processQueue(error, token = null) {
     this.failedQueue.forEach(({ resolve, reject }) => {
       if (error) {
-        reject(error)
+        reject(error);
       } else {
-        resolve(token)
+        resolve(token);
       }
-    })
+    });
 
-    this.failedQueue = []
+    this.failedQueue = [];
   }
 
   // Refresh access token using refresh token from HttpOnly cookie
@@ -27,54 +28,55 @@ class ApiClient {
         headers: {
           "Content-Type": "application/json",
         },
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Token refresh failed")
+        throw new Error("Token refresh failed");
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.accessToken) {
-        localStorage.setItem("accessToken", data.accessToken)
-        return data.accessToken
+        localStorage.setItem("accessToken", data.accessToken);
+        return data.accessToken;
       } else {
-        throw new Error("No access token in refresh response")
+        throw new Error("No access token in refresh response");
       }
     } catch (error) {
       // Refresh failed, redirect to login
-      localStorage.removeItem("accessToken")
-      localStorage.removeItem("loginSuccess")
-      window.location.href = "/login"
-      throw error
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("loginSuccess");
+      window.location.href = "/login";
+      throw error;
     }
   }
 
   // Enhanced fetch with automatic token refresh
   async fetch(url, options = {}) {
-    const fullUrl = url.startsWith("http") ? url : `${this.baseURL}${url}`
+    const fullUrl = url.startsWith("http") ? url : `${this.baseURL}${url}`;
 
     // Add authorization header if token exists
-    const token = localStorage.getItem("accessToken")
+    const token = localStorage.getItem("accessToken");
     if (token && !options.headers?.Authorization) {
       options.headers = {
         ...options.headers,
         Authorization: `Bearer ${token}`,
-      }
+      };
     }
 
     // Don't include credentials by default to avoid CORS issues
-    const needsCredentials = url.includes("/auth/refresh") || options.needsCredentials
+    const needsCredentials =
+      url.includes("/auth/refresh") || options.needsCredentials;
     if (needsCredentials) {
-      options.credentials = "include"
+      options.credentials = "include";
     }
 
     try {
-      const response = await fetch(fullUrl, options)
+      const response = await fetch(fullUrl, options);
 
       // If request succeeds, return response
       if (response.ok || response.status !== 401) {
-        return response
+        return response;
       }
 
       // Handle 401 - token expired
@@ -82,47 +84,47 @@ class ApiClient {
         // If already refreshing, queue this request
         if (this.isRefreshing) {
           return new Promise((resolve, reject) => {
-            this.failedQueue.push({ resolve, reject })
+            this.failedQueue.push({ resolve, reject });
           }).then(() => {
             // Retry with new token
-            const newToken = localStorage.getItem("accessToken")
+            const newToken = localStorage.getItem("accessToken");
             if (newToken) {
-              options.headers.Authorization = `Bearer ${newToken}`
+              options.headers.Authorization = `Bearer ${newToken}`;
             }
-            return fetch(fullUrl, options)
-          })
+            return fetch(fullUrl, options);
+          });
         }
 
         // Start refresh process
-        this.isRefreshing = true
+        this.isRefreshing = true;
 
         try {
-          const newToken = await this.refreshToken()
-          this.processQueue(null, newToken)
+          const newToken = await this.refreshToken();
+          this.processQueue(null, newToken);
 
           // Retry original request with new token
-          options.headers.Authorization = `Bearer ${newToken}`
-          const retryResponse = await fetch(fullUrl, options)
+          options.headers.Authorization = `Bearer ${newToken}`;
+          const retryResponse = await fetch(fullUrl, options);
 
-          return retryResponse
+          return retryResponse;
         } catch (refreshError) {
-          this.processQueue(refreshError, null)
-          throw refreshError
+          this.processQueue(refreshError, null);
+          throw refreshError;
         } finally {
-          this.isRefreshing = false
+          this.isRefreshing = false;
         }
       }
 
-      return response
+      return response;
     } catch (error) {
       // Network error or other issues
-      throw error
+      throw error;
     }
   }
 
   // Convenience methods
   async get(url, options = {}) {
-    return this.fetch(url, { ...options, method: "GET" })
+    return this.fetch(url, { ...options, method: "GET" });
   }
 
   async post(url, data, options = {}) {
@@ -134,7 +136,7 @@ class ApiClient {
         ...options.headers,
       },
       body: JSON.stringify(data),
-    })
+    });
   }
 
   async put(url, data, options = {}) {
@@ -146,16 +148,16 @@ class ApiClient {
         ...options.headers,
       },
       body: JSON.stringify(data),
-    })
+    });
   }
 
   async delete(url, options = {}) {
-    return this.fetch(url, { ...options, method: "DELETE" })
+    return this.fetch(url, { ...options, method: "DELETE" });
   }
 }
 
 // Export singleton instance
-export const apiClient = new ApiClient()
+export const apiClient = new ApiClient();
 
 // Export convenience function for backward compatibility
-export const apiFetch = (url, options) => apiClient.fetch(url, options)
+export const apiFetch = (url, options) => apiClient.fetch(url, options);
