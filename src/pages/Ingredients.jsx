@@ -158,30 +158,80 @@ export default function BusyFoolIngredients() {
     </AnimatePresence>
   );
 
-  // console.log(uploadedDocuments, "data");
-  useMemo(() => {
+  // Handle uploaded documents - backend already saves ingredients automatically
+  useEffect(() => {
     if (uploadedDocuments) {
-      console.log(uploadedDocuments, "data1");
-      const documentData = uploadedDocuments?.data?.[0]?.parsed?.fields;
-      console.log(documentData, "data2");
-      const supplierName = documentData?.supplier_name || "not found"; // 🟢 Supplier comes from fields
+      console.log("Upload response:", uploadedDocuments);
 
-      const formattedItems = documentData?.line_items?.map((items) => ({
-        name: items.description,
-        costPerSubunit: items.unit_price,
-        unit: items.unit || "none",
-        quantity: items.quantity || "none",
-        purchase_price: items.total_price || "none",
-        waste_percent: items.waste_percent || "0",
-        supplier: supplierName,
-      }));
+      // The backend response structure is:
+      // {
+      //   message: 'Processing finished and ingredients saved',
+      //   summary: { totalFiles, ingredientsCreated, errors },
+      //   details: { createdIngredients, errors }
+      // }
 
-      // setFormData(formattedItems);
-      setFilteredIngredients((prev) => {
-        return [...prev, ...formattedItems];
-      });
+      const summary = uploadedDocuments?.summary;
+      const details = uploadedDocuments?.details;
+
+      if (summary) {
+        // Show success message with details
+        const { ingredientsCreated, errors } = summary;
+
+        if (ingredientsCreated > 0) {
+          showSuccessMessage(
+            `Successfully imported ${ingredientsCreated} ingredient${ingredientsCreated !== 1 ? 's' : ''} from the document!`
+          );
+
+          // Refetch ingredients from backend to get the updated list
+          const fetchIngredients = async () => {
+            const token = localStorage.getItem("accessToken");
+            try {
+              const response = await fetch("http://localhost:3000/ingredients", {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+              if (response.ok) {
+                const data = await response.json();
+                const uniqueData = data.filter(
+                  (ingredient, index, self) =>
+                    index ===
+                    self.findIndex(
+                      (ing) =>
+                        ing.name.toLowerCase() === ingredient.name.toLowerCase()
+                    )
+                );
+                setIngredients(uniqueData);
+              }
+            } catch (error) {
+              console.error("Failed to refresh ingredients", error);
+            }
+          };
+          fetchIngredients();
+        }
+
+        if (errors && errors > 0 && details?.errors && details.errors.length > 0) {
+          // Show error details
+          const errorMessages = details.errors
+            .slice(0, 3)
+            .map(err => err.error || "Unknown error")
+            .join(", ");
+          showErrorMessage(
+            `${errors} error${errors !== 1 ? 's' : ''} occurred: ${errorMessages}${details.errors.length > 3 ? '...' : ''}`
+          );
+        } else if (ingredientsCreated === 0) {
+          showErrorMessage("No ingredients were extracted from the document. Please check the document format.");
+        }
+      } else {
+        // Old response format fallback (just in case)
+        showErrorMessage("Unexpected response format from server. Please try again.");
+      }
+
+      // Clear the uploaded documents after processing
+      setUploadedDocuments(null);
     }
   }, [uploadedDocuments]);
+
   // Error Toast Component
   const ErrorToast = () => (
     <AnimatePresence>
@@ -287,8 +337,8 @@ export default function BusyFoolIngredients() {
           ? 1
           : -1
         : aVal < bVal
-        ? 1
-        : -1;
+          ? 1
+          : -1;
     });
     setFilteredIngredients(filtered);
   }, [search, selectedCategory, ingredients, sortBy, sortOrder]);
@@ -604,8 +654,7 @@ Chocolate,kg,2,80,3,SupplierD`;
           if (uniqueImports.length > 0) {
             setIngredients((prev) => [...prev, ...uniqueImports]);
             showSuccessMessage(
-              `Imported ${uniqueImports.length} unique ingredients. ${
-                result.importedIngredients.length - uniqueImports.length
+              `Imported ${uniqueImports.length} unique ingredients. ${result.importedIngredients.length - uniqueImports.length
               } duplicates were skipped.`
             );
           } else {
@@ -1052,11 +1101,10 @@ Chocolate,kg,2,80,3,SupplierD`;
                               }))
                             }
                             placeholder="e.g., Oat Milk"
-                            className={`mt-1 ${
-                              formErrors.name
+                            className={`mt-1 ${formErrors.name
                                 ? "border-red-500"
                                 : "border-[#175e3b]"
-                            } transition-all duration-200`}
+                              } transition-all duration-200`}
                           />
                           {formErrors.name && (
                             <p className="text-red-500 text-xs mt-1">
@@ -1078,11 +1126,10 @@ Chocolate,kg,2,80,3,SupplierD`;
                             }
                           >
                             <SelectTrigger
-                              className={`mt-1 ${
-                                formErrors.unit
+                              className={`mt-1 ${formErrors.unit
                                   ? "border-red-500"
                                   : "border-[#175e3b] "
-                              }`}
+                                }`}
                             >
                               <SelectValue placeholder="Select unit" />
                             </SelectTrigger>
@@ -1119,11 +1166,10 @@ Chocolate,kg,2,80,3,SupplierD`;
                               }))
                             }
                             placeholder="e.g., 2"
-                            className={`mt-1 ${
-                              formErrors.quantity
+                            className={`mt-1 ${formErrors.quantity
                                 ? "border-red-500"
                                 : "border-[#175e3b]"
-                            }`}
+                              }`}
                           />
                           {formErrors.quantity && (
                             <p className="text-red-500 text-xs mt-1">
@@ -1150,11 +1196,10 @@ Chocolate,kg,2,80,3,SupplierD`;
                               }))
                             }
                             placeholder="0.00"
-                            className={`mt-1 ${
-                              formErrors.purchase_price
+                            className={`mt-1 ${formErrors.purchase_price
                                 ? "border-red-500"
                                 : "border-[#175e3b]"
-                            }`}
+                              }`}
                           />
                           {formErrors.purchase_price && (
                             <p className="text-red-500 text-xs mt-1">
@@ -1181,11 +1226,10 @@ Chocolate,kg,2,80,3,SupplierD`;
                               }))
                             }
                             placeholder="0"
-                            className={`mt-1 ${
-                              formErrors.waste_percent
+                            className={`mt-1 ${formErrors.waste_percent
                                 ? "border-red-500"
                                 : "border-[#175e3b]"
-                            }`}
+                              }`}
                           />
                           {formErrors.waste_percent && (
                             <p className="text-red-500 text-xs mt-1">
@@ -1210,11 +1254,10 @@ Chocolate,kg,2,80,3,SupplierD`;
                             }
                           >
                             <SelectTrigger
-                              className={`mt-1 ${
-                                formErrors.supplier
+                              className={`mt-1 ${formErrors.supplier
                                   ? "border-red-500"
                                   : "border-[#175e3b]"
-                              }`}
+                                }`}
                             >
                               <SelectValue placeholder="Select supplier" />
                             </SelectTrigger>
