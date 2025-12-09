@@ -64,9 +64,9 @@ class ApiClient {
       };
     }
 
-    // Don't include credentials by default to avoid CORS issues
+    // Include credentials for all auth endpoints to ensure cookies are set/sent
     const needsCredentials =
-      url.includes("/auth/refresh") || options.needsCredentials;
+      url.includes("/auth/") || options.needsCredentials;
     if (needsCredentials) {
       options.credentials = "include";
     }
