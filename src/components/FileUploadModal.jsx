@@ -127,6 +127,21 @@ const FileUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
 
       const result = await response.json();
 
+      // Log timing information to browser console
+      if (result.timing) {
+        console.log('\n');
+        console.log('╔════════════════════════════════════════════════════════════╗');
+        console.log('║                    ⏱️  TIMING SUMMARY                        ║');
+        console.log('╠════════════════════════════════════════════════════════════╣');
+        console.log(`║  🔍 LOCAL OCR TIME:      ${String(result.timing.ocrTimeMs).padStart(6)} ms                       ║`);
+        console.log(`║  🤖 OPENAI API TIME:     ${String(result.timing.openAiTimeMs).padStart(6)} ms                       ║`);
+        console.log(`║  💾 DATABASE SAVE TIME:  ${String(result.timing.databaseTimeMs).padStart(6)} ms                       ║`);
+        console.log('╠════════════════════════════════════════════════════════════╣');
+        console.log(`║  ⚡ TOTAL TIME:          ${String(result.timing.totalTimeMs).padStart(6)} ms                       ║`);
+        console.log('╚════════════════════════════════════════════════════════════╝');
+        console.log('\n');
+      }
+
       // Call the parent's callback with the API response data
       if (onUploadSuccess) {
         onUploadSuccess(result);
